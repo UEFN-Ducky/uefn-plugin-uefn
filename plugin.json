@@ -1,7 +1,7 @@
 {
   "id": "uefn",
   "kind": "plugin",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "label": "UEFN",
   "description": "Core UEFN editor surface: actors, assets, creative devices, data tables, editor control, introspection, AI Python, project memory. Bundles uefn + datatables skills.",
   "min_app_version": "1.0.0",
