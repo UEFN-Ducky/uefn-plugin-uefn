@@ -24,7 +24,8 @@ save_current_level()
 inspect_verse_device("MyWallet")
 ```
 
-All names from **inspect** — never from templates. **One MCP call per wire/set.**
+All names from **inspect** — never from templates. **One MCP call per wire/set —
+wait for each result before the next** (never same-turn multi wire/spawn/save).
 
 ## Creative golden path (granter example)
 

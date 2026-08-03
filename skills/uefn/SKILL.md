@@ -2,10 +2,10 @@
 source_plugin_id: uefn
 name: uefn
 description: "Device wiring, Verse vs Creative tools, golden paths"
-license: All Rights Reserved
+license: Ducky Source-Available License v1.0
 metadata:
   label: UEFN MCP
-  version: 26
+  version: 27
   author: UEFN-Ducky
   copyright: Copyright 2026 UEFN-Ducky
   allow_redistribute: false
@@ -15,6 +15,19 @@ metadata:
 
 Work loop: **find → inspect → write → verify → `save_current_level`**.
 Code/behavior changes live in `Verse/**/*.verse` on disk (workspace tools — works with the listener **offline**); placing devices and wiring `@editable` refs in the level need the listener. Never wait for the listener to do file work, and never poll status tools waiting for it to come online.
+
+**CRITICAL — editor mutations are SERIAL:**
+Never issue multiple `spawn_actor` / `wire_verse_device_ref` / `wire_verse_device_array` /
+`set_verse_editable` / `set_creative_device_fields` / `set_actor_*` / destroy/delete /
+`instantiate_prefab` / `save_current_level` / `execute_python` (editor) calls in the
+same assistant turn or in parallel. One heavy MCP call → wait for result → next.
+Parallel or same-batch editor calls freeze/crash UEFN and wedge the listener.
+Details: `skill_read_subskill("uefn", "batch_commands")`.
+
+**Gameplay SFX / horns / alarms = Fortnite Creative Audio Player only**
+(`audio_player_device` in Verse). Never Speakers, prop meshes, or
+`spawn_actor(actor_class="*_device")`. Search `/Game/Creative` → spawn `…_C`.
+Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 
 **Project content mount (hard rule):** before creating materials/meshes/tables/folders, call `get_project_info()` and use `content_root` (e.g. `/catland/…`). **Never invent `/Game/...` for new island assets** — that breaks cook. `/Game/Creative` is OK for **search/spawn** of catalog devices only.
 
@@ -35,7 +48,10 @@ Code/behavior changes live in `Verse/**/*.verse` on disk (workspace tools — wo
 | Verse tools on a native device, or Creative tools on a Verse device | Check `kind` from `find_devices` first |
 | Check Verse errors via the game / listener / `ping` / `get_project_info` / `execute_python` / `ducky_get_errors` | `workspace_list_verse_errors` FIRST (offline OK); never probe the listener for compile errors |
 | >3 discovery calls before a write | find → inspect → write → verify |
-| `batch_commands`, `bulk_*`, `setup_verse_device` | **One thin MCP tool per editor op** — see `batch_commands.md` (serial tools guide) |
+| `batch_commands`, `bulk_*`, `setup_verse_device`, `spawn_actor_batch` | **One thin MCP tool per editor op per turn** — never same-turn multi spawn/wire/save |
+| Multiple `wire_*` / `spawn_actor` in one assistant message | One call → wait → next; after all placements, one `save_current_level` |
+| Prop mesh / Speakers as a “horn” or wave SFX | Creative **Audio Player** only — see `creative_devices` |
+| Scan `.uasset` / binaries for `__verse_0x` hashes | `list_verse_property_hashes` / `get_verse_editables` / `workspace_*` |
 | `wire_verse_device_ref` when target is another Verse device | Same tool works now (auto-routes), or `set_verse_editable` for `?player_manager`-style refs |
 | `wire_verse_device_array` for scalar spawner fields (`NPCSpawner1`, …) | `wire_verse_device_ref` once per scalar field — read names from `get_verse_editables` |
 | Loop a failing call more than twice | Report the symptom and what you need from the user |

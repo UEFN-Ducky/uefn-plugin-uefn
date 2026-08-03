@@ -1,15 +1,23 @@
 ---
-description: "Native Creative device workflows — inspect/set ToyOptions, and the place-in-level golden path (spawn, label, folder, save)"
+description: "Native Creative device workflows — inspect/set ToyOptions, place-in-level golden path, and Fortnite Audio Player for SFX/horns"
 metadata:
   order: 4
   label: "Creative devices"
   default_enabled: false
-  load_condition: "Configuring a native Creative device (granter, button, spawner, teleporter…) or placing devices in the level"
+  load_condition: "Configuring a native Creative device (granter, button, spawner, teleporter, audio player…) or placing devices / horns / SFX in the level"
 ---
 
 ## Native Creative devices (`creative_device`)
 
-Epic-built devices: item granters, conditional buttons, player spawners, teleporters, timers, etc.
+Epic-built devices: item granters, conditional buttons, player spawners,
+teleporters, timers, **Audio Players**, etc.
+
+Prefer **Fortnite Creative devices** from `/Game/Creative` (or
+`/Game/Creative/Devices`) for gameplay devices. Confirm Blueprint with
+`search_assets` → spawn `…_C` — never `spawn_actor(actor_class="*_device")`.
+
+**SERIAL:** one heavy MCP call → wait → next (never same-turn multi spawn/wire).
+See `skill_read_subskill("uefn", "batch_commands")`.
 
 | Job | Tool |
 |-----|------|
@@ -79,4 +87,25 @@ save_current_level()
 
 Bare `search="Teleporter"` without `directory="/Game/Creative"` hits Athena gadgets — wrong family.
 
-**Wire to Verse device:** after placement, `inspect_verse_device` → `wire_verse_device_ref("MyDevice", "SomeTriggerField", "MyTrigger_1")`.
+### Audio Player (horns / wave SFX / alarms) — hard rule
+
+Gameplay SFX = Fortnite Creative **Audio Player** only (`audio_player_device` in
+Verse). **Never** Speakers, prop “horn” meshes, or Scene Graph `sound_component`
+as the primary path.
+
+```
+search_assets(search="Audio", directory="/Game/Creative", limit=15)
+# pick Creative Audio Player BP (not a prop kit / Speakers) — use …_C from hit
+spawn_actor(asset_path="<AudioPlayer>_C", location=[x,y,z], select=false)  # ONE call, wait
+set_actor_label(...)   # wait
+set_actor_folder(..., folder="Roguelike/Audio")   # wait
+inspect_creative_device / set_creative_device_fields (sound / play options)  # one at a time
+# wire to Verse ONE field per turn:
+wire_verse_device_ref("<VerseDevice>", "HordeHornAudio", "<AudioLabel>")
+```
+
+Never `spawn_actor(actor_class="audio_player_device")`.
+
+**Wire to Verse device:** after placement, wait → `inspect_verse_device` →
+`wire_verse_device_ref("MyDevice", "SomeTriggerField", "MyTrigger_1")` —
+**one field per turn**.

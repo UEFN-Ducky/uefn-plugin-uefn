@@ -2,16 +2,19 @@
 source_plugin_id: uefn
 name: datatables
 description: "DataTable assets in UEFN — inspect row structs, read rows, create tables, and rewrite contents via JSON/CSV; capability-guarded editor tools"
-license: All Rights Reserved
+license: Ducky Source-Available License v1.0
 metadata:
   label: UEFN Data Tables
-  version: 3
+  version: 4
   author: UEFN-Ducky
   copyright: Copyright 2026 UEFN-Ducky
   allow_redistribute: false
 ---
 
 # UEFN Data Tables — read and rewrite
+
+**SERIAL:** never parallel `save_current_level` with other heavy editor calls
+in the same turn (`skill_read_subskill("uefn", "batch_commands")`).
 
 DataTables are editor assets holding rows of one struct type. Editing is
 **editor-only** Python and has ONE write model: **replace all rows** from
