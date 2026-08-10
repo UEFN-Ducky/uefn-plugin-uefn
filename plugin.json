@@ -1,9 +1,9 @@
 {
   "id": "uefn",
   "kind": "plugin",
-  "version": "1.0.19",
+  "version": "1.0.21",
   "label": "UEFN",
-  "description": "Core UEFN editor surface: actors, assets, creative devices (incl. Audio Player), serial wire/spawn hard rules, data tables, editor control, introspection, AI Python, project memory. Bundles uefn + datatables skills.",
+  "description": "Core UEFN editor surface: actors, assets, creative devices (incl. Audio Player), serial wire/spawn hard rules, data tables, text localization, editor control, introspection, AI Python, project memory. Bundles uefn + datatables + localization skills.",
   "min_app_version": "1.0.0",
   "default_enabled": true,
   "secret_keys": [],
@@ -127,7 +127,7 @@
         {
           "target": "settings.store.root",
           "title": "UEFN core tools ready",
-          "body": "Core UEFN editor MCP tools are live — actors, assets, devices, data tables, and editor control.",
+          "body": "Core UEFN editor MCP tools are live \u2014 actors, assets, devices, data tables, and editor control.",
           "advance": "next",
           "mode": "rect"
         }

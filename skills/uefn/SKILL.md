@@ -5,7 +5,7 @@ description: "Device wiring, Verse vs Creative tools, golden paths"
 license: Ducky Source-Available License v1.0
 metadata:
   label: UEFN MCP
-  version: 27
+  version: 28
   author: UEFN-Ducky
   copyright: Copyright 2026 UEFN-Ducky
   allow_redistribute: false
@@ -59,5 +59,9 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 ## Project memory (index + pull, like skills)
 
 Each project has ONE memory shared by its duckies: named entries stored in app data per project (`memory/projects/<project-slug>/<entry>.md`, same separation as chats — survives project-folder deletion). Only the INDEX (name — description) is in your prompt — pull one entry with `project_memory_get(name)` when its description matches the task, never bulk-read. Save stable facts (the user's name for a thing → its Outliner label, verse vs creative devices, field names that worked, coding standards, decisions) with `project_memory_save(name, content, description, author=<your ducky name>)` — one topic per entry, description says when to pull it; extend with `project_memory_append(name, text)`. Memory entries grow like skills: when a topic gets big, split it into sub-entries — `project_memory_save("coding-standards/error-handling", …)` (one nesting level; the parent becomes that topic's index). Document hard-won solutions as you solve them, like building a project-specific skill. You WRITE only to YOUR project's memory; you can READ any project's with `project_memory_list(project=...)` / `project_memory_get(name, project=...)`. To check what duckies elsewhere know: `ducky_memory_overview` surveys every project's memory index + chats, then `ducky_read_chat(conv_id, project=...)` / `ducky_get_chat_context(conv_id, project=...)` read a specific ducky's context (its chat history) cross-project.
+
+**Island languages / PO / Export Localization / L10N assets:** load
+`skill_read_subskill("localization")` (UI-ready checklist:
+`skill_read_subskill("localization", "ui_ready")`). Not Ducky app UI translation.
 
 This guide is already in your context — do **not** call `uefn_skill` to re-fetch it. Load the reference files listed below with `skill_read_subskill` only when their condition applies.

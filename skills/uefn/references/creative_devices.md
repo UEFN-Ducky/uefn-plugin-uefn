@@ -98,7 +98,7 @@ search_assets(search="Audio", directory="/Game/Creative", limit=15)
 # pick Creative Audio Player BP (not a prop kit / Speakers) — use …_C from hit
 spawn_actor(asset_path="<AudioPlayer>_C", location=[x,y,z], select=false)  # ONE call, wait
 set_actor_label(...)   # wait
-set_actor_folder(..., folder="Roguelike/Audio")   # wait
+set_actor_folder(..., folder="Hub/Audio")   # wait
 inspect_creative_device / set_creative_device_fields (sound / play options)  # one at a time
 # wire to Verse ONE field per turn:
 wire_verse_device_ref("<VerseDevice>", "HordeHornAudio", "<AudioLabel>")
