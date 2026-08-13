@@ -5,7 +5,7 @@ description: "Device wiring, Verse vs Creative tools, golden paths"
 license: Ducky Source-Available License v1.0
 metadata:
   label: UEFN MCP
-  version: 29
+  version: 30
   author: UEFN-Ducky
   copyright: Copyright 2026 UEFN-Ducky
   allow_redistribute: false
@@ -49,6 +49,7 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 | Do not | Do instead |
 |--------|------------|
 | `class_prefix="Fort"` to inventory the scene | `find_devices` / `get_all_actors(label_filter=…)` |
+| Loop `inspect_verse_device` / `inspect_creative_device` over every device | `find_devices` once (`kind` + `script_class`); inspect only the device you will write |
 | Verse tools on a native device, or Creative tools on a Verse device | Check `kind` from `find_devices` first |
 | Check Verse errors via the game / listener / `ping` / `get_project_info` / `execute_python` / `ducky_get_errors` | `workspace_list_verse_errors` FIRST (offline OK); never probe the listener for compile errors |
 | >3 discovery calls before a write | find → inspect → write → verify |

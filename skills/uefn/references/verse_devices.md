@@ -13,8 +13,8 @@ Custom Verse classes placed in the world (`VerseDevice_C` — the label is whate
 
 | Job | Tool |
 |-----|------|
-| Discover | `find_devices` → confirm `kind: verse_script` |
-| Read | `inspect_verse_device("<label>")` — **always before write** |
+| Discover | `find_devices` once — `kind` + `script_class` (do **not** inspect-loop) |
+| Read | `inspect_verse_device("<label>")` — **only the device you are about to write** |
 | Wire one ref | `wire_verse_device_ref` — **one field per call; wait before next** |
 | Set scalar | `set_verse_editable` — **one field per call** |
 | Wallet rows | `set_currency_config_entries` |
@@ -35,6 +35,9 @@ Custom Verse classes placed in the world (`VerseDevice_C` — the label is whate
 `/Game/Creative/Devices/...` paths.
 
 `workspace_compile_verse` returns `verse_classes` (compiled `/_Verse` asset paths) — use one directly as `asset_path`. If spawn fails, compile **once** and wait for the build to finish (`[WinError 10054]` means it started — never retry). Poll `list_verse_types` / `verse_classes`; never ask the user to Build Verse unless the wait already finished and the class is still missing. See `skill_read_subskill("uefn", "verse_build_lifecycle")`.
+
+**Do not** census the level with `inspect_verse_device`. `find_devices` already
+returns `script_class`. Field names live in that class's `.verse` on disk.
 
 **Do not** use `inspect_creative_device` / `set_creative_device_fields` for @editable Script fields.
 
