@@ -18,6 +18,7 @@ metadata:
 | Wire N scalar refs | `inspect_verse_device` → `wire_verse_device_ref` **once per field** (wait between each) |
 | Wire N array entries | `resize_verse_array` if needed → `wire_verse_device_array` **once per target** or `patch_verse_array_entry` per row |
 | Spawn + wire Verse device | `spawn_actor` → label → `wire_verse_device_ref` per field (serial) → `save_current_level` |
+| Package one mesh prefab | `create_entity` (root) → `create_entity` (child) → `add_entity_component` → `create_prefab_from_entities` → `destroy_entity` the temp — **one call per assistant message**. `save_directory` every 5–10 prefabs. Never an `execute_python` loop over many prefabs. |
 
 **Never** pass multiple fields, multiple spawn items, or combined verify+save mega-calls.
 **Never** fire multiple wire/spawn/save tools in the same assistant turn (parallel or batched) — that freezes UEFN and wedges the listener.
@@ -30,3 +31,13 @@ wrong “horn” actor instead of Creative Audio Player, and crashed UEFN / kill
 the MCP bridge on cancel. Recover: restart UEFN → `inspect_verse_device` →
 resume **one wire/spawn at a time**. SFX fields → Fortnite Audio Player only
 (`skill_read_subskill("uefn", "creative_devices")`).
+
+### Crash postmortem — bulk Python + digest deadlock (do not repeat)
+
+One `execute_python` script that packaged many prefabs froze UEFN. After
+restart, Verse linking cascaded `Script error 9002: Unable to import resolve`
+into `9000: previous link task did not complete successfully` for unrelated
+assets. Recover: comment out the unresolvable `using` / class refs → rebuild
+and wait (`WinError 10054` = started) → confirm digest with `list_verse_types`
+→ uncomment → rebuild. Check `class_path` for `VERSE_DEAD_*`. Details:
+`skill_read_subskill("uefn", "verse_build_lifecycle")`.

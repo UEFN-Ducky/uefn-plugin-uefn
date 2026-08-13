@@ -5,7 +5,7 @@ description: "Device wiring, Verse vs Creative tools, golden paths"
 license: Ducky Source-Available License v1.0
 metadata:
   label: UEFN MCP
-  version: 28
+  version: 29
   author: UEFN-Ducky
   copyright: Copyright 2026 UEFN-Ducky
   allow_redistribute: false
@@ -22,7 +22,9 @@ Never issue multiple `spawn_actor` / `wire_verse_device_ref` / `wire_verse_devic
 `instantiate_prefab` / `save_current_level` / `execute_python` (editor) calls in the
 same assistant turn or in parallel. One heavy MCP call → wait for result → next.
 Parallel or same-batch editor calls freeze/crash UEFN and wedge the listener.
-Details: `skill_read_subskill("uefn", "batch_commands")`.
+Prefer `spawn_actor(..., label=..., folder=...)` (same tick) over separate
+`set_actor_label` / `set_actor_folder`. Never Grep the project root / `Saved/` /
+`Intermediate/` / `*.uasset`. Details: `skill_read_subskill("uefn", "batch_commands")`.
 
 **Gameplay SFX / horns / alarms = Fortnite Creative Audio Player only**
 (`audio_player_device` in Verse). Never Speakers, prop meshes, or
@@ -33,11 +35,13 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 
 **Verse folders (hard rule):** never dump new `.verse` at `Verse/` root — one system per folder (`Verse/Economy/…`, `Verse/Shop/…`, …). Prefer `verse_template_apply`. Details: `skill_read_subskill("verse","modules")` and `verse_files`.
 
+**Write boundary (hard rule):** `workspace_write_file` may only write `Content/**` and `.ducky/**`. Never touch UEFN core files, digests, `Saved/`, `Intermediate/`, or the project root. Same rule for `execute_python` / listener file I/O. Scratch → `%LOCALAPPDATA%/UEFN-Ducky/`. Verse build wait / digest deadlock: `skill_read_subskill("uefn", "verse_build_lifecycle")`.
+
 **Verse errors / logic FIRST:** `workspace_list_verse_errors` (host) — never `ping`, `get_project_info`, `ducky_get_errors`, `execute_python`, or listener tools. If a listener call does not return immediately it is offline/broken; do not retry — stay on `workspace_*`.
 
 ## STOP ladder
 
-- `inspect_verse_device` returns `STOP: true` → `workspace_compile_verse` once → still STOP: `reload_listener` → still STOP: ask the user to restart UEFN.
+- `inspect_verse_device` returns `STOP: true` → `workspace_compile_verse` once and **wait** (`[WinError 10054]` means the build started — never retry) → still STOP: `reload_listener` → still STOP: ask the user to restart UEFN. Digest deadlock: `skill_read_subskill("uefn", "verse_build_lifecycle")`.
 - `STOP: false` (even with `wiring.status: partial`) → wire with labels now; never ask the user to rebuild.
 
 ## Do not / do instead

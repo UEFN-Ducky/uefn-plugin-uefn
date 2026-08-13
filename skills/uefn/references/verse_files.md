@@ -17,7 +17,7 @@ When the user asks to change **behavior** (trigger on enter, grant item, spawn N
 | Problems panel / syntax scan | `workspace_list_verse_errors()` (verse-lsp; updates editor Problems). Call with **no args** — incremental, re-checks only changed files. **Never `full=true`** to re-confirm (rescans all files, ~1 min); use `rescan=false` to just re-read. | **No** | **No** |
 | Full compile in editor | `workspace_compile_verse` | **No** (uses Verse Workflow Server) | **Yes** (UEFN running) |
 | Wire `@editable` device refs in level | `find_devices` → `inspect_verse_device` → `wire_verse_device_ref` (one per field) | **Yes** | **Yes** |
-| Place new device actor in level | `spawn_actor` → `set_actor_label` (once per device) | **Yes** | **Yes** |
+| Place new device actor in level | `spawn_actor(..., label=..., folder=...)` once per device | **Yes** | **Yes** |
 
 **Decision rule:** code/logic change → **edit files now**. Level placement or Details-panel wiring → listener tools when online.
 

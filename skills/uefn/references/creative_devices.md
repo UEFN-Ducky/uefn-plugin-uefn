@@ -55,16 +55,18 @@ spawn_actor(
   asset_path="/Game/Creative/Devices/Trigger/BP_Creative_Trigger.BP_Creative_Trigger_C",
   location=[x, y, z],
   select=false,
+  label="MyTrigger_1",
+  folder="Hub/Triggers",   # same tick — never leave at Outliner root
 )
-set_actor_label(actor_path="<spawned label>", label="MyTrigger_1")
-set_actor_folder(actor_path="MyTrigger_1", folder="Hub/Triggers")   # ALWAYS folder — never Outliner root
 save_current_level()
 find_devices(label_filter="MyTrigger")
 ```
 
 **Asset path gotcha:** package path alone (`.../BP_Creative_Trigger`) fails — append **`.BP_Creative_Trigger_C`**.
 
-**Rename + folder:** `set_actor_label` then `set_actor_folder` — one call each. Nested folders by area/system (`Hub/Spawners`, `Hub/Teleporters`, `Area1/Combat`).
+**Rename + folder:** prefer `label` + `folder` on `spawn_actor` (one call, one tick).
+Use separate `set_actor_label` / `set_actor_folder` only when renaming an existing actor.
+Nested folders by area/system (`Hub/Spawners`, `Hub/Teleporters`, `Area1/Combat`).
 
 **Granters:** `search_assets(search="Item_Granter", directory="/Game/Creative")` → spawn `BP_Creative_Item_Granter` (use full `.…_C` suffix from search result).
 
@@ -78,9 +80,9 @@ spawn_actor(
   asset_path="/Game/Creative/Devices/Teleporter/BP_Creative_Device_Teleporter.BP_Creative_Device_Teleporter_C",
   location=[x, y, z],
   select=false,
+  label="Hub_TP_Area1",
+  folder="Hub/Teleporters",
 )
-set_actor_label(actor_path="<label>", label="Hub_TP_Area1")
-set_actor_folder(actor_path="Hub_TP_Area1", folder="Hub/Teleporters")
 inspect_creative_device / set_creative_device_fields as needed
 save_current_level()
 ```
@@ -96,16 +98,20 @@ as the primary path.
 ```
 search_assets(search="Audio", directory="/Game/Creative", limit=15)
 # pick Creative Audio Player BP (not a prop kit / Speakers) — use …_C from hit
-spawn_actor(asset_path="<AudioPlayer>_C", location=[x,y,z], select=false)  # ONE call, wait
-set_actor_label(...)   # wait
-set_actor_folder(..., folder="Hub/Audio")   # wait
+spawn_actor(
+  asset_path="<AudioPlayer>_C",
+  location=[x,y,z],
+  select=false,
+  label="Hub_Horn",
+  folder="Hub/Audio",
+)  # ONE call, wait
 inspect_creative_device / set_creative_device_fields (sound / play options)  # one at a time
 # wire to Verse ONE field per turn:
-wire_verse_device_ref("<VerseDevice>", "HordeHornAudio", "<AudioLabel>")
+wire_verse_device_ref(actor_path="<VerseDevice>", field="HordeHornAudio", target_path="<AudioLabel>")
 ```
 
 Never `spawn_actor(actor_class="audio_player_device")`.
 
 **Wire to Verse device:** after placement, wait → `inspect_verse_device` →
-`wire_verse_device_ref("MyDevice", "SomeTriggerField", "MyTrigger_1")` —
+`wire_verse_device_ref(actor_path="MyDevice", field="SomeTriggerField", target_path="MyTrigger_1")` —
 **one field per turn**.
