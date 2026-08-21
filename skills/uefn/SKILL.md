@@ -13,17 +13,19 @@ metadata:
 
 # UEFN MCP — Operator Skill
 
+**Epic UEFN MCP first:** editor Verse compile, Creative devices, Scene Graph entities, and PIC sessions use nested `unreal__*` tools. If `ducky_get_status.epic_mcp_online` is false, recites `epic_mcp_setup_steps` (enable the island in Ducky, open UEFN) — never `find_devices` / `inspect_creative_device` / `play_in_editor` / `create_entity`. Offline `workspace_*` file edits still run.
+
 Work loop: **find → inspect → write → verify → `save_current_level`**.
-Code/behavior changes live in `Verse/**/*.verse` on disk (workspace tools — works with the listener **offline**); placing devices and wiring `@editable` refs in the level need the listener. Never wait for the listener to do file work, and never poll status tools waiting for it to come online.
+Code/behavior changes live in `Verse/**/*.verse` on disk (workspace tools — works with the listener **offline**). Creative-device place/edit and PIC need Epic MCP; VerseDevice `@editable` wires still use Ducky `inspect_verse_device` / `wire_verse_device_ref`. Never poll status tools waiting for the listener.
 
 **CRITICAL — editor mutations are SERIAL:**
-Never issue multiple `spawn_actor` / `wire_verse_device_ref` / `wire_verse_device_array` /
-`set_verse_editable` / `set_creative_device_fields` / `set_actor_*` / destroy/delete /
+Never issue multiple `unreal__*` / `spawn_actor` / `wire_verse_device_ref` / `wire_verse_device_array` /
+`set_verse_editable` / `set_actor_*` / destroy/delete /
 `instantiate_prefab` / `save_current_level` / `execute_python` (editor) calls in the
 same assistant turn or in parallel. One heavy MCP call → wait for result → next.
-Parallel or same-batch editor calls freeze/crash UEFN and wedge the listener.
+Parallel or same-batch editor calls freeze/crash UEFN (Epic hitching too).
 Prefer `spawn_actor(..., label=..., folder=...)` (same tick) over separate
-`set_actor_label` / `set_actor_folder`. Never Grep the project root / `Saved/` /
+`set_actor_label` / `set_actor_folder` for **props/meshes**. Never Grep the project root / `Saved/` /
 `Intermediate/` / `*.uasset`. Details: `skill_read_subskill("uefn", "batch_commands")`.
 
 **Gameplay SFX / horns / alarms = Fortnite Creative Audio Player only**

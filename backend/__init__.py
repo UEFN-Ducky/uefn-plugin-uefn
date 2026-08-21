@@ -10,8 +10,6 @@ def register(api) -> None:
     import backend.tools.uefn.level_viewport  # noqa: F401
     import backend.tools.uefn.assets  # noqa: F401
     import backend.tools.uefn.assets_pipeline  # noqa: F401
-    import backend.tools.uefn.device_focused  # noqa: F401
-    import backend.tools.uefn.device_editor  # noqa: F401
     import backend.tools.uefn.data_tables  # noqa: F401
     import backend.tools.uefn.editor  # noqa: F401
     import backend.tools.uefn.introspection  # noqa: F401
