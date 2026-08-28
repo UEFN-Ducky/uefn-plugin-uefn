@@ -2,18 +2,27 @@
 source_plugin_id: uefn
 name: uefn
 description: "Device wiring, Verse vs Creative tools, golden paths"
-license: Ducky Source-Available License v1.0
+license: MIT
 metadata:
   label: UEFN MCP
-  version: 30
+  version: 34
   author: UEFN-Ducky
-  copyright: Copyright 2026 UEFN-Ducky
-  allow_redistribute: false
+  copyright: Copyright 2026 Mindful Path Company, LLC
+  allow_redistribute: true
 ---
 
 # UEFN MCP — Operator Skill
 
-**Epic UEFN MCP first:** editor Verse compile, Creative devices, Scene Graph entities, and PIC sessions use nested `unreal__*` tools. If `ducky_get_status.epic_mcp_online` is false, recites `epic_mcp_setup_steps` (enable the island in Ducky, open UEFN) — never `find_devices` / `inspect_creative_device` / `play_in_editor` / `create_entity`. Offline `workspace_*` file edits still run.
+**ALWAYS prefer official UEFN MCP (`unreal__*`) when `epic_mcp_online`.**
+Settings → MCPs → **UEFN MCP (Epic)** (`unreal-mcp`).
+Only three bridge tools: `unreal__list_toolsets` → `unreal__describe_toolset` →
+`unreal__call_tool` into Valkyrie Device / Entity / Verse / Session toolsets (and
+`editor_toolset.*` for actors/assets/materials/Niagara/UMG). There are **no** flat
+`unreal__create_entity` names. Listener is second — offline `workspace_*`,
+VerseDevice wires, prefabs, screenshots/Meshy — never pruned Ducky
+`find_devices` / `inspect_creative_device` / `play_in_editor` / `create_entity`
+while Epic is up. If Epic is offline, recite `epic_mcp_setup_steps`. Full map:
+`skill_read_subskill("uefn", "epic_mcp")`.
 
 Work loop: **find → inspect → write → verify → `save_current_level`**.
 Code/behavior changes live in `Verse/**/*.verse` on disk (workspace tools — works with the listener **offline**). Creative-device place/edit and PIC need Epic MCP; VerseDevice `@editable` wires still use Ducky `inspect_verse_device` / `wire_verse_device_ref`. Never poll status tools waiting for the listener.
@@ -39,12 +48,15 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 
 **Write boundary (hard rule):** `workspace_write_file` may only write `Content/**` and `.ducky/**`. Never touch UEFN core files, digests, `Saved/`, `Intermediate/`, or the project root. Same rule for `execute_python` / listener file I/O. Scratch → `%LOCALAPPDATA%/UEFN-Ducky/`. Verse build wait / digest deadlock: `skill_read_subskill("uefn", "verse_build_lifecycle")`.
 
+**No extra Python in the island (HARD):** Ducky auto-manages `Content/Python/init_unreal.py` on project open — that file **starts the listener**. **Never delete it, never move it, never tell anyone to remove it.** Do not add any other `.py` / `.pyc` (project root, `.ducky/**`, extra files under `Content/Python/`). Extra `.py` can trip Epic `[ContainsPythonData]`. `execute_python` is in-memory only. Scratch → `%LOCALAPPDATA%/UEFN-Ducky/`.
+
 **Verse errors / logic FIRST:** `workspace_list_verse_errors` (host) — never `ping`, `get_project_info`, `ducky_get_errors`, `execute_python`, or listener tools. If a listener call does not return immediately it is offline/broken; do not retry — stay on `workspace_*`.
 
 ## STOP ladder
 
-- `inspect_verse_device` returns `STOP: true` → `workspace_compile_verse` once and **wait** (`[WinError 10054]` means the build started — never retry) → still STOP: `reload_listener` → still STOP: ask the user to restart UEFN. Digest deadlock: `skill_read_subskill("uefn", "verse_build_lifecycle")`.
-- `STOP: false` (even with `wiring.status: partial`) → wire with labels now; never ask the user to rebuild.
+- `inspect_verse_device` / `get_verse_editables` `STOP: true` or `mangled_name: null` is **advisory**. Resolve, then wire — do not ask the user to Build Verse, paste T3D, or drag Details. Ladder: `list_verse_property_hashes(refresh=true)` → re-inspect that one device → `wire_verse_*` once → still empty: `reload_listener` → retry once. Internals: `skill_read_subskill("uefn", "verse_editable_internals")`.
+- `STOP: false` (even with `wiring.status: partial`) → wire with labels now.
+- Digest deadlock / `WinError 10054`: `skill_read_subskill("uefn", "verse_build_lifecycle")`.
 
 ## Do not / do instead
 
@@ -58,10 +70,11 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 | `batch_commands`, `bulk_*`, `setup_verse_device`, `spawn_actor_batch` | **One thin MCP tool per editor op per turn** — never same-turn multi spawn/wire/save |
 | Multiple `wire_*` / `spawn_actor` in one assistant message | One call → wait → next; after all placements, one `save_current_level` |
 | Prop mesh / Speakers as a “horn” or wave SFX | Creative **Audio Player** only — see `creative_devices` |
-| Scan `.uasset` / binaries for `__verse_0x` hashes | `list_verse_property_hashes` / `get_verse_editables` / `workspace_*` |
+| Scan `.uasset` / binaries / `os.walk` for `__verse_0x` hashes | Direct read/write of one object's mangled `__verse_0x<HASH>_<Field>` is fine; prefer `list_verse_property_hashes` / `get_verse_editables` / `wire_verse_*` |
 | `wire_verse_device_ref` when target is another Verse device | Same tool works now (auto-routes), or `set_verse_editable` for `?player_manager`-style refs |
 | `wire_verse_device_array` for scalar spawner fields (`NPCSpawner1`, …) | `wire_verse_device_ref` once per scalar field — read names from `get_verse_editables` |
-| Loop a failing call more than twice | Report the symptom and what you need from the user |
+| Loop a failing call more than twice | One alternative, then `ducky_ask_user` — do not invent Details-panel homework |
+| Ask the user to create NPCDefs / AnimPresets / hook anims / drag wires | You program it: `ducky_get_tools` + `skill_read_subskill("animation", "npc_characters")` + the `create_*` NPC tools. Write original Verse for *this* island. |
 
 ## Project memory (index + pull, like skills)
 

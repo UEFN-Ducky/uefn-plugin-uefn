@@ -2,13 +2,13 @@
 source_plugin_id: uefn
 name: localization
 description: "UEFN Text Localization — project settings, Export Localization PO files, Auto/manual translation, Private Version auto-build, asset L10N folders, and Verse/UMG localization-ready UI. Use when translating island text, PO files, L10N, Export Localization, Auto Localization, or making HUD/UMG/canvas copy localizable."
-license: Ducky Source-Available License v1.0
+license: MIT
 metadata:
   label: UEFN Text Localization
   version: 1
   author: UEFN-Ducky
-  copyright: Copyright 2026 UEFN-Ducky
-  allow_redistribute: false
+  copyright: Copyright 2026 Mindful Path Company, LLC
+  allow_redistribute: true
 ---
 
 # UEFN Text Localization

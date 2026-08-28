@@ -2,13 +2,13 @@
 source_plugin_id: uefn
 name: datatables
 description: "DataTable assets in UEFN — inspect row structs, read rows, create tables, and rewrite contents via JSON/CSV; capability-guarded editor tools"
-license: Ducky Source-Available License v1.0
+license: MIT
 metadata:
   label: UEFN Data Tables
   version: 4
   author: UEFN-Ducky
-  copyright: Copyright 2026 UEFN-Ducky
-  allow_redistribute: false
+  copyright: Copyright 2026 Mindful Path Company, LLC
+  allow_redistribute: true
 ---
 
 # UEFN Data Tables — read and rewrite
