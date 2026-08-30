@@ -9,12 +9,17 @@ metadata:
 
 ## Which tool path? (read first)
 
-UEFN has **two different** device APIs. Using the wrong one fails silently or returns empty editables.
+**Creative devices + census:** use nested Epic UEFN MCP — `skill_read_subskill("uefn", "epic_mcp")`.
+`unreal__call_tool` → `ValkyrieToolset.DeviceToolset` (`ListDeviceAssets`, `PlaceDevice`,
+`GetDeviceProperties`, `SetDeviceProperty`, …). Do **not** call pruned Ducky
+`find_devices` / `inspect_creative_device` / `set_creative_device_fields`.
 
-| You see in level | `find_devices` → `kind` | Read | Write (one op per call) |
-|------------------|-------------------------|------|-------------------------|
-| Custom Verse (your project's own device classes, `VerseDevice_C`) | `verse_script` | `inspect_verse_device` | `wire_verse_device_ref`, `set_verse_editable`, `resize_verse_array`, `patch_verse_array_entry` |
-| Native Creative (item granter, conditional button, spawner, `Device_*_C`) | `creative_device` | `inspect_creative_device` | `set_creative_device_fields` |
-| Static mesh / prop / Fort actor | (not in `find_devices`) | `get_all_actors` | `set_actor_properties` |
+UEFN still has **two** device shapes. Using the wrong path fails silently.
 
-**Decision:** `find_devices(label_filter="wallet")` → check `kind` on each hit → open the matching inspect tool.
+| You see in level | Path | Read | Write (one op per call) |
+|------------------|------|------|-------------------------|
+| Native Creative (granter, button, spawner, `Device_*_C`) | Epic `DeviceToolset` | `GetDeviceProperties` / `ListDeviceProperties` via `unreal__call_tool` | `SetDeviceProperty` via `unreal__call_tool` |
+| Custom Verse (`VerseDevice_C`) | Ducky VerseDevice | `inspect_verse_device` | `wire_verse_device_ref`, `set_verse_editable`, … |
+| Static mesh / prop / Fort actor | Ducky actors **or** Epic `ActorTools` / `SceneTools` | `get_all_actors` or Epic describe | `set_actor_properties` / Epic |
+
+**Decision:** Epic DeviceToolset for Creative; `inspect_verse_device` only for project Verse scripts.

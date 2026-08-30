@@ -7,28 +7,45 @@ metadata:
   load_condition: "Configuring a native Creative device (granter, button, spawner, teleporter, audio player…) or placing devices / horns / SFX in the level"
 ---
 
-## Native Creative devices (`creative_device`)
+## Native Creative devices (Epic `ValkyrieToolset.DeviceToolset`)
 
 Epic-built devices: item granters, conditional buttons, player spawners,
 teleporters, timers, **Audio Players**, etc.
 
+**Prefer nested Epic UEFN MCP** (`skill_read_subskill("uefn", "epic_mcp")`):
+
+```
+unreal__describe_toolset({ "toolset_name": "ValkyrieToolset.DeviceToolset" })
+unreal__call_tool({
+  "toolset_name": "ValkyrieToolset.DeviceToolset",
+  "tool_name": "PlaceDevice",   # or ListDeviceAssets / GetDeviceProperties / SetDeviceProperty
+  "arguments": { … }            # XYZ; use refPath objects from prior Epic returns
+})
+```
+
+Pruned Ducky tools (`find_devices`, `inspect_creative_device`,
+`set_creative_device_fields`) must **not** be used when Epic is the path.
+
 Prefer **Fortnite Creative devices** from `/Game/Creative` (or
 `/Game/Creative/Devices`) for gameplay devices. Confirm Blueprint with
-`search_assets` → spawn `…_C` — never `spawn_actor(actor_class="*_device")`.
+`search_assets` → Epic `PlaceDevice` (or Ducky `spawn_actor(…_C)` for props only).
 
 **SERIAL:** one heavy MCP call → wait → next (never same-turn multi spawn/wire).
 See `skill_read_subskill("uefn", "batch_commands")`.
 
 | Job | Tool |
 |-----|------|
-| Discover | `find_devices` → confirm `kind: creative_device` |
-| Read | `inspect_creative_device(actor_path="<label>", keys=[…])` — ToyOptions keys + allowed enum values |
-| Write | `set_creative_device_fields(actor_path="<label>", fields={...}, save_level=true)` |
-| Save | `save_level=true` on set, or `save_current_level` |
+| Discover assets | Epic `ListDeviceAssets` |
+| Place | Epic `PlaceDevice` |
+| Read ToyOptions | Epic `ListDeviceProperties` / `GetDeviceProperties` |
+| Write | Epic `SetDeviceProperty` |
+| Event graph | Epic `ListEventBindings` / `AddEventBinding` / … |
 
-**Do not** use Verse tools for ToyOptions (e.g. granter item list) — those are not @editable Script fields.
+**Do not** use VerseDevice `@editable` tools for ToyOptions (e.g. granter item list).
 
-**Island Settings** (`Device_ExperienceSettings_V2_UEFN_C`, label often `IslandSettings0`): **CORE session setup** — MaxPlayers, starting class, teams. Same Creative tools; load `skill_read_subskill("islandsettings", "session_setup")`. Rule: `MaxPlayers = N` requires **N Player Spawn Pads**. Many `CreativeMutator_*:…` keys are `readonly_override`.
+**Island Settings:** same Epic DeviceToolset path; load
+`skill_read_subskill("islandsettings", "session_setup")`.
+Rule: `MaxPlayers = N` requires **N Player Spawn Pads**.
 
 ## Verse `*_device` name ≠ placeable Blueprint
 
@@ -45,26 +62,24 @@ all listed via digests: `list_verse_types(digest="fortnite", kind="class", name_
 
 ## Place devices in the level (golden path)
 
-When the user says **place / add / put** triggers, granters, teleporters, spawn pads — **do it immediately** with defaults. Do not ask weapon lists or placement coordinates first.
+When the user says **place / add / put** triggers, granters, teleporters, spawn pads — **do it immediately** with defaults. Prefer Epic DeviceToolset:
 
 ```
-ping
-get_viewport_camera()                                    # anchor row near editor view
-search_assets(search="Creative_Trigger", directory="/Game/Creative", limit=5)
-spawn_actor(
-  asset_path="/Game/Creative/Devices/Trigger/BP_Creative_Trigger.BP_Creative_Trigger_C",
-  location=[x, y, z],
-  select=false,
-  label="MyTrigger_1",
-  folder="Hub/Triggers",   # same tick — never leave at Outliner root
-)
-save_current_level()
-find_devices(label_filter="MyTrigger")
+unreal__describe_toolset({ "toolset_name": "ValkyrieToolset.DeviceToolset" })
+unreal__call_tool({
+  "toolset_name": "ValkyrieToolset.DeviceToolset",
+  "tool_name": "ListDeviceAssets",
+  "arguments": {}
+})
+unreal__call_tool({
+  "toolset_name": "ValkyrieToolset.DeviceToolset",
+  "tool_name": "PlaceDevice",
+  "arguments": { … }   # assetPath refPath + transform XYZ from describe schema
+})
 ```
 
-**Asset path gotcha:** package path alone (`.../BP_Creative_Trigger`) fails — append **`.BP_Creative_Trigger_C`**.
-
-**Rename + folder:** prefer `label` + `folder` on `spawn_actor` (one call, one tick).
+Props-only fallback (not Creative ToyOptions): `search_assets` → `spawn_actor(asset_path="…_C", label=…, folder=…)`.
+Never `spawn_actor(actor_class="*_device")`.
 Use separate `set_actor_label` / `set_actor_folder` only when renaming an existing actor.
 Nested folders by area/system (`Hub/Spawners`, `Hub/Teleporters`, `Area1/Combat`).
 

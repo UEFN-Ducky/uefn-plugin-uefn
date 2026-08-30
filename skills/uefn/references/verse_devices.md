@@ -41,6 +41,11 @@ returns `script_class`. Field names live in that class's `.verse` on disk.
 
 **Do not** use `inspect_creative_device` / `set_creative_device_fields` for @editable Script fields.
 
+Storage is `__verse_0x<HASH>_<Field>` on the Script object. Wrappers outer to
+**Script** (not the actor) and hold `SavedActor`. `STOP` / `mangled_name: null`
+is a cache miss — resolve then wire. Never ask the user to paste T3D.
+Details: `skill_read_subskill("uefn", "verse_editable_internals")`.
+
 **Do not** use `batch_commands`, `bulk_*`, `setup_verse_device`, or
 `spawn_actor_batch` — removed (freeze UEFN).
 
