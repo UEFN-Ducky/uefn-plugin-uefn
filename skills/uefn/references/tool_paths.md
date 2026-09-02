@@ -11,8 +11,9 @@ metadata:
 
 **Creative devices + census:** use nested Epic UEFN MCP — `skill_read_subskill("uefn", "epic_mcp")`.
 `unreal__call_tool` → `ValkyrieToolset.DeviceToolset` (`ListDeviceAssets`, `PlaceDevice`,
-`GetDeviceProperties`, `SetDeviceProperty`, …). Do **not** call pruned Ducky
-`find_devices` / `inspect_creative_device` / `set_creative_device_fields`.
+`GetDeviceProperties`, `SetDeviceProperty`, …). The old Ducky Creative-device
+find/inspect/set tools were pruned and no longer exist. Epic offline or erroring twice →
+degrade to `spawn_actor` (props/Verse devices) / `get_all_actors(label_filter=…)` and finish.
 
 UEFN still has **two** device shapes. Using the wrong path fails silently.
 

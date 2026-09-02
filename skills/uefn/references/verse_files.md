@@ -16,7 +16,7 @@ When the user asks to change **behavior** (trigger on enter, grant item, spawn N
 | Find / read / write `.verse` | `workspace_list_dir` → `workspace_read_file` → `workspace_write_file` | **No** | **No** |
 | Problems panel / syntax scan | `workspace_list_verse_errors()` (verse-lsp; updates editor Problems). Call with **no args** — incremental, re-checks only changed files. **Never `full=true`** to re-confirm (rescans all files, ~1 min); use `rescan=false` to just re-read. | **No** | **No** |
 | Full compile in editor | `workspace_compile_verse` | **No** (uses Verse Workflow Server) | **Yes** (UEFN running) |
-| Wire `@editable` device refs in level | `find_devices` → `inspect_verse_device` → `wire_verse_device_ref` (one per field) | **Yes** | **Yes** |
+| Wire `@editable` device refs in level | `workspace_compile_verse` succeeded → `list_verse_devices` → `inspect_verse_device` → `wire_verse_device_ref` (one per field) | **Yes** | **Yes** |
 | Place new device actor in level | `spawn_actor(..., label=..., folder=...)` once per device | **Yes** | **Yes** |
 
 **Decision rule:** code/logic change → **edit files now**. Level placement or Details-panel wiring → listener tools when online.
@@ -36,7 +36,7 @@ New `.verse` files go in a **system folder**, not `Verse/<file>.verse`.
 ```
 workspace_list_dir("Verse")
 # pick / create a system folder — never write at Verse root
-workspace_write_file("Verse/Devices/trigger_granter_device.verse", content="...")
+workspace_write_file("Verse/Granting/trigger_granter_device.verse", content="...")
 workspace_list_verse_errors()
 ```
 
@@ -44,9 +44,9 @@ Editing an existing file:
 
 ```
 workspace_list_dir("Verse")
-workspace_read_file("Verse/Devices/trigger_granter_device.verse")
+workspace_read_file("Verse/Granting/trigger_granter_device.verse")
 # ... edit full file ...
-workspace_write_file("Verse/Devices/trigger_granter_device.verse", content="...")
+workspace_write_file("Verse/Granting/trigger_granter_device.verse", content="...")
 workspace_list_verse_errors()
 ```
 
@@ -54,9 +54,12 @@ Use `workspace_open_verse_file` only when the user explicitly wants the editor f
 
 ## Example: trigger → grant + spawn NPC (Verse class)
 
-Custom `creative_device` subclasses wire devices in **source** via `@editable` fields and `Subscribe` — no listener needed to write this (path example: `Verse/Devices/trigger_granter_device.verse`):
+Custom `creative_device` subclasses wire devices in **source** via `@editable` fields and `Subscribe` — no listener needed to write this (path example: `Verse/<System>/trigger_granter_device.verse`, e.g. `Verse/Granting/`):
 
 ```verse
+using { /Fortnite.com/Devices }
+using { /Verse.org/Simulation }
+
 trigger_granter_device := class(creative_device):
     @editable Trigger: trigger_device = trigger_device{}
     @editable Granter: item_granter_device = item_granter_device{}
@@ -71,7 +74,7 @@ trigger_granter_device := class(creative_device):
             NPCSpawner.Spawn()
 ```
 
-After saving the file, tell the user: assign the three devices in UEFN Details when the editor is open (`wire_verse_device_ref` per field / inspect only then). The **logic** is already done in source.
+After saving the file: `workspace_list_verse_errors` → `workspace_compile_verse` (must succeed; the offline LSP does **not** catch effect/module/ambiguity errors — only the real build does) → when UEFN is open, wire the three fields yourself with `wire_verse_device_ref` (one per turn). Never ask the user to drag Details refs. The **logic** is already done in source.
 
 ## Anti-patterns
 

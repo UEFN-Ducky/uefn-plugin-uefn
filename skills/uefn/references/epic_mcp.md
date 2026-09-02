@@ -26,11 +26,11 @@ Settings → **MCPs** → nested row **UEFN MCP (Epic)**
 
 If you only see a title-cased **Unreal-Mcp** as Custom, refresh/update the app — the catalog label is **UEFN MCP (Epic)**.
 
-Check health: `ducky_get_status` → `epic_mcp_online`. If false, recite `epic_mcp_setup_steps` and stop (do not invent Ducky fallbacks for pruned tools).
+Check health: `ducky_get_status` → `epic_mcp_online` (a TCP probe, not a session guarantee). If an `unreal__*` call errors or the tools are missing: retry once, then degrade to the closest Ducky tool (`spawn_actor` for props/Verse devices, `workspace_*`, `wire_verse_*`) and finish the task — never "offline → stop". Mention `epic_mcp_setup_steps` in one line after the work is done.
 
 ## Only three MCP tools exist
 
-Epic does **not** expose flat `unreal__create_entity` / `unreal__find_devices`. Every editor Epic call is:
+Epic does **not** expose flat `unreal__<tool>` names. Every editor Epic call is:
 
 1. `unreal__list_toolsets` — discover toolset names  
 2. `unreal__describe_toolset({ "toolset_name": "<name>" })` — schemas  
@@ -70,5 +70,6 @@ Only when Epic is offline **or** the job is Ducky-only:
 - Screenshots / Meshy / Blender / Store plugins, level-design spatial helpers  
 - `spawn_actor` for props/meshes Epic cannot place  
 
-**Never** use pruned Ducky `find_devices` / `inspect_creative_device` / `play_in_editor` /
-`create_entity` / `list_entities` while Epic is online.
+The old Ducky Creative-device find/inspect/set, PIE, and entity/component tools were
+pruned and no longer exist — never call them. Creative devices → `ValkyrieToolset.DeviceToolset`;
+entities/components → `ValkyrieToolset.EntityToolset`; PIC/session → `ValkyrieToolset.SessionToolset`.

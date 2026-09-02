@@ -9,10 +9,12 @@ metadata:
 
 ## Verse golden path (wallet / currency example)
 
-Labels below are placeholders — always use the real Outliner labels from `find_devices`.
+Labels below are placeholders — always use the real Outliner labels from `list_verse_devices`.
 
 ```
-find_devices(label_filter="wallet")
+workspace_list_verse_errors()                        # Problems clean first
+workspace_compile_verse()                            # real build — fields need a compiled hash (else STALE REFLECTION)
+list_verse_devices()                                 # label + script_class; pick "MyWallet"
 inspect_verse_device(actor_path="MyWallet")          # STOP false → continue (partial OK)
 set_currency_config_entries(actor_path="MyWallet", entries=[
   {"CurrencyName": "Gold", "DisplayOrder": 0},
@@ -30,9 +32,12 @@ wait for each result before the next** (never same-turn multi wire/spawn/save).
 ## Creative golden path (granter example)
 
 ```
-find_devices(label_filter="granter")
-inspect_creative_device(actor_path="MyGoldGranter")
-set_creative_device_fields(actor_path="MyGoldGranter", fields={...}, save_level=true)
+unreal__describe_toolset(toolset_name="ValkyrieToolset.DeviceToolset")   # read exact argument names — never invent them
+unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="GetDeviceProperties", arguments={…})  # device ref for "MyGoldGranter"
+unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="SetDeviceProperty",  arguments={…})  # one property per call, wait
+save_current_level()                                                     # once at the end — never save_level=true inside other calls
 ```
 
-Property keys from **inspect_creative_device** only.
+Property keys from Epic **GetDeviceProperties** only. If `ducky_get_status.epic_mcp_online` is
+false or the Epic call errors twice, degrade: placement falls back to `spawn_actor(asset_path=…)`
+(props and Verse devices only) and finish the task — never stop mid-task.

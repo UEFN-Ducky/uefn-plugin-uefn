@@ -1,7 +1,7 @@
 ---
 source_plugin_id: uefn
 name: uefn
-description: "Device wiring, Verse vs Creative tools, golden paths"
+description: "Placed Creative devices: Epic DeviceToolset placement/properties, Verse-device @editable wiring, level ops, golden paths — not Verse source (use verse) and not entities/prefabs (use scenegraph)"
 license: MIT
 metadata:
   label: UEFN MCP
@@ -18,11 +18,25 @@ Settings → MCPs → **UEFN MCP (Epic)** (`unreal-mcp`).
 Only three bridge tools: `unreal__list_toolsets` → `unreal__describe_toolset` →
 `unreal__call_tool` into Valkyrie Device / Entity / Verse / Session toolsets (and
 `editor_toolset.*` for actors/assets/materials/Niagara/UMG). There are **no** flat
-`unreal__create_entity` names. Listener is second — offline `workspace_*`,
-VerseDevice wires, prefabs, screenshots/Meshy — never pruned Ducky
-`find_devices` / `inspect_creative_device` / `play_in_editor` / `create_entity`
-while Epic is up. If Epic is offline, recite `epic_mcp_setup_steps`. Full map:
+`unreal__<tool>` names — always go through a toolset. Listener is second — offline `workspace_*`,
+VerseDevice wires, prefabs, screenshots/Meshy. The old Ducky device/entity/PIE tools
+were pruned and no longer exist — never call them. Epic MCP errors: retry once, then
+degrade to the closest Ducky tool and finish the task (never "offline → stop"); mention
+`epic_mcp_setup_steps` only after the work is done. Full map:
 `skill_read_subskill("uefn", "epic_mcp")`.
+
+**Placement (canonical):** Creative devices (any `*_device`) → Epic
+`unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="PlaceDevice", …)`,
+properties via `SetDeviceProperty` (call `unreal__describe_toolset` first for exact argument
+names; never invent them). When `ducky_get_status.epic_mcp_online` is false, the fallback is
+`spawn_actor(asset_path=…, location=…, label=…, folder=…)` for props and Verse devices only.
+Verse devices → `spawn_actor(asset_path=<from search_assets(directory='/_Verse')>)` →
+`set_actor_label` → `wire_verse_device_ref` / `wire_verse_device_array` per @editable field
+(one heavy call at a time) — only after `workspace_compile_verse` succeeded ("STALE REFLECTION"
+otherwise). Scene Graph entities/components → Epic `ValkyrieToolset.EntityToolset`.
+Verse build: `workspace_list_verse_errors` → `workspace_compile_verse` → wire; Epic
+`ValkyrieToolset.VerseToolset` BuildAll when `epic_mcp_online`. Save: one `save_current_level`
+at the end of a placement batch.
 
 Work loop: **find → inspect → write → verify → `save_current_level`**.
 Code/behavior changes live in `Verse/**/*.verse` on disk (workspace tools — works with the listener **offline**). Creative-device place/edit and PIC need Epic MCP; VerseDevice `@editable` wires still use Ducky `inspect_verse_device` / `wire_verse_device_ref`. Never poll status tools waiting for the listener.
@@ -62,9 +76,9 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 
 | Do not | Do instead |
 |--------|------------|
-| `class_prefix="Fort"` to inventory the scene | `find_devices` / `get_all_actors(label_filter=…)` |
-| Loop `inspect_verse_device` / `inspect_creative_device` over every device | `find_devices` once (`kind` + `script_class`); inspect only the device you will write |
-| Verse tools on a native device, or Creative tools on a Verse device | Check `kind` from `find_devices` first |
+| `class_prefix="Fort"` to inventory the scene | Epic `ValkyrieToolset.DeviceToolset` query (names from `unreal__describe_toolset`) / `get_all_actors(label_filter=…, limit=500)` / `list_verse_devices` |
+| Loop `inspect_verse_device` over every device | `list_verse_devices` once (label + `script_class`); inspect only the device you will write |
+| Verse tools on a native device, or Creative tools on a Verse device | Verse device = listed by `list_verse_devices` (VerseDevice_C); anything else is a Creative device → Epic DeviceToolset |
 | Check Verse errors via the game / listener / `ping` / `get_project_info` / `execute_python` / `ducky_get_errors` | `workspace_list_verse_errors` FIRST (offline OK); never probe the listener for compile errors |
 | >3 discovery calls before a write | find → inspect → write → verify |
 | `batch_commands`, `bulk_*`, `setup_verse_device`, `spawn_actor_batch` | **One thin MCP tool per editor op per turn** — never same-turn multi spawn/wire/save |

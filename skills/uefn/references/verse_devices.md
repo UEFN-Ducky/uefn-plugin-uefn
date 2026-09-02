@@ -13,7 +13,7 @@ Custom Verse classes placed in the world (`VerseDevice_C` — the label is whate
 
 | Job | Tool |
 |-----|------|
-| Discover | `find_devices` once — `kind` + `script_class` (do **not** inspect-loop) |
+| Discover | `list_verse_devices` once — label + `script_class` (do **not** inspect-loop) |
 | Read | `inspect_verse_device("<label>")` — **only the device you are about to write** |
 | Wire one ref | `wire_verse_device_ref` — **one field per call; wait before next** |
 | Set scalar | `set_verse_editable` — **one field per call** |
@@ -27,7 +27,7 @@ Custom Verse classes placed in the world (`VerseDevice_C` — the label is whate
 **SERIAL:** never multiple wire/spawn/save in the same assistant turn —
 `skill_read_subskill("uefn", "batch_commands")`.
 
-**Spawn new device:** `workspace_write_file` → `workspace_compile_verse` →
+**Spawn new device:** `workspace_write_file` → `workspace_list_verse_errors` → `workspace_compile_verse` (must succeed — otherwise fields have no compiled hash, "STALE REFLECTION") →
 `search_assets(directory="/_Verse")` for `asset_path` →
 `spawn_actor(..., label=..., folder=...)` → wait →
 `wire_verse_device_ref` **one field per turn** →
@@ -36,10 +36,10 @@ Custom Verse classes placed in the world (`VerseDevice_C` — the label is whate
 
 `workspace_compile_verse` returns `verse_classes` (compiled `/_Verse` asset paths) — use one directly as `asset_path`. If spawn fails, compile **once** and wait for the build to finish (`[WinError 10054]` means it started — never retry). Poll `list_verse_types` / `verse_classes`; never ask the user to Build Verse unless the wait already finished and the class is still missing. See `skill_read_subskill("uefn", "verse_build_lifecycle")`.
 
-**Do not** census the level with `inspect_verse_device`. `find_devices` already
+**Do not** census the level with `inspect_verse_device`. `list_verse_devices` already
 returns `script_class`. Field names live in that class's `.verse` on disk.
 
-**Do not** use `inspect_creative_device` / `set_creative_device_fields` for @editable Script fields.
+**Do not** use Epic DeviceToolset `SetDeviceProperty` for @editable Script fields — that is the Creative-device path.
 
 Storage is `__verse_0x<HASH>_<Field>` on the Script object. Wrappers outer to
 **Script** (not the actor) and hold `SavedActor`. `STOP` / `mangled_name: null`

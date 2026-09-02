@@ -35,7 +35,7 @@ The same wait applies to a user clicking **Build Verse Code** in UEFN.
 `Assets.digest.verse` updating (or `list_verse_types` listing a new class) does
 **not** mean the live Verse VM has linked that class.
 
-`add_entity_component` can still fail with:
+Epic `ValkyrieToolset.EntityToolset` add-component (via `unreal__call_tool`) can still fail with:
 
 ```
 create_asset_component_from_asset_path failed for '…'. The asset must live in
@@ -44,19 +44,19 @@ the PROJECT's own content (it needs a digest-generated Verse class) — Fortnite
 ```
 
 even after the digest is correct. That needs **another Verse build** (and the
-10054 wait), not a retry of `add_entity_component` and not a digest edit.
+10054 wait), not a retry of the EntityToolset add-component call and not a digest edit.
 
 ## `VERSE_DEAD_*` components
 
-`add_entity_component` can return a broken component:
+The EntityToolset add-component call can return a broken component:
 
 - `class`: `VERSE_DEAD_Prefabs-Chunks-…`
 - `class_path`: `/Engine/Transient.VERSE_DEAD_…`
 
 That is a stale class after a VM relink. Check `class_path` on every result.
 
-Recover: `reload_listener` → wait for it → `destroy_entity` the temp → recreate
-the entity → `add_entity_component` again. Do not keep attaching to the dead
+Recover: `reload_listener` → wait for it → destroy the temp entity (EntityToolset) → recreate
+the entity → add the component again (EntityToolset). Do not keep attaching to the dead
 component.
 
 ## Digest deadlock (9002 → 9000 cascade)
@@ -91,19 +91,21 @@ the Verse side, in this order:
    they resolve, because the classes exist in the regenerated digest.
 
 After step 4, a fresh digest still does not mean the VM relinked. If
-`add_entity_component` rejects a class that `list_verse_types` already shows,
+the EntityToolset add-component call rejects a class that `list_verse_types` already shows,
 build once more — do not retry the attach in a loop.
 
 ## Prefabs and linking
 
 `create_prefab_from_entities` saves the asset immediately. Its Verse class
 appears in `Assets.digest.verse` only after the next Verse build, and is
-usable by `add_entity_component` / `using` only after the VM relinks (another
+usable by EntityToolset add-component / `using` only after the VM relinks (another
 build if the first one only refreshed the digest).
 
 Prefab packaging is five serial calls, **one per assistant message**:
-`create_entity` (root) → `create_entity` (child) → `add_entity_component` →
-`create_prefab_from_entities` → `destroy_entity` the temp instance.
+Epic `ValkyrieToolset.EntityToolset` via `unreal__call_tool` (tool names from
+`unreal__describe_toolset`): create root entity → create child entity → add component →
+`create_prefab_from_entities` → destroy the temp instance (EntityToolset). The removed
+Ducky entity tools no longer exist.
 `save_directory` every 5–10 prefabs. Never `execute_python` loops that
 package many prefabs in one script — that freezes UEFN.
 

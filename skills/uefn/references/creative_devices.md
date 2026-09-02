@@ -23,8 +23,11 @@ unreal__call_tool({
 })
 ```
 
-Pruned Ducky tools (`find_devices`, `inspect_creative_device`,
-`set_creative_device_fields`) must **not** be used when Epic is the path.
+The old Ducky Creative-device find/inspect/set tools were pruned and no longer exist.
+Call `unreal__describe_toolset` first to read the exact argument names — never invent them.
+If `ducky_get_status.epic_mcp_online` is false or an Epic call errors twice, degrade:
+`spawn_actor(asset_path=…, location=…, label=…, folder=…)` places props and Verse devices
+and you finish the task — never "offline → stop".
 
 Prefer **Fortnite Creative devices** from `/Game/Creative` (or
 `/Game/Creative/Devices`) for gameplay devices. Confirm Blueprint with
@@ -54,7 +57,7 @@ Rule: `MaxPlayers = N` requires **N Player Spawn Pads**.
 | Job | Tool |
 |-----|------|
 | Learn API / events | `search_verse_digest(query="teleporter")` → `get_verse_api(name="teleporter_device")` |
-| Place in level | `search_assets(search="…", directory="/Game/Creative")` → `spawn_actor(asset_path="…_C")` |
+| Place in level | Epic `ValkyrieToolset.DeviceToolset` `ListDeviceAssets` → `PlaceDevice`; offline fallback: `search_assets(search="…", directory="/Game/Creative")` → `spawn_actor(asset_path="…_C")` |
 
 **Props / Prefabs / full Creative catalog** (walls, Sets, Content Drawer map): not this
 file — `skill_read_subskill("leveldesign", "content_catalog")`. Device **API types** are
@@ -83,26 +86,24 @@ Never `spawn_actor(actor_class="*_device")`.
 Use separate `set_actor_label` / `set_actor_folder` only when renaming an existing actor.
 Nested folders by area/system (`Hub/Spawners`, `Hub/Teleporters`, `Area1/Combat`).
 
-**Granters:** `search_assets(search="Item_Granter", directory="/Game/Creative")` → spawn `BP_Creative_Item_Granter` (use full `.…_C` suffix from search result).
+**Granters:** Epic `ListDeviceAssets` → pick the Item Granter asset → `PlaceDevice` → `SetDeviceProperty` per option. Offline fallback: `search_assets(search="Item_Granter", directory="/Game/Creative")` → `spawn_actor(asset_path="…BP_Creative_Item_Granter…_C", …)` (full `_C` suffix from the search hit).
 
 **Teleporter (built-in Creative device):**
 
 ```
 search_verse_digest(query="teleporter")   # optional — confirms teleporter_device API
-search_assets(search="Teleporter", directory="/Game/Creative", limit=10)
-# → BP_Creative_Device_Teleporter (not Athena B_Teleporter gadgets)
-spawn_actor(
-  asset_path="/Game/Creative/Devices/Teleporter/BP_Creative_Device_Teleporter.BP_Creative_Device_Teleporter_C",
-  location=[x, y, z],
-  select=false,
-  label="Hub_TP_Area1",
-  folder="Hub/Teleporters",
-)
-inspect_creative_device / set_creative_device_fields as needed
+unreal__describe_toolset(toolset_name="ValkyrieToolset.DeviceToolset")   # exact argument names — never invent them
+unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="ListDeviceAssets", arguments={})
+# → Creative Teleporter device asset (not Athena B_Teleporter gadgets)
+unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="PlaceDevice",       arguments={…})  # ONE call, wait
+unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="SetDeviceProperty", arguments={…})  # one property per call
 save_current_level()
 ```
 
-Bare `search="Teleporter"` without `directory="/Game/Creative"` hits Athena gadgets — wrong family.
+Offline fallback only (`epic_mcp_online` false or Epic errored twice):
+`search_assets(search="Teleporter", directory="/Game/Creative", limit=10)` →
+`spawn_actor(asset_path="…/BP_Creative_Device_Teleporter.BP_Creative_Device_Teleporter_C", location=[x, y, z], select=false, label="Hub_TP_Area1", folder="Hub/Teleporters")`
+→ `save_current_level()`. Bare `search="Teleporter"` without `directory="/Game/Creative"` hits Athena gadgets — wrong family.
 
 ### Audio Player (horns / wave SFX / alarms) — hard rule
 
@@ -111,19 +112,18 @@ Verse). **Never** Speakers, prop “horn” meshes, or Scene Graph `sound_compon
 as the primary path.
 
 ```
-search_assets(search="Audio", directory="/Game/Creative", limit=15)
-# pick Creative Audio Player BP (not a prop kit / Speakers) — use …_C from hit
-spawn_actor(
-  asset_path="<AudioPlayer>_C",
-  location=[x,y,z],
-  select=false,
-  label="Hub_Horn",
-  folder="Hub/Audio",
-)  # ONE call, wait
-inspect_creative_device / set_creative_device_fields (sound / play options)  # one at a time
-# wire to Verse ONE field per turn:
+unreal__describe_toolset(toolset_name="ValkyrieToolset.DeviceToolset")   # exact argument names — never invent them
+unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="ListDeviceAssets", arguments={})
+# pick the Creative Audio Player device (not a prop kit / Speakers)
+unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="PlaceDevice",       arguments={…})  # ONE call, wait
+unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="SetDeviceProperty", arguments={…})  # sound / play options, one at a time
+# wire to Verse ONE field per turn (workspace_compile_verse must have succeeded first):
 wire_verse_device_ref(actor_path="<VerseDevice>", field="HordeHornAudio", target_path="<AudioLabel>")
+save_current_level()   # once, at the end of the batch
 ```
+
+Offline fallback only: `search_assets(search="Audio", directory="/Game/Creative", limit=15)` →
+`spawn_actor(asset_path="<AudioPlayer>_C", location=[x,y,z], select=false, label="Hub_Horn", folder="Hub/Audio")`.
 
 Never `spawn_actor(actor_class="audio_player_device")`.
 

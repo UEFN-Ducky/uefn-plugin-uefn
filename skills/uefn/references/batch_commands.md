@@ -4,7 +4,7 @@ metadata:
   order: 8
   label: "Serial tools"
   default_enabled: true
-  load_condition: "Any spawn_actor, wire_verse_*, set_creative_device_fields, set_actor_*, destroy/delete, instantiate_prefab, save_current_level, or multi-device level mutation"
+  load_condition: "Any spawn_actor, wire_verse_*, Epic PlaceDevice/SetDeviceProperty, set_actor_*, destroy/delete, instantiate_prefab, save_current_level, or multi-device level mutation"
 ---
 
 ## One operation per MCP call
@@ -18,7 +18,7 @@ metadata:
 | Wire N scalar refs | `inspect_verse_device` → `wire_verse_device_ref` **once per field** (wait between each) |
 | Wire N array entries | `resize_verse_array` if needed → `wire_verse_device_array` **once per target** or `patch_verse_array_entry` per row |
 | Spawn + wire Verse device | `spawn_actor` → label → `wire_verse_device_ref` per field (serial) → `save_current_level` |
-| Package one mesh prefab | `create_entity` (root) → `create_entity` (child) → `add_entity_component` → `create_prefab_from_entities` → `destroy_entity` the temp — **one call per assistant message**. `save_directory` every 5–10 prefabs. Never an `execute_python` loop over many prefabs. |
+| Package one mesh prefab | Epic `ValkyrieToolset.EntityToolset` via `unreal__call_tool` (names from `unreal__describe_toolset`): create root entity → create child entity → add component → `create_prefab_from_entities` → destroy the temp entity — **one call per assistant message**. `save_directory` every 5–10 prefabs. Never an `execute_python` loop over many prefabs. |
 
 **Never** pass multiple fields, multiple spawn items, or combined verify+save mega-calls.
 **Never** fire multiple wire/spawn/save tools in the same assistant turn (parallel or batched) — that freezes UEFN and wedges the listener.
