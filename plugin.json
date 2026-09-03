@@ -1,7 +1,7 @@
 {
   "id": "uefn",
   "kind": "plugin",
-  "version": "1.0.32",
+  "version": "1.0.34",
   "label": "UEFN",
   "description": "Core UEFN editor surface: actors, assets, data tables, text localization, editor control, introspection, AI Python, project memory. Creative devices / PIC sessions use nested Epic UEFN MCP (unreal__list_toolsets/describe_toolset/call_tool). Bundles uefn + datatables + localization skills.",
   "min_app_version": "1.0.0",

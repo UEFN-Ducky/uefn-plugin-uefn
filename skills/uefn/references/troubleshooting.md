@@ -29,3 +29,7 @@ metadata:
 Never loop retries more than twice. The only human asks left are things only
 they can do (restart UEFN, Epic MCP setup). Do not ask them to Build Verse,
 paste T3D, or drag Details refs.
+
+## Moved or renamed assets (v42.10+)
+
+Non-private assets, and every asset referenced from compiled Verse, now leave a **redirector** when moved or renamed, so `using` paths and `@editable` refs keep resolving. Run `fixup_redirectors` after a batch of moves before a Verse build; if the Assets digest still shows the old name, rebuild once and re-search.

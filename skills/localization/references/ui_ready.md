@@ -41,8 +41,17 @@ MessageAgent<localizes>(Agent : agent) : message = "{Agent}"
 5. **Verse canvas:** `text_block` + `SetText(NamedMessage)` (or a
    parameterized `<localizes>`). Do not put English labels into
    `texture_block` images when a text widget will do.
-6. **HUD devices:** `hud_message_device.SetText(NamedMessage).Show(Agent)` —
-   same `message` rules. Details: `skill_read_subskill("verse", "devices")`.
+6. **HUD devices:** `SetText` returns `void`, so it **cannot be chained** —
+   two calls, or the one-shot `Show` overload that takes the message:
+
+```verse
+HudMessage.SetText(NamedMessage)
+HudMessage.Show(Agent)
+# digest also has Show(Agent:agent, Message:message, ?DisplayTime:float)
+HudMessage.Show(Agent, NamedMessage, ?DisplayTime := 3.0)
+```
+
+   Same `message` rules. Details: `skill_read_subskill("verse", "devices")`.
 7. **UMG:** Verse field type `message` → View Bindings → Text. Drive with
    named `<localizes>` fields (see Style1/Style2 in
    `skill_read_subskill("verse", "umg_verse_fields")`). Numbers: ToText

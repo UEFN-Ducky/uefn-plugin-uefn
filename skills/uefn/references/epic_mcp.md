@@ -53,8 +53,22 @@ Epic does **not** expose flat `unreal__<tool>` names. Every editor Epic call is:
 | Materials | `editor_toolset.toolsets.material.MaterialTools` (+ `material_instance`) | Epic material graph when preferred |
 | Niagara | `NiagaraToolsets.NiagaraToolset_System` (+ Component / Assets / Info) | Epic Niagara assembly |
 | UMG | `UMGToolSet.UMGToolSet`, `MVVMToolset.MVVMToolset`, `VerseFieldsToolset.VerseFieldsToolset` | widget tree + MVVM |
+| Batched calls (v42.10+) | `editor_toolset.toolsets.programmatic.ProgrammaticToolset` | `get_execution_environment` (call once first, read its `instructions`), then `execute_tool_script(script)` — a sandboxed Python script defining `run() -> dict` that calls other toolsets |
 
 Always `describe_toolset` before first call in a session if arguments are unclear — property names and `refPath` shapes are Epic-owned.
+
+**Batching (v42.10+):** `editor_toolset.toolsets.programmatic.ProgrammaticToolset`
+runs a small sandboxed Python script that calls other registered toolsets — tool
+orchestration, not general Python. Workflow, in order:
+
+1. `unreal__call_tool(toolset_name="editor_toolset.toolsets.programmatic.ProgrammaticToolset", tool_name="get_execution_environment", arguments={})` once per session; read `instructions` and `supported_modules`.
+2. `unreal__describe_toolset` for every toolset the script will call, so argument names and output schemas are exact.
+3. `unreal__call_tool(..., tool_name="execute_tool_script", arguments={"script": "<python defining run() -> dict>"})`.
+
+Use it when a task needs 5+ placements, property sets, or entity edits; the SERIAL
+rule still applies to the single script call (one per turn), the batching happens
+inside the editor. The script may only import the modules the environment lists; it
+raises on disallowed imports or a missing `run()`.
 
 ## Coordinates
 
