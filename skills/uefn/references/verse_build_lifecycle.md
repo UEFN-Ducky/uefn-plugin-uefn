@@ -48,7 +48,10 @@ identical failure is not a cue to call `wire_verse_device_array` again.
 1. Do **not** hammer `wire_*` / `set_verse_editable`.
 2. Wait for the build (same 10054 wait as above).
 3. `get_verse_editables` on **that one** device — wire only if `mangled_name` is set.
-4. Still no hash after a finished build → re-place the Verse device, then wire once.
+4. Still no hash after a finished build → the build did not land (compile errors or
+   still linking). Check `workspace_compile_verse` output, wait, re-run step 3 on the
+   **same** device. Never place a second copy: a duplicate has the same stale class
+   and the existing instance gets the hashes the moment the build finishes.
 
 ## Digest regenerated ≠ Verse VM relinked
 
