@@ -17,6 +17,10 @@ Epic material / Niagara / UMG toolsets). Do **not** reach for the Ducky listener
 for those jobs. Listener is second — only Epic-offline gaps and Ducky-only work
 below.
 
+**NEVER `execute_python` to spawn / place / assign materials.** That is not Epic MCP.
+5+ editor ops → `ProgrammaticToolset` `execute_tool_script` (sandboxed tool calls),
+not `EditorLevelLibrary.spawn_actor_from_object` in the Ducky listener.
+
 ## Where it shows in the app
 
 Settings → **MCPs** → nested row **UEFN MCP (Epic)**  

@@ -5,13 +5,15 @@ description: "DataTable assets in UEFN — inspect row structs, read rows, creat
 license: MIT
 metadata:
   label: UEFN Data Tables
-  version: 4
+  version: 5
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
 ---
 
 # UEFN Data Tables — read and rewrite
+
+**Tool order (HARD):** 1) Official UEFN MCP first — `ducky_get_status`; when `epic_mcp_online` use nested `unreal__*` (`unreal__list_toolsets` → `unreal__describe_toolset` → `unreal__call_tool`; 5+ ops → ProgrammaticToolset `execute_tool_script`). 2) Ducky listener second (Epic-offline gaps + Ducky-only tools listed in this skill). 3) `execute_python` LAST — never a placement/layout path, even if Epic and listener already failed. Never spawn, move, or assign materials. Map: `skill_read_subskill("uefn", "epic_mcp")`.
 
 **SERIAL:** never parallel `save_current_level` with other heavy editor calls
 in the same turn (`skill_read_subskill("uefn", "batch_commands")`).

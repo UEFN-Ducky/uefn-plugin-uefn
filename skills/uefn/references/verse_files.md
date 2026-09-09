@@ -7,6 +7,8 @@ metadata:
   load_condition: "Creating or editing .verse files, or unsure what works while the listener/UEFN is offline"
 ---
 
+**Tool order (HARD):** 1) Official UEFN MCP first (`ducky_get_status` → `epic_mcp_online` → nested `unreal__*`). 2) Ducky listener second. 3) `execute_python` LAST — never a placement path, even if Epic and listener failed. Map: `skill_read_subskill("uefn", "epic_mcp")`.
+
 ## Verse source edits — do this first, listener not required
 
 When the user asks to change **behavior** (trigger on enter, grant item, spawn NPC, subscribe to events, game logic), that lives in **`Verse/**/*.verse` on disk**. Edit it **immediately** with workspace tools. Do **not** ask for Outliner labels, do **not** wait for the UEFN listener, do **not** say you need UEFN open first.
