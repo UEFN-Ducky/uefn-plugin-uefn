@@ -7,6 +7,8 @@ metadata:
   load_condition: "Configuring a native Creative device (granter, button, spawner, teleporter, audio player…) or placing devices / horns / SFX in the level"
 ---
 
+**Tool order (HARD):** 1) Official UEFN MCP first (`ducky_get_status` → `epic_mcp_online` → nested `unreal__*`). 2) Ducky listener second. 3) `execute_python` LAST — never a placement path, even if Epic and listener failed. Map: `skill_read_subskill("uefn", "epic_mcp")`.
+
 ## Native Creative devices (Epic `ValkyrieToolset.DeviceToolset`)
 
 Epic-built devices: item granters, conditional buttons, player spawners,

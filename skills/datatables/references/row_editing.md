@@ -7,6 +7,8 @@ metadata:
   load_condition: "Editing/adding/deleting data table rows, a fill call was rejected, or column discovery came back unavailable"
 ---
 
+**Tool order (HARD):** 1) Official UEFN MCP first (`ducky_get_status` → `epic_mcp_online` → nested `unreal__*`). 2) Ducky listener second. 3) `execute_python` LAST — never a placement path, even if Epic and listener failed. Map: `skill_read_subskill("uefn", "epic_mcp")`.
+
 ## Row editing — the JSON round-trip
 
 There is no add_row/update_row/delete_row in editor Python. Every write is a

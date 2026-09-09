@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 34
+  version: 39
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -13,17 +13,23 @@ metadata:
 
 # UEFN MCP — Operator Skill
 
+**Tool order (HARD):** 1) Official UEFN MCP first — `ducky_get_status`; when `epic_mcp_online` ALWAYS nested `unreal__*`. 2) Ducky listener second. 3) `execute_python` LAST — never a placement path, even if other options failed. Never spawn, move, or assign materials.
+
+**Save popup lock (HARD):** a Save/Yes modal blocks Slate — Epic MCP and `execute_python` hang. Call `dismiss_uefn_modal` (Ducky host). Do not retry Python / `unreal__*`.
+
 **ALWAYS prefer official UEFN MCP (`unreal__*`) when `epic_mcp_online`.**
 Settings → MCPs → **UEFN MCP (Epic)** (`unreal-mcp`).
 Only three bridge tools: `unreal__list_toolsets` → `unreal__describe_toolset` →
 `unreal__call_tool` into Valkyrie Device / Entity / Verse / Session toolsets (and
 `editor_toolset.*` for actors/assets/materials/Niagara/UMG). There are **no** flat
-`unreal__<tool>` names — always go through a toolset. Listener is second — offline `workspace_*`,
-VerseDevice wires, prefabs, screenshots/Meshy. The old Ducky device/entity/PIE tools
-were pruned and no longer exist — never call them. Epic MCP errors: retry once, then
-degrade to the closest Ducky tool and finish the task (never "offline → stop"); mention
-`epic_mcp_setup_steps` only after the work is done. Full map:
-`skill_read_subskill("uefn", "epic_mcp")`.
+`unreal__<tool>` names — always go through a toolset. **NEVER** `execute_python`
+to spawn actors, place devices, or assign materials — use Epic toolsets (or
+`spawn_actor` / `assign_material_to_mesh` when Epic is offline). Listener is
+second — offline `workspace_*`, VerseDevice wires, prefabs, screenshots/Meshy.
+The old Ducky device/entity/PIE tools were pruned and no longer exist — never
+call them. Epic MCP errors: retry once, then degrade to the closest Ducky tool
+and finish the task (never "offline → stop"); mention `epic_mcp_setup_steps`
+only after the work is done. Full map: `skill_read_subskill("uefn", "epic_mcp")`.
 
 **Placement (canonical):** Creative devices (any `*_device`) → Epic
 `unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="PlaceDevice", …)`,
@@ -70,6 +76,7 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 
 - `inspect_verse_device` / `get_verse_editables` `STOP: true` or `mangled_name: null` is **advisory**. Resolve, then wire — do not ask the user to Build Verse, paste T3D, or drag Details. Ladder: `list_verse_property_hashes(refresh=true)` → re-inspect that one device → `wire_verse_*` once → still empty: `reload_listener` → retry once. Internals: `skill_read_subskill("uefn", "verse_editable_internals")`.
 - `STOP: false` (even with `wiring.status: partial`) → wire with labels now.
+- **STALE REFLECTION / no compiled hash:** you wired before the Verse VM had hashes (new field like `Triggers`, new class, or compile still running). **Do not call `wire_verse_*` again.** Host already compiles + reloads + retries once. Wait out `WinError 10054`, poll `list_verse_types`, then `get_verse_editables`; still no `mangled_name` → re-place the device. `skill_read_subskill("uefn", "verse_build_lifecycle")`.
 - Digest deadlock / `WinError 10054`: `skill_read_subskill("uefn", "verse_build_lifecycle")`.
 
 ## Do not / do instead
@@ -87,6 +94,7 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 | Scan `.uasset` / binaries / `os.walk` for `__verse_0x` hashes | Direct read/write of one object's mangled `__verse_0x<HASH>_<Field>` is fine; prefer `list_verse_property_hashes` / `get_verse_editables` / `wire_verse_*` |
 | `wire_verse_device_ref` when target is another Verse device | Same tool works now (auto-routes), or `set_verse_editable` for `?player_manager`-style refs |
 | `wire_verse_device_array` for scalar spawner fields (`NPCSpawner1`, …) | `wire_verse_device_ref` once per scalar field — read names from `get_verse_editables` |
+| `wire_verse_*` before `workspace_compile_verse` succeeded | Compile first. STALE REFLECTION is not a retry cue — stop, wait, re-inspect |
 | Loop a failing call more than twice | One alternative, then `ducky_ask_user` — do not invent Details-panel homework |
 | Ask the user to create NPCDefs / AnimPresets / hook anims / drag wires | You program it: `ducky_get_tools` + `skill_read_subskill("animation", "npc_characters")` + the `create_*` NPC tools. Write original Verse for *this* island. |
 

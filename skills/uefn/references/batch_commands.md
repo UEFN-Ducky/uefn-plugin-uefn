@@ -7,6 +7,8 @@ metadata:
   load_condition: "Any spawn_actor, wire_verse_*, Epic PlaceDevice/SetDeviceProperty, set_actor_*, destroy/delete, instantiate_prefab, save_current_level, or multi-device level mutation"
 ---
 
+**Tool order (HARD):** 1) Official UEFN MCP first (`ducky_get_status` → `epic_mcp_online` → nested `unreal__*`). 2) Ducky listener second. 3) `execute_python` LAST — never a placement path, even if Epic and listener failed. Map: `skill_read_subskill("uefn", "epic_mcp")`.
+
 ## One operation per MCP call
 
 `batch_commands`, `bulk_*`, `setup_verse_device`, and `spawn_actor_batch` were
@@ -14,7 +16,8 @@ metadata:
 
 | Task | Pattern |
 |------|---------|
-| Place N devices | `spawn_actor` → wait → `set_actor_label` → wait → `set_actor_folder` **once per device**, then **one** `save_current_level` |
+| Place N devices | Epic `DeviceToolset` `PlaceDevice` (or ProgrammaticToolset `execute_tool_script` for 5+) — **not** `execute_python` |
+| Place N props | Epic ActorTools / ProgrammaticToolset; leftover `spawn_actor` **once per leftover**, then **one** `save_current_level` |
 | Wire N scalar refs | `inspect_verse_device` → `wire_verse_device_ref` **once per field** (wait between each) |
 | Wire N array entries | `resize_verse_array` if needed → `wire_verse_device_array` **once per target** or `patch_verse_array_entry` per row |
 | Spawn + wire Verse device | `spawn_actor` → label → `wire_verse_device_ref` per field (serial) → `save_current_level` |

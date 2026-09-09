@@ -7,6 +7,8 @@ metadata:
   load_condition: "Wiring or inspecting a VerseDevice_C @editable, get_verse_editables STOP, mangled_name null, or a device-ref array (npc_spawner_device, button_device, …)"
 ---
 
+**Tool order (HARD):** 1) Official UEFN MCP first (`ducky_get_status` → `epic_mcp_online` → nested `unreal__*`). 2) Ducky listener second. 3) `execute_python` LAST — never a placement path, even if Epic and listener failed. Map: `skill_read_subskill("uefn", "epic_mcp")`.
+
 ## Verse `@editable` internals
 
 You always edit these yourself. Never ask the user to Build Verse, paste a T3D
@@ -74,5 +76,11 @@ fields is a **cache miss**, not missing compilation.
 3. If `mangled_name` is set, `wire_verse_device_ref` / `wire_verse_device_array` / `set_verse_editable` **once**
 4. If a wire still fails: `reload_listener`, retry **once**
 5. One-object `execute_python` that reads/writes `script.get_editor_property(mangled)` is allowed. Do **not** `os.walk` / `rglob` / scan `.uasset` for `__verse_0x`.
+
+**STALE REFLECTION is a different failure.** The field exists in `.verse` but this
+placed device has no compiled hash yet. Compile first; the host auto-retries
+`wire_*` **once**. A second identical STALE error means the build is still
+running or the placed instance is stale — wait / re-inspect / re-place. Never
+loop `wire_verse_device_array`.
 
 Asking the user to paste T3D is never a step.

@@ -4,8 +4,10 @@ metadata:
   order: 9
   label: "Verse build lifecycle"
   default_enabled: false
-  load_condition: "WinError 10054 on compile, Script error 9002/9000, Script linking is incomplete, VERSE_DEAD component, or a new mesh/prefab class is missing from the digest"
+  load_condition: "WinError 10054 on compile, STALE REFLECTION / no compiled hash, Script error 9002/9000, Script linking is incomplete, VERSE_DEAD component, or a new mesh/prefab class is missing from the digest"
 ---
+
+**Tool order (HARD):** 1) Official UEFN MCP first (`ducky_get_status` → `epic_mcp_online` → nested `unreal__*`). 2) Ducky listener second. 3) `execute_python` LAST — never a placement path, even if Epic and listener failed. Map: `skill_read_subskill("uefn", "epic_mcp")`.
 
 # Verse build lifecycle
 
@@ -29,6 +31,24 @@ This is not a dropped connection and not a failure.
 4. The build is done when the new class names appear (or Problems is clean).
 
 The same wait applies to a user clicking **Build Verse Code** in UEFN.
+
+## `STALE REFLECTION` — no compiled hash on a placed device
+
+Wiring `@editable` (including new arrays like `Triggers`) before that wait
+finishes fails with:
+
+```
+Field 'Triggers' is in Verse source but has no compiled hash on this device yet.
+STALE REFLECTION — run Verse build in UEFN, then reload_listener, then retry ONCE.
+```
+
+The host already does compile + `reload_listener` + **one** retry. A second
+identical failure is not a cue to call `wire_verse_device_array` again.
+
+1. Do **not** hammer `wire_*` / `set_verse_editable`.
+2. Wait for the build (same 10054 wait as above).
+3. `get_verse_editables` on **that one** device — wire only if `mangled_name` is set.
+4. Still no hash after a finished build → re-place the Verse device, then wire once.
 
 ## Digest regenerated ≠ Verse VM relinked
 
