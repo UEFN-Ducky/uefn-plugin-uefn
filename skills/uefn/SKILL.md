@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 39
+  version: 40
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -76,7 +76,7 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 
 - `inspect_verse_device` / `get_verse_editables` `STOP: true` or `mangled_name: null` is **advisory**. Resolve, then wire — do not ask the user to Build Verse, paste T3D, or drag Details. Ladder: `list_verse_property_hashes(refresh=true)` → re-inspect that one device → `wire_verse_*` once → still empty: `reload_listener` → retry once. Internals: `skill_read_subskill("uefn", "verse_editable_internals")`.
 - `STOP: false` (even with `wiring.status: partial`) → wire with labels now.
-- **STALE REFLECTION / no compiled hash:** you wired before the Verse VM had hashes (new field like `Triggers`, new class, or compile still running). **Do not call `wire_verse_*` again.** Host already compiles + reloads + retries once. Wait out `WinError 10054`, poll `list_verse_types`, then `get_verse_editables`; still no `mangled_name` → re-place the device. `skill_read_subskill("uefn", "verse_build_lifecycle")`.
+- **STALE REFLECTION / no compiled hash:** you wired before the Verse VM had hashes (new field like `Triggers`, new class, or compile still running). **Do not call `wire_verse_*` again.** Host already compiles + reloads + retries once. Wait out `WinError 10054`, poll `list_verse_types`, then `get_verse_editables` on the **same** device and wire once. **Never place a second copy of a Verse device to get hashes** — a duplicate has the same stale class; the placed instance picks up the hashes when the build lands. One Verse class = one placed device unless the design needs more. `skill_read_subskill("uefn", "verse_build_lifecycle")`.
 - Digest deadlock / `WinError 10054`: `skill_read_subskill("uefn", "verse_build_lifecycle")`.
 
 ## Do not / do instead

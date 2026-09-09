@@ -80,7 +80,8 @@ fields is a **cache miss**, not missing compilation.
 **STALE REFLECTION is a different failure.** The field exists in `.verse` but this
 placed device has no compiled hash yet. Compile first; the host auto-retries
 `wire_*` **once**. A second identical STALE error means the build is still
-running or the placed instance is stale — wait / re-inspect / re-place. Never
-loop `wire_verse_device_array`.
+running or failed — wait, check compile output, re-inspect the **same** device.
+Never place a second copy (same stale class; the existing instance gets the
+hashes when the build lands). Never loop `wire_verse_device_array`.
 
 Asking the user to paste T3D is never a step.

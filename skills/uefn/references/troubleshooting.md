@@ -23,8 +23,8 @@ metadata:
 | UEFN Save/Yes popup; Epic MCP / `execute_python` hang | Call **`dismiss_uefn_modal`** (Ducky host). Do not retry Python or `unreal__*` — the Slate thread is blocked. |
 | Partial wires after a crash | `inspect_verse_device` → list empty vs set → wire remaining fields **one at a time** |
 | Horn / SFX is Speakers or a prop mesh | Delete wrong actor; place Creative **Audio Player** (`creative_devices`); wire `audio_player_device` fields |
-| `STALE REFLECTION` / field in source but no compiled hash | You wired too early (or the first auto-retry already ran). **Do not hammer `wire_verse_*`.** Wait for the Verse build (`WinError 10054` = started), poll `list_verse_types`, `get_verse_editables`; still no hash → re-place the device |
-| New `@editable` missing on device Script | `workspace_list_verse_errors` until Problems is clean → `workspace_compile_verse` once (wait; 10054 = started) → `list_verse_property_hashes(refresh=true)` → re-inspect → wire. Re-place the device only if hashes still missing after compile+refresh. |
+| `STALE REFLECTION` / field in source but no compiled hash | You wired too early (or the first auto-retry already ran). **Do not hammer `wire_verse_*`.** Wait for the Verse build (`WinError 10054` = started), poll `list_verse_types`, `get_verse_editables` on the **same** device, wire once. **Never place a second copy** — a duplicate has the same stale class; the existing instance gets the hashes when the build lands |
+| New `@editable` missing on device Script | `workspace_list_verse_errors` until Problems is clean → `workspace_compile_verse` once (wait; 10054 = started) → `list_verse_property_hashes(refresh=true)` → re-inspect the same device → wire. Hashes still missing = build did not land (errors / still linking) — fix and wait; placing another device never adds a hash. |
 | MCP bridge dies: `Request already responded to` | Cancel race — restart Ducky/MCP bridge (launcher patches idempotent respond); do not parallel long tools |
 | ToyOptions error on Verse device | Wrong path — use Verse tools |
 | @editable ref won't set on granter | Wrong path — use Creative tools |
