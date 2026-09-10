@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 40
+  version: 41
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -97,6 +97,7 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 | `wire_verse_*` before `workspace_compile_verse` succeeded | Compile first. STALE REFLECTION is not a retry cue — stop, wait, re-inspect |
 | Loop a failing call more than twice | One alternative, then `ducky_ask_user` — do not invent Details-panel homework |
 | Ask the user to create NPCDefs / AnimPresets / hook anims / drag wires | You program it: `ducky_get_tools` + `skill_read_subskill("animation", "npc_characters")` + the `create_*` NPC tools. Write original Verse for *this* island. |
+| `set_actor_transform` / ActorTools / `PlaceDevice` **Scale** on a Fortnite Creative device (button, trigger, volume, barrier, pad, granter, Island Settings) | Location + rotation only. Resize via Details `Width` / `Height` / `Depth` / zone / tiles — `GetDeviceProperties` then `SetDeviceProperty`. Scale is for props, meshes, and custom assets only — actor scale **breaks** Fortnite devices. |
 
 ## Project memory (index + pull, like skills)
 

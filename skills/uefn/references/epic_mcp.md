@@ -61,6 +61,10 @@ Epic does **not** expose flat `unreal__<tool>` names. Every editor Epic call is:
 
 Always `describe_toolset` before first call in a session if arguments are unclear — property names and `refPath` shapes are Epic-owned.
 
+**Never scale Fortnite Creative devices.** `PlaceDevice` takes location + rotation —
+omit Scale. Resize volumes/triggers/barriers via `SetDeviceProperty` (Details
+Width/Height/zone/tiles). Actor scale is for props and custom assets only.
+
 **Batching (v42.10+):** `editor_toolset.toolsets.programmatic.ProgrammaticToolset`
 runs a small sandboxed Python script that calls other registered toolsets — tool
 orchestration, not general Python. Workflow, in order:

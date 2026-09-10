@@ -26,3 +26,6 @@ UEFN still has **two** device shapes. Using the wrong path fails silently.
 | Static mesh / prop / Fort actor | Ducky actors **or** Epic `ActorTools` / `SceneTools` | `get_all_actors` or Epic describe | `set_actor_properties` / Epic |
 
 **Decision:** Epic DeviceToolset for Creative; `inspect_verse_device` only for project Verse scripts.
+
+**Never scale Fortnite Creative devices.** Location/rotation OK. Resize via
+`SetDeviceProperty` (Details Width/Height/zone). Scale is for props/meshes only.
