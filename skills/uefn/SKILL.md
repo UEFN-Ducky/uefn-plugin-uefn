@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 41
+  version: 43
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -36,8 +36,10 @@ only after the work is done. Full map: `skill_read_subskill("uefn", "epic_mcp")`
 properties via `SetDeviceProperty` (call `unreal__describe_toolset` first for exact argument
 names; never invent them). When `ducky_get_status.epic_mcp_online` is false, the fallback is
 `spawn_actor(asset_path=…, location=…, label=…, folder=…)` for props and Verse devices only.
-Verse devices → `spawn_actor(asset_path=<from search_assets(directory='/_Verse')>)` →
-`set_actor_label` → `wire_verse_device_ref` / `wire_verse_device_array` per @editable field
+Verse devices → pick `asset_path` from `workspace_compile_verse.verse_classes` (or
+`search_assets` on `/<Project>/_Verse` from `get_project_info().content_root` — never bare
+`/_Verse` or `/Game`) → `spawn_actor(asset_path=…, label=…, folder=…)` →
+`wire_verse_device_ref` / `wire_verse_device_array` per @editable field
 (one heavy call at a time) — only after `workspace_compile_verse` succeeded ("STALE REFLECTION"
 otherwise). Scene Graph entities/components → Epic `ValkyrieToolset.EntityToolset`.
 Verse build: `workspace_list_verse_errors` → `workspace_compile_verse` → wire; Epic
@@ -76,7 +78,7 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 
 - `inspect_verse_device` / `get_verse_editables` `STOP: true` or `mangled_name: null` is **advisory**. Resolve, then wire — do not ask the user to Build Verse, paste T3D, or drag Details. Ladder: `list_verse_property_hashes(refresh=true)` → re-inspect that one device → `wire_verse_*` once → still empty: `reload_listener` → retry once. Internals: `skill_read_subskill("uefn", "verse_editable_internals")`.
 - `STOP: false` (even with `wiring.status: partial`) → wire with labels now.
-- **STALE REFLECTION / no compiled hash:** you wired before the Verse VM had hashes (new field like `Triggers`, new class, or compile still running). **Do not call `wire_verse_*` again.** Host already compiles + reloads + retries once. Wait out `WinError 10054`, poll `list_verse_types`, then `get_verse_editables` on the **same** device and wire once. **Never place a second copy of a Verse device to get hashes** — a duplicate has the same stale class; the placed instance picks up the hashes when the build lands. One Verse class = one placed device unless the design needs more. `skill_read_subskill("uefn", "verse_build_lifecycle")`.
+- **STALE REFLECTION / no compiled hash:** you wired before the Verse VM had hashes (new field like `Triggers`, new class, or compile still running). **Do not call `wire_verse_*` again.** Host already compiles + reloads + retries once. Wait out `WinError 10054`, poll `list_verse_types`, then `get_verse_editables` on the **same** device and wire once. **Never place a second copy of a Verse device to get hashes** — a duplicate has the same stale class; the placed instance picks up the hashes when the build lands. One Verse class = one placed device unless the design needs more. First array item: `wire_verse_device_array` + `target_paths=[one]`. Rewrite: same device, `replace=true`, full list. `skill_read_subskill("uefn", "verse_devices")`.
 - Digest deadlock / `WinError 10054`: `skill_read_subskill("uefn", "verse_build_lifecycle")`.
 
 ## Do not / do instead
@@ -94,6 +96,7 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 | Scan `.uasset` / binaries / `os.walk` for `__verse_0x` hashes | Direct read/write of one object's mangled `__verse_0x<HASH>_<Field>` is fine; prefer `list_verse_property_hashes` / `get_verse_editables` / `wire_verse_*` |
 | `wire_verse_device_ref` when target is another Verse device | Same tool works now (auto-routes), or `set_verse_editable` for `?player_manager`-style refs |
 | `wire_verse_device_array` for scalar spawner fields (`NPCSpawner1`, …) | `wire_verse_device_ref` once per scalar field — read names from `get_verse_editables` |
+| Spawn `_v2` / a second Verse device to hash or rewrite a field | Census, compile, wire **this** device. First item = `target_paths=[one]`. Rewrite = `replace=true` |
 | `wire_verse_*` before `workspace_compile_verse` succeeded | Compile first. STALE REFLECTION is not a retry cue — stop, wait, re-inspect |
 | Loop a failing call more than twice | One alternative, then `ducky_ask_user` — do not invent Details-panel homework |
 | Ask the user to create NPCDefs / AnimPresets / hook anims / drag wires | You program it: `ducky_get_tools` + `skill_read_subskill("animation", "npc_characters")` + the `create_*` NPC tools. Write original Verse for *this* island. |
