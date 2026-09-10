@@ -21,7 +21,7 @@ unreal__describe_toolset({ "toolset_name": "ValkyrieToolset.DeviceToolset" })
 unreal__call_tool({
   "toolset_name": "ValkyrieToolset.DeviceToolset",
   "tool_name": "PlaceDevice",   # or ListDeviceAssets / GetDeviceProperties / SetDeviceProperty
-  "arguments": { … }            # XYZ; use refPath objects from prior Epic returns
+  "arguments": { … }            # XYZ location/rotation; omit Scale — use refPath objects from prior Epic returns
 })
 ```
 
@@ -34,6 +34,13 @@ and you finish the task — never "offline → stop".
 Prefer **Fortnite Creative devices** from `/Game/Creative` (or
 `/Game/Creative/Devices`) for gameplay devices. Confirm Blueprint with
 `search_assets` → Epic `PlaceDevice` (or Ducky `spawn_actor(…_C)` for props only).
+
+**Never scale Fortnite Creative devices (HARD).** Actor `scale` / `set_actor_scale3d`
+/ Epic ActorTools scale / `PlaceDevice` Scale **breaks** buttons, triggers, volumes,
+barriers, pads, granters, Island Settings. Place with location + rotation only —
+**omit Scale**. To resize, `GetDeviceProperties` then `SetDeviceProperty` (Details
+`Width` / `Height` / `Depth` / zone / tiles). Location and rotation via
+`set_actor_transform` are fine. Scale is for props, meshes, and custom assets only.
 
 **SERIAL:** one heavy MCP call → wait → next (never same-turn multi spawn/wire).
 See `skill_read_subskill("uefn", "batch_commands")`.
@@ -79,7 +86,7 @@ unreal__call_tool({
 unreal__call_tool({
   "toolset_name": "ValkyrieToolset.DeviceToolset",
   "tool_name": "PlaceDevice",
-  "arguments": { … }   # assetPath refPath + transform XYZ from describe schema
+  "arguments": { … }   # assetPath refPath + location/rotation XYZ — omit Scale
 })
 ```
 

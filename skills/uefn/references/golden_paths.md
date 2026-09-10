@@ -40,6 +40,8 @@ unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="SetDe
 save_current_level()                                                     # once at the end — never save_level=true inside other calls
 ```
 
-Property keys from Epic **GetDeviceProperties** only. If `ducky_get_status.epic_mcp_online` is
+Property keys from Epic **GetDeviceProperties** only. Device size (volume/trigger/barrier
+Width/Height/zone) is a Details property via `SetDeviceProperty` — never actor Scale.
+If `ducky_get_status.epic_mcp_online` is
 false or the Epic call errors twice, degrade: placement falls back to `spawn_actor(asset_path=…)`
 (props and Verse devices only) and finish the task — never stop mid-task.
