@@ -27,8 +27,10 @@ Example: `CatSpawners` → `__verse_0xDE71A4D4_CatSpawners`.
 Probing the plain Verse name (`CatSpawners`, `catSpawners`) correctly returns
 "not found". That is **not** evidence the field is missing.
 
-`get_verse_editables` / `inspect_verse_device` return `mangled_name` (or resolve
-it on write). Use that. `STOP` is advisory.
+`wire_verse_*` resolves the mangled name on write from the live Script
+(`dir()` + class properties + export-text). `get_verse_editables` /
+`inspect_verse_device` return `mangled_name` for **verify**, not as a
+prerequisite. `STOP` is advisory.
 
 ### Script object
 
@@ -77,11 +79,28 @@ fields is a **cache miss**, not missing compilation.
 4. If a wire still fails: `reload_listener`, retry **once**
 5. One-object `execute_python` that reads/writes `script.get_editor_property(mangled)` is allowed. Do **not** `os.walk` / `rglob` / scan `.uasset` for `__verse_0x`.
 
-**STALE REFLECTION is a different failure.** The field exists in `.verse` but this
-placed device has no compiled hash yet. Compile first; the host auto-retries
-`wire_*` **once**. A second identical STALE error means the build is still
-running or failed — wait, check compile output, re-inspect the **same** device.
-Never place a second copy (same stale class; the existing instance gets the
-hashes when the build lands). Never loop `wire_verse_device_array`.
+**STALE REFLECTION means the live Script has no readable hash after resolve**
+— not “always wait for a build.” The field is in `.verse`, but
+`get_editor_property(__verse_0x…_Field)` still fails on this placed device
+(compile not landed, or a real reflection miss). The host auto-retries
+`wire_*` **once**. A second identical STALE: check compile output, re-inspect
+the **same** device. Never place a second copy (same stale class; the existing
+instance gets the hashes when the build lands). Never loop
+`wire_verse_device_array`. `get_verse_editables` verifies; it is not a
+prerequisite once resolve is complete.
+
+### First array item vs rewrite (HARD)
+
+One Verse class = one placed device unless the design needs more. A new
+`@editable []` does **not** mean spawn another device.
+
+| Job | Call on the **existing** label |
+|-----|--------------------------------|
+| First item (list empty) | `wire_verse_device_array(device, field, target_paths=[first])` |
+| Rewrite the list | `wire_verse_device_array(device, field, target_paths=[…full list…], replace=true)` |
+| Clear the list | `wire_verse_device_array(device, field, target_paths=[], replace=true)` |
+
+Default without `replace` **appends**. A rewrite without `replace=true` stacks
+duplicates on the same device — still not a reason to spawn `_v2`.
 
 Asking the user to paste T3D is never a step.
