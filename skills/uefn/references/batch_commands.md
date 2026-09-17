@@ -17,7 +17,7 @@ metadata:
 | Task | Pattern |
 |------|---------|
 | Place N devices | Epic `DeviceToolset` `PlaceDevice` (or ProgrammaticToolset `execute_tool_script` for 5+) — **not** `execute_python` |
-| Place N props | Epic ActorTools / ProgrammaticToolset; leftover `spawn_actor` **once per leftover**, then **one** `save_current_level` |
+| Place N props | Epic ActorTools / ProgrammaticToolset on Content Drawer `_C` only (skip StaticMesh / BakeData / HLOD); leftover `spawn_actor(…_C)` **once per leftover**, then **one** `save_current_level` |
 | Wire N scalar refs | `inspect_verse_device` → `wire_verse_device_ref` **once per field** (wait between each) |
 | Wire N array entries | `resize_verse_array` if needed → `wire_verse_device_array` **once per target** or `patch_verse_array_entry` per row |
 | Spawn + wire Verse device | `spawn_actor` → label → `wire_verse_device_ref` per field (serial) → `save_current_level` |
@@ -31,14 +31,15 @@ The listener drains **max 1 heavy command per tick**.
 
 Parallel wiring left some `@editable` refs connected and others empty, used a
 wrong “horn” actor instead of Creative Audio Player, and crashed UEFN / killed
-the MCP bridge on cancel. Recover: restart UEFN → `inspect_verse_device` →
-resume **one wire/spawn at a time**. SFX fields → Fortnite Audio Player only
-(`skill_read_subskill("uefn", "creative_devices")`).
+the MCP bridge on cancel. Recover: `inspect_verse_device` → resume **one
+wire/spawn at a time**. `reload_listener` **once** if the listener is stale;
+if still stuck stay on `workspace_*`. **Never restart UEFN.** SFX fields →
+Fortnite Audio Player only (`skill_read_subskill("uefn", "creative_devices")`).
 
 ### Crash postmortem — bulk Python + digest deadlock (do not repeat)
 
 One `execute_python` script that packaged many prefabs froze UEFN. After
-restart, Verse linking cascaded `Script error 9002: Unable to import resolve`
+that freeze, Verse linking cascaded `Script error 9002: Unable to import resolve`
 into `9000: previous link task did not complete successfully` for unrelated
 assets. Recover: comment out the unresolvable `using` / class refs → rebuild
 and wait (`WinError 10054` = started) → confirm digest with `list_verse_types`

@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 43
+  version: 44
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -31,11 +31,17 @@ call them. Epic MCP errors: retry once, then degrade to the closest Ducky tool
 and finish the task (never "offline → stop"); mention `epic_mcp_setup_steps`
 only after the work is done. Full map: `skill_read_subskill("uefn", "epic_mcp")`.
 
+**Place like Content Drawer (HARD):** search `/Game/Creative/**` → spawn only
+`BlueprintGeneratedClass` paths ending in `_C` (Epic ActorTools and leftover
+`spawn_actor` alike). Skip `StaticMesh`, `/BakeData/`, `/HLOD/`, `SM_*` mesh hits —
+page or search again. Epic ActorTools / ProgrammaticToolset have **no** mesh guard;
+a wrong class there cook-fails. Never spawn a mesh “and fix later”.
+
 **Placement (canonical):** Creative devices (any `*_device`) → Epic
 `unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="PlaceDevice", …)`,
 properties via `SetDeviceProperty` (call `unreal__describe_toolset` first for exact argument
 names; never invent them). When `ducky_get_status.epic_mcp_online` is false, the fallback is
-`spawn_actor(asset_path=…, location=…, label=…, folder=…)` for props and Verse devices only.
+`spawn_actor(asset_path=…_C, location=…, label=…, folder=…)` for props and Verse devices only.
 Verse devices → pick `asset_path` from `workspace_compile_verse.verse_classes` (or
 `search_assets` on `/<Project>/_Verse` from `get_project_info().content_root` — never bare
 `/_Verse` or `/Game`) → `spawn_actor(asset_path=…, label=…, folder=…)` →
@@ -76,7 +82,7 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 
 ## STOP ladder
 
-- `inspect_verse_device` / `get_verse_editables` `STOP: true` or `mangled_name: null` is **advisory**. Resolve, then wire — do not ask the user to Build Verse, paste T3D, or drag Details. Ladder: `list_verse_property_hashes(refresh=true)` → re-inspect that one device → `wire_verse_*` once → still empty: `reload_listener` → retry once. Internals: `skill_read_subskill("uefn", "verse_editable_internals")`.
+- `inspect_verse_device` / `get_verse_editables` `STOP: true` or `mangled_name: null` is **advisory**. Resolve, then wire — do not ask the user to Build Verse, paste T3D, or drag Details. Ladder: `list_verse_property_hashes(refresh=true)` → re-inspect that one device → `wire_verse_*` once → still empty: `reload_listener` **once**. If still stuck: stay on `workspace_*` / `ducky_get_status`. **Never restart UEFN.** Internals: `skill_read_subskill("uefn", "verse_editable_internals")`.
 - `STOP: false` (even with `wiring.status: partial`) → wire with labels now.
 - **STALE REFLECTION / no compiled hash:** you wired before the Verse VM had hashes (new field like `Triggers`, new class, or compile still running). **Do not call `wire_verse_*` again.** Host already compiles + reloads + retries once. Wait out `WinError 10054`, poll `list_verse_types`, then `get_verse_editables` on the **same** device and wire once. **Never place a second copy of a Verse device to get hashes** — a duplicate has the same stale class; the placed instance picks up the hashes when the build lands. One Verse class = one placed device unless the design needs more. First array item: `wire_verse_device_array` + `target_paths=[one]`. Rewrite: same device, `replace=true`, full list. `skill_read_subskill("uefn", "verse_devices")`.
 - Digest deadlock / `WinError 10054`: `skill_read_subskill("uefn", "verse_build_lifecycle")`.
@@ -101,6 +107,8 @@ Recipe: `skill_read_subskill("uefn", "creative_devices")`.
 | Loop a failing call more than twice | One alternative, then `ducky_ask_user` — do not invent Details-panel homework |
 | Ask the user to create NPCDefs / AnimPresets / hook anims / drag wires | You program it: `ducky_get_tools` + `skill_read_subskill("animation", "npc_characters")` + the `create_*` NPC tools. Write original Verse for *this* island. |
 | `set_actor_transform` / ActorTools / `PlaceDevice` **Scale** on a Fortnite Creative device (button, trigger, volume, barrier, pad, granter, Island Settings) | Location + rotation only. Resize via Details `Width` / `Height` / `Depth` / zone / tiles — `GetDeviceProperties` then `SetDeviceProperty`. Scale is for props, meshes, and custom assets only — actor scale **breaks** Fortnite devices. |
+| Spawn a `StaticMesh` / `/BakeData/` / `/HLOD/` / `SM_*` hit (Epic ActorTools or `spawn_actor`) | Search `/Game/Creative/**`, spawn the Content Drawer `_C` Blueprint only. Skip mesh hits and search again. Never spawn a mesh “and fix later”. |
+| Restart UEFN / ask the user to restart UEFN | `reload_listener` **once** if stale; if still stuck stay on `workspace_*` / `ducky_get_status`. **Never restart UEFN.** |
 
 ## Project memory (index + pull, like skills)
 

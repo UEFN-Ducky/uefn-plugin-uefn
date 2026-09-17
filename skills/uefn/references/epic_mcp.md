@@ -53,7 +53,7 @@ Epic does **not** expose flat `unreal__<tool>` names. Every editor Epic call is:
 | Verse files / build (in-editor) | `ValkyrieToolset.VerseToolset` | `ListFiles`, `ReadFile`, `WriteFile`, `Replace`, `BuildAll`, … |
 | PIC / live session | `ValkyrieToolset.SessionToolset` | `StartSession`, `PushChanges`, `StartGame`, `StopGame`, `GetSessionStatus`, … |
 | Editor app / PIE-ish | `EditorToolset.EditorAppToolset` | viewport, selection, notifications, … |
-| Actors / levels / assets | `editor_toolset.toolsets.actor.ActorTools`, `.scene.SceneTools`, `.asset.AssetTools`, … | place/inspect actors, levels |
+| Actors / levels / assets | `editor_toolset.toolsets.actor.ActorTools`, `.scene.SceneTools`, `.asset.AssetTools`, … | place/inspect actors. Props: spawn only Content Drawer `_C` Blueprints. Skip `StaticMesh` / `/BakeData/` / `/HLOD/` / `SM_*` — ActorTools has **no** mesh guard; never spawn a mesh “and fix later”. |
 | Materials | `editor_toolset.toolsets.material.MaterialTools` (+ `material_instance`) | Epic material graph when preferred |
 | Niagara | `NiagaraToolsets.NiagaraToolset_System` (+ Component / Assets / Info) | Epic Niagara assembly |
 | UMG | `UMGToolSet.UMGToolSet`, `MVVMToolset.MVVMToolset`, `VerseFieldsToolset.VerseFieldsToolset` | widget tree + MVVM |
@@ -90,7 +90,7 @@ Only when Epic is offline **or** the job is Ducky-only:
 - VerseDevice `@editable` wiring: `inspect_verse_device`, `wire_verse_device_ref`, …  
 - Prefab helpers: `create_empty_prefab`, `instantiate_prefab`, …  
 - Screenshots / Meshy / Blender / Store plugins, level-design spatial helpers  
-- `spawn_actor` for props/meshes Epic cannot place  
+- `spawn_actor` for leftover `_C` props Epic cannot place (never a `StaticMesh` / BakeData / HLOD hit)  
 
 The old Ducky Creative-device find/inspect/set, PIE, and entity/component tools were
 pruned and no longer exist — never call them. Creative devices → `ValkyrieToolset.DeviceToolset`;
