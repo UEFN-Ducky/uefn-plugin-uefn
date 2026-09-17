@@ -5,7 +5,7 @@ description: "UEFN Text Localization — project settings, Export Localization P
 license: MIT
 metadata:
   label: UEFN Text Localization
-  version: 2
+  version: 3
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -22,6 +22,9 @@ per language under **L10N**.
 **Not this pack:** Ducky desktop UI language (`translate_ui_*` / Settings →
 language). That is app chrome. This pack is **Fortnite player-facing island**
 text and localized content.
+
+**Communities posts** (v42.20 auto-translate) are Epic-side Discover chrome —
+the island PO / L10N pipeline in this pack is unchanged.
 
 ## MCP hard rule
 
