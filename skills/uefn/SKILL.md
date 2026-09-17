@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 44
+  version: 45
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -31,11 +31,13 @@ call them. Epic MCP errors: retry once, then degrade to the closest Ducky tool
 and finish the task (never "offline → stop"); mention `epic_mcp_setup_steps`
 only after the work is done. Full map: `skill_read_subskill("uefn", "epic_mcp")`.
 
-**Place like Content Drawer (HARD):** search `/Game/Creative/**` → spawn only
-`BlueprintGeneratedClass` paths ending in `_C` (Epic ActorTools and leftover
-`spawn_actor` alike). Skip `StaticMesh`, `/BakeData/`, `/HLOD/`, `SM_*` mesh hits —
-page or search again. Epic ActorTools / ProgrammaticToolset have **no** mesh guard;
-a wrong class there cook-fails. Never spawn a mesh “and fix later”.
+**Place like Content Drawer (HARD):** search `/Game/Creative/**` → keep only
+`BlueprintGeneratedClass` / `*_C`. **5+ pieces** → Programmatic `execute_tool_script`
+→ `SceneTools.add_to_scene_from_class` (`actor_type.refPath` = `Package.Asset_C`)
+then `set_actor_folder`. **Never** `add_to_scene_from_asset` on `/Game/Creative`
+(`FortStaticMeshActor` cook-fails). Skip `StaticMesh`, `/BakeData/`, `/HLOD/`,
+`SM_*`, `…/Meshes/`. Leftover `spawn_actor(…_C)` only for props Epic cannot place.
+Devices → `PlaceDevice` (no Scale).
 
 **Placement (canonical):** Creative devices (any `*_device`) → Epic
 `unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="PlaceDevice", …)`,

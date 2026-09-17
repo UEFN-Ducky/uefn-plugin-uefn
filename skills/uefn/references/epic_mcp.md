@@ -53,7 +53,7 @@ Epic does **not** expose flat `unreal__<tool>` names. Every editor Epic call is:
 | Verse files / build (in-editor) | `ValkyrieToolset.VerseToolset` | `ListFiles`, `ReadFile`, `WriteFile`, `Replace`, `BuildAll`, … |
 | PIC / live session | `ValkyrieToolset.SessionToolset` | `StartSession`, `PushChanges`, `StartGame`, `StopGame`, `GetSessionStatus`, … |
 | Editor app / PIE-ish | `EditorToolset.EditorAppToolset` | viewport, selection, notifications, … |
-| Actors / levels / assets | `editor_toolset.toolsets.actor.ActorTools`, `.scene.SceneTools`, `.asset.AssetTools`, … | place/inspect actors. Props: spawn only Content Drawer `_C` Blueprints. Skip `StaticMesh` / `/BakeData/` / `/HLOD/` / `SM_*` — ActorTools has **no** mesh guard; never spawn a mesh “and fix later”. |
+| Actors / levels / assets | `editor_toolset.toolsets.actor.ActorTools`, `.scene.SceneTools`, `.asset.AssetTools`, … | Fortnite catalog props: **`SceneTools.add_to_scene_from_class`** with `actor_type.refPath` = Content Drawer `Package.Asset_C`. **Never** `add_to_scene_from_asset` on `/Game/Creative` (creates `FortStaticMeshActor`, cook-fails). Skip `StaticMesh` / `/BakeData/` / `/HLOD/` / `SM_*` / `…/Meshes/`. |
 | Materials | `editor_toolset.toolsets.material.MaterialTools` (+ `material_instance`) | Epic material graph when preferred |
 | Niagara | `NiagaraToolsets.NiagaraToolset_System` (+ Component / Assets / Info) | Epic Niagara assembly |
 | UMG | `UMGToolSet.UMGToolSet`, `MVVMToolset.MVVMToolset`, `VerseFieldsToolset.VerseFieldsToolset` | widget tree + MVVM |
@@ -77,6 +77,13 @@ Use it when a task needs 5+ placements, property sets, or entity edits; the SERI
 rule still applies to the single script call (one per turn), the batching happens
 inside the editor. The script may only import the modules the environment lists; it
 raises on disallowed imports or a missing `run()`.
+
+**Fortnite catalog batch (HARD):** inside `run()`, place props with
+`execute_tool("editor_toolset.toolsets.scene.SceneTools.add_to_scene_from_class", …)`
+and `actor_type.refPath` = `Package.Asset_C`, then
+`execute_tool("…SceneTools.set_actor_folder", …)`. Devices:
+`ValkyrieToolset.DeviceToolset.PlaceDevice` (no Scale). **Never** call
+`add_to_scene_from_asset` for `/Game/Creative`.
 
 ## Coordinates
 
