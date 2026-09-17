@@ -136,6 +136,31 @@ Offline fallback only: `search_assets(search="Audio", directory="/Game/Creative"
 
 Never `spawn_actor(actor_class="audio_player_device")`.
 
+### First Person Camera + Unarmed (v42.20 FPS melee)
+
+Verse type `gameplay_camera_first_person_device`. Place it like any other
+Creative device: `ListDeviceAssets` → pick the **First Person Camera** asset →
+`PlaceDevice` (location/rotation only — **never scale**). Never
+`spawn_actor(actor_class="gameplay_camera_first_person_device")`.
+
+Punch / unarmed melee is **not** a device and **not** a custom montage. Grant
+`Unarmed_Creative_V1_Common{}` via `AddItemDistribute` (`skill_read_subskill("scenegraph", "itemization")`).
+
+### Player Movement Device caps (v42.20)
+
+ToyOptions via `GetDeviceProperties` / `SetDeviceProperty` — **never scale**
+the device. New maxima (values above the old caps are at-own-risk):
+
+| ToyOption | Old cap | 42.20 max |
+|-----------|---------|-----------|
+| Sprint Maximum Speed | 2,000 | **11,000** |
+| Tactical Sprint Speed Multiplier | 5 | **20** |
+| Maximum Acceleration | 1,000 | **10,000** |
+
+`ListDeviceAssets` once for the Content Drawer **Player Movement Device** `*_C`.
+The Verse type `movement_modulator_device` is the speed modulator — do **not**
+assume it is the Player Movement Device until the asset name matches.
+
 **Wire to Verse device:** after placement, wait → `inspect_verse_device` →
 `wire_verse_device_ref(actor_path="MyDevice", field="SomeTriggerField", target_path="MyTrigger_1")` —
 **one field per turn**.
