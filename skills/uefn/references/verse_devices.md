@@ -67,9 +67,11 @@ returns `script_class`. Field names live in that class's `.verse` on disk.
 
 **Do not** use Epic DeviceToolset `SetDeviceProperty` for @editable Script fields — that is the Creative-device path.
 
-Storage is `__verse_0x<HASH>_<Field>` on the Script object. Wrappers outer to
-**Script** (not the actor) and hold `SavedActor`. `STOP` / `mangled_name: null`
-is a cache miss — resolve then wire. Never ask the user to paste T3D.
+Storage is `__verse_0x<HASH>_<Field>` on the Script object (hash = CRC32 of the
+field name, identical in every project). Wrappers outer to
+**Script** (not the actor) and hold `SavedActor`. `STOP` / `readable: false`
+means the compiled class lacks that field — compile once, wait, re-inspect.
+Never ask the user to paste T3D.
 Details: `skill_read_subskill("uefn", "verse_editable_internals")`.
 
 **Do not** use `batch_commands`, `bulk_*`, `setup_verse_device`, or
