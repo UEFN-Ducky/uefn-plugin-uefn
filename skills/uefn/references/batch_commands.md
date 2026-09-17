@@ -17,7 +17,7 @@ metadata:
 | Task | Pattern |
 |------|---------|
 | Place N devices | Epic `DeviceToolset` `PlaceDevice` (or ProgrammaticToolset `execute_tool_script` for 5+) — **not** `execute_python` |
-| Place N props | Epic ActorTools / ProgrammaticToolset on Content Drawer `_C` only (skip StaticMesh / BakeData / HLOD); leftover `spawn_actor(…_C)` **once per leftover**, then **one** `save_current_level` |
+| Place N props | Programmatic `execute_tool_script` → `SceneTools.add_to_scene_from_class` (`actor_type.refPath` = `Package.Asset_C`) + `set_actor_folder`. **Never** `add_to_scene_from_asset` (FortStaticMeshActor cook-fail). Leftover `spawn_actor(…_C)` **once per leftover**, then **one** `save_current_level` |
 | Wire N scalar refs | `inspect_verse_device` → `wire_verse_device_ref` **once per field** (wait between each) |
 | Wire N array entries | `resize_verse_array` if needed → `wire_verse_device_array` **once per target** or `patch_verse_array_entry` per row |
 | Spawn + wire Verse device | `spawn_actor` → label → `wire_verse_device_ref` per field (serial) → `save_current_level` |
