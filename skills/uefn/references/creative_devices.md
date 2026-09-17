@@ -33,7 +33,8 @@ and you finish the task — never "offline → stop".
 
 Prefer **Fortnite Creative devices** from `/Game/Creative` (or
 `/Game/Creative/Devices`) for gameplay devices. Confirm Blueprint with
-`search_assets` → Epic `PlaceDevice` (or Ducky `spawn_actor(…_C)` for props only).
+`search_assets` → Epic `PlaceDevice` (or Ducky `spawn_actor(…_C)` for props only —
+skip `StaticMesh` / `/BakeData/` / `/HLOD/` / `SM_*` hits; never spawn a mesh “and fix later”).
 
 **Never scale Fortnite Creative devices (HARD).** Actor `scale` / `set_actor_scale3d`
 / Epic ActorTools scale / `PlaceDevice` Scale **breaks** buttons, triggers, volumes,
@@ -90,8 +91,7 @@ unreal__call_tool({
 })
 ```
 
-Props-only fallback (not Creative ToyOptions): `search_assets` → `spawn_actor(asset_path="…_C", label=…, folder=…)`.
-Never `spawn_actor(actor_class="*_device")`.
+Props-only fallback (not Creative ToyOptions): `search_assets` under `/Game/Creative` → spawn only `BlueprintGeneratedClass` `_C` paths (`spawn_actor(asset_path="…_C", label=…, folder=…)`). Skip mesh / BakeData / HLOD hits. Never `spawn_actor(actor_class="*_device")`.
 Use separate `set_actor_label` / `set_actor_folder` only when renaming an existing actor.
 Nested folders by area/system (`Hub/Spawners`, `Hub/Teleporters`, `Area1/Combat`).
 

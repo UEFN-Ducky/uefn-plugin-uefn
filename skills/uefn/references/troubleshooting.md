@@ -19,7 +19,7 @@ metadata:
 | `workspace_compile_verse` → `[WinError 10054]` | Build **started**. Wait minutes; poll `list_verse_types`. Never retry. |
 | `Script error 9002: Unable to import resolve` / `9000: previous link task did not complete successfully` | Digest deadlock. Comment out problem Verse → rebuild → confirm digest fresh → uncomment → rebuild. Never patch the digest. |
 | Epic `ValkyrieToolset.EntityToolset` add-component returns `VERSE_DEAD_*` / `/Engine/Transient` | Stale class after VM relink. `reload_listener` → destroy + recreate the entity via EntityToolset → attach again. |
-| Tools hang after `reload_listener` | **Restart UEFN** — old reload could deadlock the tick |
+| Tools hang after `reload_listener` | Stay on `workspace_*` / `ducky_get_status`. Do not hammer. **Never restart UEFN.** |
 | UEFN Save/Yes popup; Epic MCP / `execute_python` hang | Call **`dismiss_uefn_modal`** (Ducky host). Do not retry Python or `unreal__*` — the Slate thread is blocked. |
 | Partial wires after a crash | `inspect_verse_device` → list empty vs set → wire remaining fields **one at a time** |
 | Horn / SFX is Speakers or a prop mesh | Delete wrong actor; place Creative **Audio Player** (`creative_devices`); wire `audio_player_device` fields |
@@ -30,8 +30,10 @@ metadata:
 | @editable ref won't set on granter | Wrong path — use Creative tools |
 
 Never loop retries more than twice. The only human asks left are things only
-they can do (restart UEFN, Epic MCP setup). Do not ask them to Build Verse,
-paste T3D, or drag Details refs.
+they can do (Epic MCP setup when `epic_mcp_online` is false). Do not ask them
+to Build Verse, paste T3D, drag Details refs, or restart UEFN. `reload_listener`
+**once** if the listener is stale; if still stuck stay on `workspace_*`.
+**Never restart UEFN.**
 
 ## Moved or renamed assets (v42.10+)
 
