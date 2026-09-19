@@ -7,8 +7,6 @@ metadata:
   load_condition: "Inspecting, wiring, or placing a Verse (verse_script) device in the level"
 ---
 
-**Tool order (HARD):** 1) Official UEFN MCP first (`ducky_get_status` → `epic_mcp_online` → nested `unreal__*`). 2) Ducky listener second. 3) `execute_python` LAST — never a placement path, even if Epic and listener failed. Map: `skill_read_subskill("uefn", "epic_mcp")`.
-
 ## Verse script devices (`verse_script`)
 
 Custom Verse classes placed in the world (`VerseDevice_C` — the label is whatever the Outliner shows).
@@ -27,7 +25,7 @@ Custom Verse classes placed in the world (`VerseDevice_C` — the label is whate
 | Save | `save_current_level` once when done |
 
 **SERIAL:** never multiple wire/spawn/save in the same assistant turn —
-`skill_read_subskill("uefn", "batch_commands")`.
+SERIAL: one mutating/editor call per assistant message..
 
 **Census first (HARD):** `list_verse_devices` for this class. If a placement
 already exists, **reuse it**. Never spawn `_v2` / `_Test` / a second
