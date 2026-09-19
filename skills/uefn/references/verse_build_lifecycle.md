@@ -7,8 +7,6 @@ metadata:
   load_condition: "WinError 10054 on compile, STALE REFLECTION / no compiled hash, Script error 9002/9000, Script linking is incomplete, VERSE_DEAD component, or a new mesh/prefab class is missing from the digest"
 ---
 
-**Tool order (HARD):** 1) Official UEFN MCP first (`ducky_get_status` → `epic_mcp_online` → nested `unreal__*`). 2) Ducky listener second. 3) `execute_python` LAST — never a placement path, even if Epic and listener failed. Map: `skill_read_subskill("uefn", "epic_mcp")`.
-
 # Verse build lifecycle
 
 UEFN compiles and relinks Verse **asynchronously**. The MCP socket going away
@@ -134,5 +132,5 @@ package many prefabs in one script — that freezes UEFN.
 
 ## Related
 
-- Serial editor ops: `skill_read_subskill("uefn", "batch_commands")`
+- Serial editor ops: SERIAL: one mutating/editor call per assistant message.
 - Digest search (read-only): `skill_read_subskill("verse", "digests")`

@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 46
+  version: 47
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -13,23 +13,7 @@ metadata:
 
 # UEFN MCP — Operator Skill
 
-**Tool order (HARD):** 1) Official UEFN MCP first — `ducky_get_status`; when `epic_mcp_online` ALWAYS nested `unreal__*`. 2) Ducky listener second. 3) `execute_python` LAST — never a placement path, even if other options failed. Never spawn, move, or assign materials.
-
 **Save popup lock (HARD):** a Save/Yes modal blocks Slate — Epic MCP and `execute_python` hang. Call `dismiss_uefn_modal` (Ducky host). Do not retry Python / `unreal__*`.
-
-**ALWAYS prefer official UEFN MCP (`unreal__*`) when `epic_mcp_online`.**
-Settings → MCPs → **UEFN MCP (Epic)** (`unreal-mcp`).
-Only three bridge tools: `unreal__list_toolsets` → `unreal__describe_toolset` →
-`unreal__call_tool` into Valkyrie Device / Entity / Verse / Session toolsets (and
-`editor_toolset.*` for actors/assets/materials/Niagara/UMG). There are **no** flat
-`unreal__<tool>` names — always go through a toolset. **NEVER** `execute_python`
-to spawn actors, place devices, or assign materials — use Epic toolsets (or
-`spawn_actor` / `assign_material_to_mesh` when Epic is offline). Listener is
-second — offline `workspace_*`, VerseDevice wires, prefabs, screenshots/Meshy.
-The old Ducky device/entity/PIE tools were pruned and no longer exist — never
-call them. Epic MCP errors: retry once, then degrade to the closest Ducky tool
-and finish the task (never "offline → stop"); mention `epic_mcp_setup_steps`
-only after the work is done. Full map: `skill_read_subskill("uefn", "epic_mcp")`.
 
 **Place like Content Drawer (HARD):** search `/Game/Creative/**` → keep only
 `BlueprintGeneratedClass` / `*_C`. **5+ pieces** → Programmatic `execute_tool_script`
@@ -65,7 +49,7 @@ same assistant turn or in parallel. One heavy MCP call → wait for result → n
 Parallel or same-batch editor calls freeze/crash UEFN (Epic hitching too).
 Prefer `spawn_actor(..., label=..., folder=...)` (same tick) over separate
 `set_actor_label` / `set_actor_folder` for **props/meshes**. Never Grep the project root / `Saved/` /
-`Intermediate/` / `*.uasset`. Details: `skill_read_subskill("uefn", "batch_commands")`.
+`Intermediate/` / `*.uasset`. Details: SERIAL: one mutating/editor call per assistant message..
 
 **Gameplay SFX / horns / alarms = Fortnite Creative Audio Player only**
 (`audio_player_device` in Verse). Never Speakers, prop meshes, or
@@ -121,3 +105,7 @@ Each project has ONE memory shared by its duckies: named entries stored in app d
 `skill_read_subskill("localization", "ui_ready")`). Not Ducky app UI translation.
 
 This guide is already in your context — do **not** call `uefn_skill` to re-fetch it. Load the reference files listed below with `skill_read_subskill` only when their condition applies.
+
+## Verify
+
+After wiring or placement: `get_verse_editables` / `GetDeviceProperties` / `take_high_res_screenshot`. Do not claim done without that read-back.
