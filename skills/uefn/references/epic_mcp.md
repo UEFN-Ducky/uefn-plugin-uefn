@@ -85,6 +85,14 @@ and `actor_type.refPath` = `Package.Asset_C`, then
 `ValkyrieToolset.DeviceToolset.PlaceDevice` (no Scale). **Never** call
 `add_to_scene_from_asset` for `/Game/Creative`.
 
+**Instance arrays (HARD):** `ObjectTools.set_properties` cannot replace
+`perInstanceSMData` or `perInstanceSMCustomData` in one write. Unreal raises
+`ArrayAdd: elements changed alongside the size change; insertion points are
+ambiguous` when the array length and the element transforms change together.
+Set the array to `[]`, then set the new instances. Ducky's Epic proxy does
+that split on `unreal__call_tool`, including scripts passed to
+`execute_tool_script`.
+
 ## Coordinates
 
 Epic Python toolsets use **XYZ**. UEFN SpatialMath / many Ducky helpers use **LUF**. Do not paste LUF vectors into Epic `arguments`.

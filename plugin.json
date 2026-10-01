@@ -1,7 +1,7 @@
 {
   "id": "uefn",
   "kind": "plugin",
-  "version": "1.0.47",
+  "version": "1.0.48",
   "label": "UEFN",
   "description": "Core UEFN editor surface: actors, assets, data tables, text localization, editor control, introspection, AI Python, project memory. Creative devices / PIC sessions use nested Epic UEFN MCP (unreal__list_toolsets/describe_toolset/call_tool). Bundles uefn + datatables + localization skills.",
   "min_app_version": "1.0.0",
@@ -118,6 +118,430 @@
           "body": "Core UEFN editor MCP tools are live \u2014 actors, assets, data tables, and editor control. Creative devices and PIC sessions use nested Epic UEFN MCP.",
           "advance": "next",
           "mode": "rect"
+        }
+      ]
+    },
+    "automations": {
+      "templates": [
+        {
+          "id": "daily-island-check",
+          "label": "Daily island check at 8 AM",
+          "icon": "\ud83c\udf05",
+          "category": "Play tests",
+          "description": "Every morning at 8: waits for Fortnite's servers, opens your island, starts a session and a Tester ducky play-tests it. Problems go to a Verse Coder ducky to fix, then the session restarts and the test runs again, up to 3 tries. When it passes: a private version and a memory calculation. Either way you get a report in the Workflow reports chat (on your phone too), and a message if a step breaks. It runs from the day you create it (switch it off in the list to pause); this PC and UEFN Ducky need to be on at 8.",
+          "graph": {
+            "nodes": [
+              {
+                "id": "start",
+                "type": "start.cron",
+                "x": 0,
+                "y": 240,
+                "config": {
+                  "cron": "0 8 * * *"
+                },
+                "label": "Every day at 8 AM"
+              },
+              {
+                "id": "servers",
+                "type": "fortnite.servers",
+                "x": 300,
+                "y": 240,
+                "config": {
+                  "wait_minutes": 120,
+                  "every_seconds": 60
+                }
+              },
+              {
+                "id": "down",
+                "type": "notify.message",
+                "x": 600,
+                "y": 600,
+                "config": {
+                  "inputs": {
+                    "message": "\u23f8 Fortnite's servers were still down after 2 hours of checking, so today's island check didn't run.\n\nStatus: {{servers_status}}"
+                  }
+                },
+                "label": "Tell me: servers down"
+              },
+              {
+                "id": "check",
+                "type": "uefn.check",
+                "x": 600,
+                "y": 240,
+                "config": {}
+              },
+              {
+                "id": "running",
+                "type": "flow.branch",
+                "x": 900,
+                "y": 240,
+                "config": {
+                  "mode": "data",
+                  "field": "running",
+                  "op": "equals",
+                  "equals": "true"
+                },
+                "label": "UEFN running?"
+              },
+              {
+                "id": "ready",
+                "type": "uefn.wait_ready",
+                "x": 1200,
+                "y": 120,
+                "config": {
+                  "timeout": 180
+                }
+              },
+              {
+                "id": "open",
+                "type": "uefn.open_project",
+                "x": 1200,
+                "y": 360,
+                "config": {
+                  "project": "",
+                  "timeout": 300
+                }
+              },
+              {
+                "id": "play",
+                "type": "uefn.game.start",
+                "x": 1500,
+                "y": 240,
+                "config": {
+                  "skip_if_playing": true,
+                  "wait_player": 90
+                },
+                "label": "Launch session"
+              },
+              {
+                "id": "loop",
+                "type": "flow.repeat",
+                "x": 1800,
+                "y": 240,
+                "config": {
+                  "max": 3
+                },
+                "label": "Test, fix, test again"
+              },
+              {
+                "id": "test",
+                "type": "pipeline.agent",
+                "x": 2100,
+                "y": -120,
+                "config": {
+                  "ducky": "tester",
+                  "timeout_sec": 1200,
+                  "prompt": "A play session of this island is running with a player in it. Play-test it with the tester tools: session_status, get_editor_log, actor_state_snapshot, actor_state_diff, device_graph_snapshot, device_graph_audit, simulate_device_event, verse_test_results, workspace_list_verse_errors. Don't edit files, stop the session or restart UEFN. Check: 1) Verse compiles with no errors; 2) the player spawned and the HUD shows; 3) the island's main loop works end to end: what the player does first, what it gives back, the next step; 4) no errors or Verse runtime errors in the editor log since the session started; 5) the device audit finds no unbound device references. For each problem give what you saw (log lines, snapshot diffs), where it is (file and line, device or actor) and how to reproduce it. If you tested earlier in this run, check those problems first and say which are fixed now. End with exactly one last line: RESULT: PASS when nothing needs fixing, else RESULT: FAIL."
+                },
+                "label": "Play tester"
+              },
+              {
+                "id": "passed",
+                "type": "logic.if",
+                "x": 2400,
+                "y": -120,
+                "config": {
+                  "expression": "report.includes(\"RESULT: PASS\")",
+                  "names": [
+                    "report"
+                  ]
+                },
+                "label": "Test passed?"
+              },
+              {
+                "id": "fix",
+                "type": "pipeline.agent",
+                "x": 2700,
+                "y": 0,
+                "config": {
+                  "ducky": "verse-coder",
+                  "timeout_sec": 1800,
+                  "prompt": "The play test below found problems on this island. Fix them: read the files it names, change the Verse or the device setup, then workspace_compile_verse and workspace_push_verse_changes until it compiles with no errors. Fix the cause, change only what the problems need, and don't upload, publish or change project settings. If something can't be fixed from here, say why. Reply with what you changed (file, what and why) and what to re-test. The play test's report:"
+                },
+                "label": "Fixer"
+              },
+              {
+                "id": "stop",
+                "type": "uefn.game.stop",
+                "x": 3000,
+                "y": 0,
+                "config": {},
+                "label": "Stop session"
+              },
+              {
+                "id": "replay",
+                "type": "uefn.game.start",
+                "x": 3300,
+                "y": 0,
+                "config": {
+                  "skip_if_playing": false,
+                  "wait_player": 90
+                },
+                "label": "Relaunch session"
+              },
+              {
+                "id": "all",
+                "type": "logic.if",
+                "x": 2100,
+                "y": 420,
+                "config": {
+                  "expression": "passed",
+                  "names": [
+                    "passed"
+                  ]
+                },
+                "label": "All fixed?"
+              },
+              {
+                "id": "end",
+                "type": "uefn.game.stop",
+                "x": 2400,
+                "y": 360,
+                "config": {},
+                "label": "End session"
+              },
+              {
+                "id": "private",
+                "type": "pipeline.agent",
+                "x": 2700,
+                "y": 360,
+                "config": {
+                  "ducky": "verse-coder",
+                  "timeout_sec": 900,
+                  "prompt": "Load skill_read_subskill('ducky', 'publish_private'). Do only Upload to Private Version. When 'Private version has been created!' is up, copy the island code, press OK to close the popup, and put the code in your reply."
+                },
+                "label": "Private version"
+              },
+              {
+                "id": "memory",
+                "type": "pipeline.agent",
+                "x": 3000,
+                "y": 360,
+                "config": {
+                  "ducky": "verse-coder",
+                  "timeout_sec": 900,
+                  "prompt": "Load skill_read_subskill('ducky', 'publish_private'). Do Launch Memory Calculation. First set the Launch Session menu to Launch on this PC if another platform is selected. If 'Private version has been created!' appears, copy the code, put it in your reply, and press OK so the client can start the calculation. Report the memory result when it returns."
+                },
+                "label": "Memory calculation"
+              },
+              {
+                "id": "report",
+                "type": "text.template",
+                "x": 3300,
+                "y": 480,
+                "config": {
+                  "template": "\u2705 Today's island check passed ({{tries}} play test run(s)).\n\n**Play test**\n{{test}}\n\n**Private version**\n{{code}}\n\n**Memory calculation**\n{{memory}}",
+                  "names": [
+                    "tries",
+                    "test",
+                    "code",
+                    "memory"
+                  ]
+                },
+                "label": "Report"
+              },
+              {
+                "id": "send",
+                "type": "notify.message",
+                "x": 3600,
+                "y": 360,
+                "config": {
+                  "on_fail": true
+                },
+                "label": "Send me the report"
+              },
+              {
+                "id": "endf",
+                "type": "uefn.game.stop",
+                "x": 2400,
+                "y": 720,
+                "config": {},
+                "label": "End session"
+              },
+              {
+                "id": "sendf",
+                "type": "notify.message",
+                "x": 2700,
+                "y": 720,
+                "config": {
+                  "inputs": {
+                    "message": "\u274c Today's island check still fails after {{attempts}} tries, so no private version was made.\n\n**Last play test**\n{{nodes.test.text}}\n\n**Last fix attempt**\n{{nodes.fix.text}}\n\n{{last_error}}"
+                  }
+                },
+                "label": "Send me what still fails"
+              }
+            ],
+            "edges": [
+              {
+                "source": "start",
+                "target": "servers",
+                "kind": "main"
+              },
+              {
+                "source": "servers",
+                "target": "check",
+                "kind": "true"
+              },
+              {
+                "source": "servers",
+                "target": "down",
+                "kind": "false"
+              },
+              {
+                "source": "check",
+                "target": "running",
+                "kind": "main"
+              },
+              {
+                "source": "running",
+                "target": "ready",
+                "kind": "true"
+              },
+              {
+                "source": "running",
+                "target": "open",
+                "kind": "false"
+              },
+              {
+                "source": "ready",
+                "target": "play",
+                "kind": "main"
+              },
+              {
+                "source": "open",
+                "target": "play",
+                "kind": "main"
+              },
+              {
+                "source": "play",
+                "target": "loop",
+                "kind": "main"
+              },
+              {
+                "source": "loop",
+                "target": "test",
+                "kind": "each"
+              },
+              {
+                "source": "test",
+                "target": "passed",
+                "kind": "main"
+              },
+              {
+                "source": "passed",
+                "target": "fix",
+                "kind": "false"
+              },
+              {
+                "source": "fix",
+                "target": "stop",
+                "kind": "main"
+              },
+              {
+                "source": "stop",
+                "target": "replay",
+                "kind": "main"
+              },
+              {
+                "source": "loop",
+                "target": "all",
+                "kind": "done"
+              },
+              {
+                "source": "all",
+                "target": "end",
+                "kind": "true"
+              },
+              {
+                "source": "end",
+                "target": "private",
+                "kind": "main"
+              },
+              {
+                "source": "private",
+                "target": "memory",
+                "kind": "main"
+              },
+              {
+                "source": "memory",
+                "target": "send",
+                "kind": "main"
+              },
+              {
+                "source": "all",
+                "target": "endf",
+                "kind": "false"
+              },
+              {
+                "source": "endf",
+                "target": "sendf",
+                "kind": "main"
+              },
+              {
+                "source": "test",
+                "target": "passed",
+                "kind": "data",
+                "source_pin": "text",
+                "target_pin": "report"
+              },
+              {
+                "source": "test",
+                "target": "fix",
+                "kind": "data",
+                "source_pin": "text",
+                "target_pin": "context"
+              },
+              {
+                "source": "passed",
+                "target": "loop",
+                "kind": "data",
+                "source_pin": "result",
+                "target_pin": "until"
+              },
+              {
+                "source": "loop",
+                "target": "all",
+                "kind": "data",
+                "source_pin": "passed",
+                "target_pin": "passed"
+              },
+              {
+                "source": "loop",
+                "target": "report",
+                "kind": "data",
+                "source_pin": "attempt",
+                "target_pin": "tries"
+              },
+              {
+                "source": "test",
+                "target": "report",
+                "kind": "data",
+                "source_pin": "text",
+                "target_pin": "test"
+              },
+              {
+                "source": "private",
+                "target": "report",
+                "kind": "data",
+                "source_pin": "text",
+                "target_pin": "code"
+              },
+              {
+                "source": "memory",
+                "target": "report",
+                "kind": "data",
+                "source_pin": "text",
+                "target_pin": "memory"
+              },
+              {
+                "source": "report",
+                "target": "send",
+                "kind": "data",
+                "source_pin": "text",
+                "target_pin": "message"
+              }
+            ]
+          }
         }
       ]
     }
