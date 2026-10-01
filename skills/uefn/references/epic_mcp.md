@@ -1,5 +1,5 @@
 ---
-description: "Nested Epic UEFN MCP — Settings label, three bridge tools, Valkyrie + editor toolsets"
+description: "Nested Epic UEFN MCP — Settings label, three bridge tools, Valkyrie + editor toolsets (42.30: 30 toolsets — full catalog in epic_toolsets)"
 metadata:
   order: 0
   label: "Epic UEFN MCP"
@@ -56,10 +56,16 @@ Epic does **not** expose flat `unreal__<tool>` names. Every editor Epic call is:
 | Actors / levels / assets | `editor_toolset.toolsets.actor.ActorTools`, `.scene.SceneTools`, `.asset.AssetTools`, … | Fortnite catalog props: **`SceneTools.add_to_scene_from_class`** with `actor_type.refPath` = Content Drawer `Package.Asset_C`. **Never** `add_to_scene_from_asset` on `/Game/Creative` (creates `FortStaticMeshActor`, cook-fails). Skip `StaticMesh` / `/BakeData/` / `/HLOD/` / `SM_*` / `…/Meshes/`. |
 | Materials | `editor_toolset.toolsets.material.MaterialTools` (+ `material_instance`) | Epic material graph when preferred |
 | Niagara | `NiagaraToolsets.NiagaraToolset_System` (+ Component / Assets / Info) | Epic Niagara assembly |
-| UMG | `UMGToolSet.UMGToolSet`, `MVVMToolset.MVVMToolset`, `VerseFieldsToolset.VerseFieldsToolset` | widget tree + MVVM |
+| UMG | `UMGToolSet.UMGToolSet`, `MVVMToolset.MVVMToolset`, `VerseFieldsToolset.VerseFieldsToolset`, `WidgetAnimationToolset.WidgetAnimationToolset` | widget tree + MVVM; 42.30 Verse `event` fields (verse `umg_verse_field_events`) |
+| Logs (42.30) | `EditorToolset.LogsToolset` | `GetLogEntries(category, pattern, maxEntries)`, `GetLogCategories`, `Get/SetVerbosity` — compile results, Content Pre-Checks |
+| Data / curve tables | `editor_toolset.toolsets.data_table.DataTableTools`, `.curve_table.CurveTableTools` | `get_schema`, `get_rows`, `set_rows`, `add_rows`, `import_file`… |
+| Meshes / textures / primitives | `.static_mesh.StaticMeshTools`, `.skeletal_mesh.SkeletalMeshTools`, `.texture.TextureTools`, `.primitive.PrimitiveTools` | inspect / edit mesh, bones, sockets, import/export textures |
+| Physics assets | `PhysicsToolsets.PhysicsAssetToolset` | create and edit Physics Assets |
+| Gameplay tags | `GameplayTagsToolset.GameplayTagsToolset` | `ListTags`, `GetTagInfo`, `FindReferencersByTag` |
+| Python enablement | `ValkyrieToolset.ValkyriePythonToolset` | `IsPythonEnabledInUEFN`, `EnablePythonInUEFN` (core Python toolsets load after this) |
 | Batched calls (v42.10+) | `editor_toolset.toolsets.programmatic.ProgrammaticToolset` | `get_execution_environment` (call once first, read its `instructions`), then `execute_tool_script(script)` — a sandboxed Python script defining `run() -> dict` that calls other toolsets |
 
-Always `describe_toolset` before first call in a session if arguments are unclear — property names and `refPath` shapes are Epic-owned.
+Always `describe_toolset` before first call in a session if arguments are unclear — property names and `refPath` shapes are Epic-owned. Every 42.30 toolset with exact tool names: `skill_read_subskill("uefn", "epic_toolsets")`. 42.30 fixed dialogue popups stalling MCP progress; keep `dismiss_uefn_modal` for anything that still blocks.
 
 **Never scale Fortnite Creative devices.** `PlaceDevice` takes location + rotation —
 omit Scale. Resize volumes/triggers/barriers via `SetDeviceProperty` (Details

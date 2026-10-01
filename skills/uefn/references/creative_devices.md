@@ -162,3 +162,11 @@ assume it is the Player Movement Device until the asset name matches.
 **Wire to Verse device:** after placement, wait → `inspect_verse_device` →
 `wire_verse_device_ref(actor_path="MyDevice", field="SomeTriggerField", target_path="MyTrigger_1")` —
 **one field per turn**.
+
+## Racing without the Rocket Racing template (42.30)
+
+Rocket Racing **template** islands were unpublished in 42.30 and cannot be
+updated. Build racing with the migrated tools on a normal island: **Track Spline
+Tool**, **Boost Pads**, **Volume Hazards**, vehicle **Spawner** devices (find
+them with `ListDeviceAssets(nameFilter=…)`). Converting an old island:
+`creator_portal`.

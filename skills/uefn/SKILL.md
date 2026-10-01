@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 47
+  version: 48
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -14,6 +14,8 @@ metadata:
 # UEFN MCP — Operator Skill
 
 **Save popup lock (HARD):** a Save/Yes modal blocks Slate — Epic MCP and `execute_python` hang. Call `dismiss_uefn_modal` (Ducky host). Do not retry Python / `unreal__*`.
+
+**UEFN 42.30 (Oct 1 2026):** what changed and where it is covered → `skill_read_subskill("uefn", "patch_42_30")`. Every Epic toolset/tool name → `epic_toolsets`. Moderation flags during cook → `content_prechecks`. Benchmarks, offer errors, memory in MB, Rocket Racing, Fab → `creator_portal`.
 
 **Place like Content Drawer (HARD):** search `/Game/Creative/**` → keep only
 `BlueprintGeneratedClass` / `*_C`. **5+ pieces** → Programmatic `execute_tool_script`

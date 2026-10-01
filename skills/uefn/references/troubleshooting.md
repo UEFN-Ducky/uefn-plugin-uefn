@@ -35,3 +35,17 @@ to Build Verse, paste T3D, drag Details refs, or restart UEFN. `reload_listener`
 ## Moved or renamed assets (v42.10+)
 
 Non-private assets, and every asset referenced from compiled Verse, now leave a **redirector** when moved or renamed, so `using` paths and `@editable` refs keep resolving. Run `fixup_redirectors` after a batch of moves before a Verse build; if the Assets digest still shows the old name, rebuild once and re-search.
+
+## 42.30 editor changes
+
+- **Verse paths** are shown (new projects) in the Content Browser, source control
+  dialogs, validation errors, Reference Viewer, asset tooltips and copied asset
+  references; Fab and content-pack assets too. Existing projects are unchanged.
+  Context menus add **Copy File Path / Copy Package Path / Copy Verse Path**.
+  In Verse, keep using the Assets-digest names (`list_verse_types(digest="assets")`).
+- **Launch Session** now logs *why* assets need resaving — read it with
+  `get_editor_log` / `EditorToolset.LogsToolset.GetLogEntries`.
+- **Restart session** is faster; **canceling a publish** now works.
+- **Content Pre-Checks** flag possible moderation problems during cook — `content_prechecks`.
+- Crashes fixed: undoing a deleted Gameplay Effect Component, creating spline meshes,
+  copying actors from pre-5.1 editors, landscape brush in a deleted region.

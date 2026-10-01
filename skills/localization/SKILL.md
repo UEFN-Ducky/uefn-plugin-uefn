@@ -92,3 +92,9 @@ This pack owns the Epic pipeline + readiness checklist. Code recipes live in
 - Auto Localization or manual PO → `translation`
 - Private Version / Publish Build Localization → `private_version`
 - Per-language asset swaps (`L10N/`) → `asset_l10n`
+
+## 42.30
+
+`<localizes>` loads faster on the server: a module with 2000+ `<localizes>`
+values used to hang the island while loading — no longer. Keep using named
+`<localizes>` + `message` for player-facing copy.
