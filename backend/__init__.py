@@ -15,4 +15,7 @@ def register(api) -> None:
     import backend.tools.uefn.introspection  # noqa: F401
     import backend.tools.uefn.ai  # noqa: F401
     import backend.tools.uefn.memory  # noqa: F401
+    import backend.tools.uefn.fortnite_client as fortnite_client
+
+    fortnite_client.register_nodes(api)
     api.log("uefn tools registered")

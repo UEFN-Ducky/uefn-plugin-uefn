@@ -1,9 +1,9 @@
 {
   "id": "uefn",
   "kind": "plugin",
-  "version": "1.0.49",
+  "version": "1.0.50",
   "label": "UEFN",
-  "description": "Core UEFN editor surface: actors, assets, data tables, text localization, editor control, introspection, AI Python, project memory. Creative devices / PIC sessions use nested Epic UEFN MCP (unreal__list_toolsets/describe_toolset/call_tool). Bundles uefn + datatables + localization skills.",
+  "description": "Core UEFN editor surface: actors, assets, data tables, text localization, editor control, introspection, AI Python, project memory, UEFN popups and the Fortnite client a session launches (wait, capture, move). Creative devices / PIC sessions use nested Epic UEFN MCP (unreal__list_toolsets/describe_toolset/call_tool). Bundles uefn + datatables + localization skills.",
   "min_app_version": "1.0.0",
   "default_enabled": true,
   "secret_keys": [],
@@ -72,9 +72,13 @@
         "project_memory_save",
         "project_memory_append",
         "project_memory_delete",
-        "ducky_memory_overview"
+        "ducky_memory_overview",
+        "fortnite_client_status",
+        "fortnite_client_wait",
+        "fortnite_client_capture",
+        "fortnite_client_move"
       ],
-      "intent_pattern": "\\b(actor|spawn|device|asset|datatable|data\\s*table|viewport|editor|introspect|project\\s*memory)\\b",
+      "intent_pattern": "\\b(actor|spawn|device|asset|datatable|data\\s*table|viewport|editor|introspect|project\\s*memory|fortnite\\s*client|playtest|move\\s+the\\s+player)\\b",
       "plan_tools": [
         "get_all_actors",
         "get_selected_actors",
@@ -103,7 +107,8 @@
         "list_actor_classes",
         "project_memory_list",
         "project_memory_get",
-        "ducky_memory_overview"
+        "ducky_memory_overview",
+        "fortnite_client_status"
       ]
     },
     "walkthrough": {
@@ -115,7 +120,7 @@
         {
           "target": "settings.store.root",
           "title": "UEFN core tools ready",
-          "body": "Core UEFN editor MCP tools are live \u2014 actors, assets, data tables, and editor control. Creative devices and PIC sessions use nested Epic UEFN MCP.",
+          "body": "Core UEFN editor MCP tools are live — actors, assets, data tables, and editor control. Creative devices and PIC sessions use nested Epic UEFN MCP.",
           "advance": "next",
           "mode": "rect"
         }
@@ -126,7 +131,7 @@
         {
           "id": "daily-island-check",
           "label": "Daily island check at 8 AM",
-          "icon": "\ud83c\udf05",
+          "icon": "🌅",
           "category": "Play tests",
           "description": "Every morning at 8: waits for Fortnite's servers, opens your island, starts a session and a Tester ducky play-tests it. Problems go to a Verse Coder ducky to fix, then the session restarts and the test runs again, up to 3 tries. When it passes: a private version and a memory calculation. Either way you get a report in the Workflow reports chat (on your phone too), and a message if a step breaks. It runs from the day you create it (switch it off in the list to pause); this PC and UEFN Ducky need to be on at 8.",
           "graph": {
@@ -158,7 +163,7 @@
                 "y": 600,
                 "config": {
                   "inputs": {
-                    "message": "\u23f8 Fortnite's servers were still down after 2 hours of checking, so today's island check didn't run.\n\nStatus: {{servers_status}}"
+                    "message": "⏸ Fortnite's servers were still down after 2 hours of checking, so today's island check didn't run.\n\nStatus: {{servers_status}}"
                   }
                 },
                 "label": "Tell me: servers down"
@@ -330,7 +335,7 @@
                 "x": 3300,
                 "y": 480,
                 "config": {
-                  "template": "\u2705 Today's island check passed ({{tries}} play test run(s)).\n\n**Play test**\n{{test}}\n\n**Private version**\n{{code}}\n\n**Memory calculation**\n{{memory}}",
+                  "template": "✅ Today's island check passed ({{tries}} play test run(s)).\n\n**Play test**\n{{test}}\n\n**Private version**\n{{code}}\n\n**Memory calculation**\n{{memory}}",
                   "names": [
                     "tries",
                     "test",
@@ -365,7 +370,7 @@
                 "y": 720,
                 "config": {
                   "inputs": {
-                    "message": "\u274c Today's island check still fails after {{attempts}} tries, so no private version was made.\n\n**Last play test**\n{{nodes.test.text}}\n\n**Last fix attempt**\n{{nodes.fix.text}}\n\n{{last_error}}"
+                    "message": "❌ Today's island check still fails after {{attempts}} tries, so no private version was made.\n\n**Last play test**\n{{nodes.test.text}}\n\n**Last fix attempt**\n{{nodes.fix.text}}\n\n{{last_error}}"
                   }
                 },
                 "label": "Send me what still fails"
@@ -542,6 +547,210 @@
               }
             ]
           }
+        },
+        {
+          "id": "fortnite-client-movement",
+          "label": "Fortnite client movement check",
+          "icon": "🎮",
+          "category": "Play tests",
+          "description": "With a session already launched: wait for the Fortnite client to load into play mode, a Tester ducky checks a capture, the player walks forward and the Tester proves the move from before/after captures.",
+          "graph": {
+            "nodes": [
+              {
+                "id": "s",
+                "type": "start.chat",
+                "x": 0,
+                "y": 0,
+                "config": {}
+              },
+              {
+                "id": "w",
+                "type": "uefn.client.wait",
+                "x": 300,
+                "y": 0,
+                "config": {
+                  "timeout": 120
+                },
+                "label": "Wait for the client to load"
+              },
+              {
+                "id": "a",
+                "type": "pipeline.agent",
+                "x": 600,
+                "y": 0,
+                "label": "Client ready?",
+                "config": {
+                  "ducky": "tester",
+                  "prompt": "Use fortnite_client_capture and inspect the image. Confirm Fortnite is in the island with a controllable player and no menu, loading screen or popup. Do not move. Final line CLIENT: READY only if verified, else CLIENT: FAIL."
+                }
+              },
+              {
+                "id": "g",
+                "type": "logic.if",
+                "x": 900,
+                "y": 0,
+                "label": "Ready?",
+                "config": {
+                  "names": [
+                    "ready"
+                  ],
+                  "expression": "ready.trim().endsWith(\"CLIENT: READY\")"
+                }
+              },
+              {
+                "id": "m",
+                "type": "uefn.client.move",
+                "x": 1200,
+                "y": 0,
+                "config": {
+                  "key": "W",
+                  "seconds": 1.5
+                },
+                "label": "Walk forward"
+              },
+              {
+                "id": "v",
+                "type": "pipeline.agent",
+                "x": 1500,
+                "y": 0,
+                "label": "Prove the move",
+                "config": {
+                  "ducky": "tester",
+                  "prompt": "Compare the before image {{nodes.m.before}} and the after image {{nodes.m.after}} (or the attached images). Prove the character moved against fixed landmarks; input alone is not proof. Final line RESULT: PASS only if the move is proven, else RESULT: FAIL."
+                }
+              },
+              {
+                "id": "f",
+                "type": "pipeline.finish",
+                "x": 1800,
+                "y": 0,
+                "config": {
+                  "message": "{{nodes.v.text}}"
+                }
+              },
+              {
+                "id": "blocked",
+                "type": "pipeline.finish",
+                "x": 1200,
+                "y": 300,
+                "config": {
+                  "message": "Not moved: the Fortnite client was not verified ready.\n{{nodes.a.text}}"
+                }
+              }
+            ],
+            "edges": [
+              {
+                "source": "s",
+                "target": "w",
+                "kind": "main"
+              },
+              {
+                "source": "w",
+                "target": "a",
+                "kind": "main"
+              },
+              {
+                "source": "a",
+                "target": "g",
+                "kind": "main"
+              },
+              {
+                "source": "a",
+                "target": "g",
+                "kind": "data",
+                "source_pin": "text",
+                "target_pin": "ready"
+              },
+              {
+                "source": "g",
+                "target": "m",
+                "kind": "true"
+              },
+              {
+                "source": "g",
+                "target": "blocked",
+                "kind": "false"
+              },
+              {
+                "source": "m",
+                "target": "v",
+                "kind": "main"
+              },
+              {
+                "source": "v",
+                "target": "f",
+                "kind": "main"
+              }
+            ]
+          }
+        }
+      ],
+      "nodes": [
+        {
+          "id": "uefn.client.wait",
+          "label": "Wait for Fortnite client",
+          "group": "UEFN",
+          "description": "Wait (max 120 s) until the Fortnite client a session launched has loaded into play mode, without touching it.",
+          "config_fields": [
+            {
+              "id": "timeout",
+              "label": "Timeout (max 120 s)",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "id": "uefn.client.capture",
+          "label": "Capture Fortnite client",
+          "group": "UEFN",
+          "description": "Capture the loaded Fortnite client into the chat. Refuses while it is still loading.",
+          "outputs": [
+            {
+              "id": "path",
+              "label": "Capture path",
+              "type": "text"
+            },
+            {
+              "id": "files",
+              "label": "Capture",
+              "type": "any"
+            }
+          ]
+        },
+        {
+          "id": "uefn.client.move",
+          "label": "Move Fortnite player",
+          "group": "UEFN",
+          "description": "Hold W/A/S/D for 0.1–3 s in the loaded client, with before/after captures. Prove the move from the images.",
+          "config_fields": [
+            {
+              "id": "key",
+              "label": "W/A/S/D",
+              "type": "string"
+            },
+            {
+              "id": "seconds",
+              "label": "Hold seconds (0.1–3)",
+              "type": "number"
+            }
+          ],
+          "outputs": [
+            {
+              "id": "before",
+              "label": "Before image path",
+              "type": "text"
+            },
+            {
+              "id": "after",
+              "label": "After image path",
+              "type": "text"
+            },
+            {
+              "id": "files",
+              "label": "Before and after captures",
+              "type": "any"
+            }
+          ]
         }
       ]
     }
