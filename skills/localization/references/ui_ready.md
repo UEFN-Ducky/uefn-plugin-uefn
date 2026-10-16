@@ -1,5 +1,5 @@
 ---
-description: "Verse/UMG/HUD localization-ready checklist — named <localizes> messages, no raw strings, no baked English UI textures; what to do before Export Localization"
+description: "Verse/UMG/HUD localization-ready checklist — Verse UI Kit text rules, named <localizes> messages, localizable NSLOCTEXT designer text, no raw strings, no baked English UI textures; what to do before Export Localization"
 metadata:
   order: 0
   label: "UI localization-ready"
@@ -52,13 +52,18 @@ HudMessage.Show(Agent, NamedMessage, ?DisplayTime := 3.0)
 ```
 
    Same `message` rules. Details: `skill_read_subskill("verse", "devices")`.
-7. **UMG:** Verse field type `message` → View Bindings → Text. Drive with
+7. **UMG / Verse UI Kit:** Verse field type `message` → View Bindings → Text
+   (kit naming: the field ends `Text`, e.g. `Button1LabelText`). Drive with
    named `<localizes>` fields (see Style1/Style2 in
    `skill_read_subskill("verse", "umg_verse_fields")`). Numbers: ToText
-   conversion or a `<localizes>` helper — `umg_view_bindings`.
-8. **Static designer Text** on a UMG widget with no Verse `message` field /
-   binding is not driven by your Verse gather path — bind it or accept that
-   Export may not pick it up the way you expect.
+   conversion or a `<localizes>` helper — `umg_view_bindings`. Default values
+   of `message` fields are set in the Details panel — list them for the user
+   as a manual step.
+8. **Designer Text** typed in UMG goes in a text block as **localizable** text,
+   never a plain string: `NSLOCTEXT("", "<unique 32-hex key>", "Play")` via
+   `set_widget_property` (`skill_read_subskill("verse", "verse_ui_kit")` —
+   Editor steps). `build_widget_tree`'s `text` writes a plain string — a
+   placeholder only.
 9. **Baked text in textures / materials** (logos with words, poster art) cannot
    be fixed by PO strings — use **asset localization**
    (`skill_read_subskill("localization", "asset_l10n")`).
@@ -80,6 +85,7 @@ entries — declare `ShopTitle<localizes> : message = "Shop"` instead.
 | Surface | Load |
 |---------|------|
 | Effect table | `verse` / `effects` |
+| Verse UI Kit screens (default UI) | `verse` / `verse_ui_kit` |
 | Canvas + visibility | `verse` / `ui`, `sys_canvas_cookbook` |
 | ShowHUD | `verse` / `sys_hud_template` |
 | UMG fields | `verse` / `umg_verse_fields` |

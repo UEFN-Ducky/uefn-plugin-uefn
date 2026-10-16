@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 49
+  version: 50
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true

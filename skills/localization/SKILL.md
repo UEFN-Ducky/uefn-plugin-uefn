@@ -5,7 +5,7 @@ description: "UEFN Text Localization — project settings, Export Localization P
 license: MIT
 metadata:
   label: UEFN Text Localization
-  version: 3
+  version: 4
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -78,6 +78,7 @@ This pack owns the Epic pipeline + readiness checklist. Code recipes live in
 |------|------|
 | `<localizes>` effect | `skill_read_subskill("verse", "effects")` |
 | HUD message devices | `skill_read_subskill("verse", "devices")` |
+| Verse UI Kit screens (default UI) | `skill_read_subskill("verse", "verse_ui_kit")` |
 | Canvas `text_block` | `skill_read_subskill("verse", "ui")` |
 | Canvas visibility + Message rule | `skill_read_subskill("verse", "sys_canvas_cookbook")` |
 | ShowHUD template | `skill_read_subskill("verse", "sys_hud_template")` |
