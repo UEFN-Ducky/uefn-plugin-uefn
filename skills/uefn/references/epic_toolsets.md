@@ -1,13 +1,15 @@
 ---
-description: "Every Epic UEFN MCP toolset in 42.30 with its exact tool names (30 toolsets, 388 tools) — use before unreal__describe_toolset to pick the right one"
+description: "Every Epic UEFN MCP toolset in 42.30 / 42.40 (unchanged) with its exact tool names (30 toolsets, 388 tools) — use before unreal__describe_toolset to pick the right one"
 metadata:
   order: 2
-  label: "Epic toolsets catalog (42.30)"
+  label: "Epic toolsets catalog (42.30 / 42.40)"
   default_enabled: false
   load_condition: "Choosing an Epic toolset or tool name (unreal__call_tool), or the user asks what the UEFN MCP can do — Niagara, physics assets, gameplay tags, logs, data/curve tables, textures, static/skeletal meshes, widget animation, MVVM, Python enablement"
 ---
 
-# Epic UEFN MCP toolsets (42.30, described live)
+# Epic UEFN MCP toolsets (42.30, described live; unchanged in 42.40)
+
+Re-described live in UEFN 42.40 on Oct 16 2026: the same 30 toolsets and 388 tool names.
 
 The server exposes three tools: `list_toolsets`, `describe_toolset`, `call_tool`
 (Ducky shows them as `unreal__list_toolsets`, `unreal__describe_toolset`,

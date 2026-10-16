@@ -1,10 +1,10 @@
 ---
-description: "Verse build wait, digest vs VM relink, VERSE_DEAD, and the 9002/9000 digest-deadlock recovery"
+description: "Verse build wait, digest vs VM relink, VERSE_DEAD, the 9002/9000 digest-deadlock recovery, the 42.40 VerseVM session toggle (Verse Reload off), and deleted .verse files (3000)"
 metadata:
   order: 9
   label: "Verse build lifecycle"
   default_enabled: false
-  load_condition: "WinError 10054 on compile, STALE REFLECTION / no compiled hash, Script error 9002/9000, Script linking is incomplete, VERSE_DEAD component, or a new mesh/prefab class is missing from the digest"
+  load_condition: "WinError 10054 on compile, STALE REFLECTION / no compiled hash, Script error 9002/9000, Script linking is incomplete, VERSE_DEAD component, a new mesh/prefab class is missing from the digest, VerseVM / BPVM, Verse Reload / push Verse changes unavailable, or Script error 3000 Error getting text contents of snippet"
 ---
 
 # Verse build lifecycle
@@ -129,6 +129,25 @@ Epic `ValkyrieToolset.EntityToolset` via `unreal__call_tool` (tool names from
 Ducky entity tools no longer exist.
 `save_directory` every 5–10 prefabs. Never `execute_python` loops that
 package many prefabs in one script — that freezes UEFN.
+
+## VerseVM session toggle (42.40)
+
+The **Session** menu has a toggle that runs your sessions on the new **VerseVM**
+instead of the BPVM, to test an island against it early (Epic's "New Virtual Machine",
+roadmap Q4 2026). While it is **On**:
+
+- **Verse Reload is disabled** — that is Ducky's `workspace_push_verse_changes`; it
+  fails. Build and restart the session instead, or switch the toggle back to Off.
+- **Live Edit** does not carry Verse properties to the server (only BPVM does).
+
+The toggle only changes where your sessions run; the compiler and digests are the same.
+
+## Deleted `.verse` file still in the build (3000)
+
+"Error getting text contents of snippet `…/Verse/X/file.verse`" — the file was deleted on
+disk while UEFN was open. Put it back, then delete it through Epic
+`ValkyrieToolset.VerseToolset.Delete` (it tells the build), or restart UEFN. Epic
+`VerseToolset.WriteFile` / `Delete` keep the build's file list right.
 
 ## Related
 

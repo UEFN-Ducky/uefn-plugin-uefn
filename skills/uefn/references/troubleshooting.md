@@ -36,6 +36,19 @@ to Build Verse, paste T3D, drag Details refs, or restart UEFN. `reload_listener`
 
 Non-private assets, and every asset referenced from compiled Verse, now leave a **redirector** when moved or renamed, so `using` paths and `@editable` refs keep resolving. Run `fixup_redirectors` after a batch of moves before a Verse build; if the Assets digest still shows the old name, rebuild once and re-search.
 
+## 42.40 editor changes
+
+- **Browse To Asset** / **Ctrl+B** on a static mesh selects the mesh's own folder again
+  (it opened the Bumpy Bay Prop Gallery).
+- **Canceling a publish** works; closing a project no longer logs garbage-collection errors.
+- **Entity Prefab Editor** viewports: hidden toolbar tools are in the toolbar menu,
+  layout names show, Maximize checkbox follows the viewport.
+- **Interchange glTF** skinned meshes: inverse bind matrices resolve, multi-root files import.
+- **Lore**: validation fix-up resaves only the affected packages (not every actor); a
+  branch archived by someone else no longer shows as active after a revert or a new
+  personal branch.
+- **VerseVM** session toggle (Verse Reload off while on) — `verse_build_lifecycle`.
+
 ## 42.30 editor changes
 
 - **Verse paths** are shown (new projects) in the Content Browser, source control

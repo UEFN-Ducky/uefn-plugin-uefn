@@ -163,6 +163,14 @@ assume it is the Player Movement Device until the asset name matches.
 `wire_verse_device_ref(actor_path="MyDevice", field="SomeTriggerField", target_path="MyTrigger_1")` —
 **one field per turn**.
 
+## 42.40 device fixes
+
+- **Guard Spawner** keeps the weapons you assign in the editor (it used to remove them).
+- **Shock Rocks** no longer destroy structures when Environmental Damage is off.
+- The vehicle exit key shows as bound on keyboard and mouse.
+- **HUD Controller** touch layouts (Touch Control Layout Override, Apply Canvas
+  Transform): virtualpointer `touch_layout_override`.
+
 ## Racing without the Rocket Racing template (42.30)
 
 Rocket Racing **template** islands were unpublished in 42.30 and cannot be

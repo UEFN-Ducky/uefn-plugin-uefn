@@ -4,7 +4,7 @@ metadata:
   order: 1
   label: "42.30 patch (Oct 1 2026)"
   default_enabled: false
-  load_condition: "The user asks what is new in UEFN / 42.30 / the latest update / patch notes, or something the 42.30 notes changed (conversations template, held items, ability templates, Content Pre-Checks, Verse paths, Rocket Racing, benchmarks, memory thermometer, Fab source assets)"
+  load_condition: "The user asks about UEFN 42.30 specifically (the latest update is 42.40 → patch_42_40), or something the 42.30 notes changed (conversations template, held items, ability templates, Content Pre-Checks, Verse paths, Rocket Racing, benchmarks, memory thermometer, Fab source assets)"
 ---
 
 # UEFN 42.30 (released Oct 1 2026)

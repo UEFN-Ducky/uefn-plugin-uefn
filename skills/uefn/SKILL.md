@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 50
+  version: 51
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -17,7 +17,7 @@ metadata:
 
 **Fortnite client:** after a session launch, `fortnite_client_wait` → `fortnite_client_capture` → `fortnite_client_move`; never touch a loading client → `fortnite_client`.
 
-**UEFN 42.30 (Oct 1 2026):** what changed and where it is covered → `skill_read_subskill("uefn", "patch_42_30")`. Every Epic toolset/tool name → `epic_toolsets`. Moderation flags during cook → `content_prechecks`. Benchmarks, offer errors, memory in MB, Rocket Racing, Fab → `creator_portal`.
+**UEFN 42.40 (Oct 15 2026, current):** what changed and where it is covered → `skill_read_subskill("uefn", "patch_42_40")` (42.30 → `patch_42_30`). Discover artwork is required to publish from Oct 22 2026 → `creator_portal`. Every Epic toolset/tool name → `epic_toolsets`. Moderation flags during cook → `content_prechecks`. Benchmarks, offer errors, memory in MB, Rocket Racing, Fab → `creator_portal`.
 
 **Place like Content Drawer (HARD):** search `/Game/Creative/**` → keep only
 `BlueprintGeneratedClass` / `*_C`. **5+ pieces** → Programmatic `execute_tool_script`

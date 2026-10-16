@@ -1,5 +1,5 @@
 ---
-description: "Nested Epic UEFN MCP — Settings label, three bridge tools, Valkyrie + editor toolsets (42.30: 30 toolsets — full catalog in epic_toolsets)"
+description: "Nested Epic UEFN MCP — Settings label, three bridge tools, Valkyrie + editor toolsets (30 toolsets, unchanged 42.30 → 42.40 — full catalog in epic_toolsets)"
 metadata:
   order: 0
   label: "Epic UEFN MCP"
