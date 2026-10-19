@@ -1,9 +1,9 @@
 {
   "id": "uefn",
   "kind": "plugin",
-  "version": "1.0.52",
+  "version": "1.1.0",
   "label": "UEFN",
-  "description": "Core UEFN editor surface: actors, assets, data tables, text localization, editor control, introspection, AI Python, project memory, UEFN popups and the Fortnite client a session launches (wait, capture, move). Creative devices / PIC sessions use nested Epic UEFN MCP (unreal__list_toolsets/describe_toolset/call_tool). Bundles uefn + datatables + localization skills.",
+  "description": "Everything for the UEFN editor in one plugin: actors, assets, data tables, editor control, level design and worldgen, materials, modeling, Niagara VFX, Scene Graph, Verse (digests, compile, UMG, New-file templates), animation and retargeting, MetaHuman, physics, Virtual Pointer, testing and UEFN Logs. Bundles every UEFN skill. Serial editor ops (one MCP call per turn).",
   "min_app_version": "1.2.357",
   "default_enabled": true,
   "secret_keys": [],
@@ -76,9 +76,192 @@
         "fortnite_client_status",
         "fortnite_client_wait",
         "fortnite_client_capture",
-        "fortnite_client_move"
+        "fortnite_client_move",
+        "ik_retarget_capabilities",
+        "list_skeleton_bones",
+        "get_retarget_preset",
+        "get_ik_rig_info",
+        "get_ik_retargeter_info",
+        "create_ik_rig_asset",
+        "create_ik_retargeter_asset",
+        "set_retarget_root",
+        "add_retarget_chains",
+        "remove_retarget_chains",
+        "auto_map_retarget_chains",
+        "get_retarget_pose_info",
+        "create_retarget_pose",
+        "set_current_retarget_pose",
+        "set_retarget_pose_bone_rotation",
+        "set_retarget_pose_root_offset",
+        "retarget_animation",
+        "retarget_animation_pipeline",
+        "list_skeleton_sockets",
+        "add_skeleton_socket",
+        "get_skeletal_mesh_info",
+        "remove_skeleton_socket",
+        "anim_author_capabilities",
+        "create_level_sequence",
+        "add_sequence_binding",
+        "add_transform_keys",
+        "get_sequence_info",
+        "create_anim_sequence",
+        "set_anim_bone_keys",
+        "get_anim_sequence_info",
+        "set_anim_additive_type",
+        "bake_sequence_to_anim",
+        "animated_mesh_capabilities",
+        "configure_animated_mesh",
+        "npc_author_capabilities",
+        "list_npc_definitions",
+        "get_npc_definition_info",
+        "create_physics_asset_for_mesh",
+        "create_anim_preset",
+        "set_anim_preset_slots",
+        "create_character_blueprint",
+        "create_npc_character_definition",
+        "set_npc_definition_behavior",
+        "set_npc_definition_look",
+        "set_npc_spawner_definition",
+        "get_actor_bounds",
+        "get_actor_bone_transform",
+        "get_level_bounds",
+        "measure_distance",
+        "check_area_clear",
+        "find_clear_area",
+        "get_ground_z",
+        "snap_actor_to_ground",
+        "snap_actor_to_grid",
+        "align_actors",
+        "distribute_actors",
+        "area_list",
+        "area_create",
+        "blockout_list_presets",
+        "blockout_layout",
+        "worldgen_capabilities",
+        "terrain_generate",
+        "terrain_get_info",
+        "terrain_remove_generated",
+        "foliage_list_sources",
+        "foliage_scatter",
+        "foliage_get_stats",
+        "foliage_clear_generated",
+        "landscape_list",
+        "landscape_get_info",
+        "landscape_create",
+        "landscape_rename",
+        "landscape_sculpt",
+        "pcg_generate",
+        "pcg_get_graph_info",
+        "list_fort_actors",
+        "get_fort_actor_info",
+        "create_material",
+        "create_material_instance",
+        "duplicate_material",
+        "connect_material_nodes",
+        "disconnect_material_nodes",
+        "connect_material_output",
+        "add_material_expression",
+        "delete_material_expression",
+        "clear_material_expressions",
+        "set_material_expression_property",
+        "get_material_expression_info",
+        "get_material_info",
+        "set_material_flags",
+        "layout_material_expressions",
+        "list_material_expressions",
+        "list_uefn_material_expression_classes",
+        "assign_material_to_mesh",
+        "set_material_instance_scalar",
+        "set_material_instance_vector",
+        "set_material_instance_texture",
+        "recompile_material",
+        "get_static_mesh_info",
+        "set_mesh_collision",
+        "niagara_capabilities",
+        "list_niagara_systems",
+        "get_niagara_system_info",
+        "list_niagara_user_parameters",
+        "create_niagara_system",
+        "create_niagara_mesh",
+        "add_niagara_emitter",
+        "add_niagara_module",
+        "add_niagara_renderer",
+        "set_niagara_module_parameter",
+        "finalize_niagara_system",
+        "get_niagara_component_info",
+        "set_niagara_component_parameter",
+        "control_niagara_actor",
+        "scene_graph_capabilities",
+        "create_empty_prefab",
+        "create_prefab_from_entities",
+        "instantiate_prefab",
+        "convert_actors_to_entities",
+        "list_verse_digests",
+        "list_verse_types",
+        "list_verse_devices",
+        "search_verse_digest",
+        "get_verse_api",
+        "list_verse_modules",
+        "inspect_verse_device",
+        "resize_verse_array",
+        "patch_verse_array_entry",
+        "list_verse_property_hashes",
+        "get_verse_editables",
+        "set_verse_editable",
+        "wire_player_spawners",
+        "set_verse_texture_icon",
+        "list_verse_reference_types",
+        "wire_verse_device_ref",
+        "wire_verse_device_array",
+        "wire_verse_prop_assets",
+        "set_currency_config_entries",
+        "workspace_list_verse_errors",
+        "workspace_open_verse_file",
+        "workspace_compile_verse",
+        "workspace_push_verse_changes",
+        "uefn_skill",
+        "skill_read_subskill",
+        "verse_template_list",
+        "verse_template_get",
+        "verse_template_apply",
+        "verse_template_verify",
+        "umg_capabilities",
+        "list_widget_blueprints",
+        "get_widget_blueprint_info",
+        "create_widget_blueprint",
+        "add_widget_to_tree",
+        "remove_widget_from_tree",
+        "set_widget_property",
+        "list_widget_bindings",
+        "add_widget_binding",
+        "remove_widget_binding",
+        "device_graph_snapshot",
+        "simulate_device_event",
+        "device_graph_audit",
+        "verse_test_scaffold",
+        "verse_test_run",
+        "verse_test_results",
+        "session_status",
+        "actor_state_snapshot",
+        "actor_state_diff",
+        "tester_list_devices",
+        "tester_list_tests",
+        "tester_create_simulation",
+        "tester_run_simulation",
+        "verse_test_add_case",
+        "tester_get_results",
+        "uefn_logs_sources",
+        "uefn_logs_mark",
+        "uefn_logs_capture",
+        "uefn_logs_wait",
+        "uefn_logs_last",
+        "metahuman_capabilities",
+        "metahuman_list",
+        "metahuman_get_info",
+        "metahuman_can_assemble",
+        "metahuman_assemble_uefn"
       ],
-      "intent_pattern": "\\b(actor|spawn|device|asset|datatable|data\\s*table|viewport|editor|introspect|project\\s*memory|fortnite\\s*client|playtest|move\\s+the\\s+player)\\b",
+      "intent_pattern": "(?:\\b(actor|spawn|device|asset|datatable|data\\s*table|viewport|editor|introspect|project\\s*memory|fortnite\\s*client|playtest|move\\s+the\\s+player)\\b)|(?:\\b(anim|retarget|ik\\s*rig|skeleton|sequencer|level\\s*sequence|animated\\s*mesh|control\\s*rig|mixamo|additive|player\\s*anim|npc|npc\\s*def|character\\s*definition|anim\\s*preset|animpreset|character\\s*blueprint|cosmetic\\s*spawn|creature|animal|pet|quadruped|ecosystem)\\b)|(?:\\b(level\\s*design|align|snap|terrain|foliage|landscape|pcg|fort\\s*actor|blockout|greybox|graybox|hub|area_create|area\\s+layout)\\b)|(?:\\b(material|shader|mi_|material\\s*instance|base\\s*color|emissive|material\\s*graph|material\\s*node|blend\\s*mode|two[\\s-]?sided|roughness|metallic|water\\s*material|ocean|waterfall|lake|river|rapids|foam|caustic|material\\s*function|\\bmf_|starfield|star\\s*sky|night\\s*sky|procedural\\s*star)\\b)|(?:\\b(mesh|collision|lod|nanite|modeling|static\\s*mesh)\\b)|(?:\\b(niagara|vfx|particle|emitter)\\b)|(?:\\b(prefab|entity\\s*prefab)\\b)|(?:\\b(verse|digest|editable|wire_|island\\s*settings|uefn_skill|verse\\s*template|economy_manager|progression_manager|player_manager|game_player|tycoon|shop_controller|umg|user\\s*widget|widget\\s*blueprint|view\\s*binding|viewmodel|verse\\s*field)\\b)|(?:\\b(meta\\s*human|metahuman|mesh\\s*to\\s*meta|mh\\s*npc|dna)\\b)|(?:\\b(test|tester|simulate|device\\s*graph|harness|session\\s*probe|uefn[- ]?logs?|output log|verse print|log(s)? capture)\\b)",
       "plan_tools": [
         "get_all_actors",
         "get_selected_actors",
@@ -108,7 +291,85 @@
         "project_memory_list",
         "project_memory_get",
         "ducky_memory_overview",
-        "fortnite_client_status"
+        "fortnite_client_status",
+        "ik_retarget_capabilities",
+        "list_skeleton_bones",
+        "list_skeleton_sockets",
+        "get_skeletal_mesh_info",
+        "get_retarget_preset",
+        "get_ik_rig_info",
+        "get_ik_retargeter_info",
+        "get_retarget_pose_info",
+        "anim_author_capabilities",
+        "animated_mesh_capabilities",
+        "get_sequence_info",
+        "get_anim_sequence_info",
+        "npc_author_capabilities",
+        "list_npc_definitions",
+        "get_npc_definition_info",
+        "get_actor_bounds",
+        "get_actor_bone_transform",
+        "get_level_bounds",
+        "measure_distance",
+        "check_area_clear",
+        "find_clear_area",
+        "get_ground_z",
+        "area_list",
+        "blockout_list_presets",
+        "worldgen_capabilities",
+        "terrain_get_info",
+        "foliage_list_sources",
+        "foliage_get_stats",
+        "landscape_list",
+        "landscape_get_info",
+        "pcg_get_graph_info",
+        "list_fort_actors",
+        "get_fort_actor_info",
+        "get_material_expression_info",
+        "get_material_info",
+        "list_material_expressions",
+        "list_uefn_material_expression_classes",
+        "get_static_mesh_info",
+        "niagara_capabilities",
+        "list_niagara_systems",
+        "get_niagara_system_info",
+        "list_niagara_user_parameters",
+        "get_niagara_component_info",
+        "scene_graph_capabilities",
+        "list_verse_digests",
+        "list_verse_types",
+        "list_verse_devices",
+        "search_verse_digest",
+        "get_verse_api",
+        "list_verse_modules",
+        "inspect_verse_device",
+        "list_verse_property_hashes",
+        "get_verse_editables",
+        "list_verse_reference_types",
+        "verse_template_list",
+        "workspace_list_verse_errors",
+        "uefn_skill",
+        "skill_read_subskill",
+        "umg_capabilities",
+        "list_widget_blueprints",
+        "get_widget_blueprint_info",
+        "list_widget_bindings",
+        "verse_template_verify",
+        "metahuman_capabilities",
+        "metahuman_list",
+        "metahuman_get_info",
+        "metahuman_can_assemble",
+        "device_graph_snapshot",
+        "device_graph_audit",
+        "verse_test_results",
+        "session_status",
+        "actor_state_snapshot",
+        "actor_state_diff",
+        "tester_list_devices",
+        "tester_list_tests",
+        "tester_get_results",
+        "uefn_logs_sources",
+        "uefn_logs_last"
       ]
     },
     "walkthrough": {
@@ -683,6 +944,156 @@
               }
             ]
           }
+        },
+        {
+          "id": "uefn-logs-chat",
+          "label": "Chat: capture UEFN logs",
+          "description": "Chat start \u2192 Agent \u2192 Capture UEFN logs \u2192 Finish.",
+          "graph": {
+            "nodes": [
+              {
+                "id": "s",
+                "type": "start.chat",
+                "x": 0,
+                "y": 0,
+                "config": {}
+              },
+              {
+                "id": "a",
+                "type": "pipeline.agent",
+                "x": 220,
+                "y": 0,
+                "config": {}
+              },
+              {
+                "id": "c",
+                "type": "uefn-logs.capture",
+                "x": 440,
+                "y": 0,
+                "config": {}
+              },
+              {
+                "id": "f",
+                "type": "pipeline.finish",
+                "x": 660,
+                "y": 0,
+                "config": {}
+              }
+            ],
+            "edges": [
+              {
+                "source": "s",
+                "target": "a",
+                "kind": "main"
+              },
+              {
+                "source": "a",
+                "target": "c",
+                "kind": "main"
+              },
+              {
+                "source": "c",
+                "target": "f",
+                "kind": "main"
+              }
+            ]
+          }
+        },
+        {
+          "id": "uefn-logs-playtest-diagnose",
+          "label": "Play test \u2192 capture logs \u2192 agent diagnoses",
+          "description": "Mark log \u2192 Start game \u2192 wait for a line \u2192 Capture \u2192 a ducky explains what happened.",
+          "graph": {
+            "nodes": [
+              {
+                "id": "s",
+                "type": "start.manual",
+                "x": 0,
+                "y": 0,
+                "config": {}
+              },
+              {
+                "id": "m",
+                "type": "uefn-logs.mark",
+                "x": 220,
+                "y": 0,
+                "config": {}
+              },
+              {
+                "id": "g",
+                "type": "uefn.game.start",
+                "x": 440,
+                "y": 0,
+                "config": {
+                  "skip_if_playing": false
+                }
+              },
+              {
+                "id": "w",
+                "type": "uefn-logs.wait",
+                "x": 660,
+                "y": 0,
+                "config": {
+                  "timeout_sec": 240
+                }
+              },
+              {
+                "id": "c",
+                "type": "uefn-logs.capture",
+                "x": 880,
+                "y": 0,
+                "config": {}
+              },
+              {
+                "id": "a",
+                "type": "pipeline.agent",
+                "x": 1100,
+                "y": 0,
+                "config": {
+                  "prompt": "Read the captured UEFN log lines and explain what happened and how to fix it."
+                }
+              },
+              {
+                "id": "f",
+                "type": "pipeline.finish",
+                "x": 1320,
+                "y": 0,
+                "config": {}
+              }
+            ],
+            "edges": [
+              {
+                "source": "s",
+                "target": "m",
+                "kind": "main"
+              },
+              {
+                "source": "m",
+                "target": "g",
+                "kind": "main"
+              },
+              {
+                "source": "g",
+                "target": "w",
+                "kind": "main"
+              },
+              {
+                "source": "w",
+                "target": "c",
+                "kind": "main"
+              },
+              {
+                "source": "c",
+                "target": "a",
+                "kind": "main"
+              },
+              {
+                "source": "a",
+                "target": "f",
+                "kind": "main"
+              }
+            ]
+          }
         }
       ],
       "nodes": [
@@ -751,9 +1162,586 @@
               "type": "any"
             }
           ]
+        },
+        {
+          "id": "uefn.game.start",
+          "label": "Start game",
+          "group": "UEFN Playtest",
+          "systems": [
+            "pipeline"
+          ],
+          "description": "Start the island session (Epic first).",
+          "config_fields": []
+        },
+        {
+          "id": "uefn.player.wait",
+          "label": "Wait for player",
+          "group": "UEFN Playtest",
+          "systems": [
+            "pipeline"
+          ],
+          "description": "Block until a player pawn is in the session.",
+          "config_fields": [
+            {
+              "id": "timeout_sec",
+              "label": "Timeout (seconds)",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "id": "uefn.player.teleport",
+          "label": "Teleport player",
+          "group": "UEFN Playtest",
+          "systems": [
+            "pipeline"
+          ],
+          "description": "Move the live player to a teleporter / actor label or x,y,z.",
+          "config_fields": [
+            {
+              "id": "teleporter",
+              "label": "Teleporter / actor label",
+              "type": "string"
+            },
+            {
+              "id": "x",
+              "label": "X",
+              "type": "number"
+            },
+            {
+              "id": "y",
+              "label": "Y",
+              "type": "number"
+            },
+            {
+              "id": "z",
+              "label": "Z",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "id": "uefn.log.expect",
+          "label": "Expect log",
+          "group": "UEFN Playtest",
+          "systems": [
+            "pipeline"
+          ],
+          "description": "Poll the editor log until a regex matches.",
+          "config_fields": [
+            {
+              "id": "regex",
+              "label": "Regex",
+              "type": "string"
+            },
+            {
+              "id": "timeout_sec",
+              "label": "Timeout (seconds)",
+              "type": "number"
+            }
+          ]
+        },
+        {
+          "id": "uefn-logs.mark",
+          "label": "Mark UEFN log",
+          "group": "UEFN Logs",
+          "description": "Remember where the UEFN / client logs end now. Put it before Start game so captures only show this run.",
+          "config_fields": [
+            {
+              "id": "mark",
+              "label": "Mark name",
+              "type": "string",
+              "default": "default"
+            }
+          ]
+        },
+        {
+          "id": "uefn-logs.wait",
+          "label": "Wait for UEFN log line",
+          "group": "UEFN Logs",
+          "description": "Poll the UEFN log until the pattern appears after the mark. Stops early on a FAIL line. Outputs found / failed / timed_out and never aborts the run.",
+          "config_fields": [
+            {
+              "id": "pattern",
+              "label": "Pattern (regex)",
+              "type": "string",
+              "default": "\\[ARRIVAL\\] arrived"
+            },
+            {
+              "id": "fail_pattern",
+              "label": "Fail pattern (regex)",
+              "type": "string",
+              "default": "\\[ARRIVAL\\] FAIL|\\[PLAYERCORE\\] teleport TIMEOUT"
+            },
+            {
+              "id": "source",
+              "label": "Source (editor / client / both)",
+              "type": "string",
+              "default": "both"
+            },
+            {
+              "id": "mark",
+              "label": "Mark name",
+              "type": "string",
+              "default": "default"
+            },
+            {
+              "id": "timeout_sec",
+              "label": "Timeout (s)",
+              "type": "number",
+              "default": 180
+            }
+          ]
+        },
+        {
+          "id": "uefn-logs.capture",
+          "label": "Capture UEFN logs",
+          "group": "UEFN Logs",
+          "description": "Grab every matching log line since the mark. Outputs text, prompt (for an agent) and a uefn_log_capture.txt file.",
+          "config_fields": [
+            {
+              "id": "pattern",
+              "label": "Pattern (regex)",
+              "type": "string",
+              "default": "\\[ARRIVAL\\]|\\[PLAYERCORE\\]|LogVerse: .*(Error|error|FAIL)|Script error|VerseRuntime"
+            },
+            {
+              "id": "source",
+              "label": "Source (editor / client / both)",
+              "type": "string",
+              "default": "both"
+            },
+            {
+              "id": "mark",
+              "label": "Mark name",
+              "type": "string",
+              "default": "default"
+            },
+            {
+              "id": "max_lines",
+              "label": "Max lines",
+              "type": "number",
+              "default": 400
+            },
+            {
+              "id": "instructions",
+              "label": "Agent instructions",
+              "type": "string",
+              "default": ""
+            }
+          ]
         }
       ]
-    }
+    },
+    "verse.templates": [
+      {
+        "id": "device_onbegin",
+        "name": "Device + OnBegin",
+        "icon": "\u26a1",
+        "description": "Single-file creative_device with OnBegin",
+        "file": "templates/device_onbegin.verse",
+        "order": 5
+      },
+      {
+        "id": "hud_canvas",
+        "name": "HUD Canvas",
+        "icon": "\ud83d\udda5\ufe0f",
+        "description": "Single-file canvas + text_block starter",
+        "file": "templates/hud_canvas.verse",
+        "order": 6
+      },
+      {
+        "id": "helpers",
+        "name": "Subscribe Helpers",
+        "icon": "\ud83e\uddf0",
+        "description": "Subscribe* wrappers with ExtraData for listenables",
+        "file": "templates/subscribe_helpers.verse",
+        "order": 8
+      },
+      {
+        "id": "player_core",
+        "name": "Player Core",
+        "icon": "\ud83d\udc64",
+        "description": "player_manager + game_player + save_service. ?option slots for Economy / Progression / Playtime.",
+        "folder": "PlayerCore",
+        "connects": [
+          "registers:currency_provider",
+          "registers:xp_awarder",
+          "registers:playtime_provider"
+        ],
+        "files": [
+          {
+            "path": "save_service.verse",
+            "file": "templates/player_core/save_service.verse"
+          },
+          {
+            "path": "game_player.verse",
+            "file": "templates/player_core/game_player.verse"
+          },
+          {
+            "path": "player_manager.verse",
+            "file": "templates/player_core/player_manager.verse"
+          }
+        ],
+        "order": 10
+      },
+      {
+        "id": "npc_core",
+        "name": "NPC Core",
+        "icon": "\ud83e\uddd1",
+        "description": "Default NPC pack (like Player Core): session prey/hunter registries, prey FSM, hunter FSM, spawn controller. Compiles with no clips \u2014 duplicate react clips then Play(AS_\u2026). Standalone; no Player Core required.",
+        "folder": "NPCCore",
+        "files": [
+          {
+            "path": "npc_registry.verse",
+            "file": "templates/npc_core/npc_registry.verse"
+          },
+          {
+            "path": "prey_npc_behavior.verse",
+            "file": "templates/npc_core/prey_npc_behavior.verse"
+          },
+          {
+            "path": "hunter_npc_behavior.verse",
+            "file": "templates/npc_core/hunter_npc_behavior.verse"
+          },
+          {
+            "path": "npc_spawn_controller.verse",
+            "file": "templates/npc_core/npc_spawn_controller.verse"
+          }
+        ],
+        "order": 15
+      },
+      {
+        "id": "llm_npc",
+        "name": "LLM NPC Conversation",
+        "icon": "\ud83d\udde3\ufe0f",
+        "description": "An NPC you talk to by voice (UEFN 42.30 conversations): persona personality and voice from Verse, a voice channel with the players, structured output (RegisterAction) when you agree a deal, a one-shot structured Prompt, captions from CommitSayEvent. Put llm_npc_behavior on an NPC Character Definition with a Persona Modifier. Compile-verified in 42.30.",
+        "folder": "LLMNPC",
+        "files": [
+          {
+            "path": "llm_npc_behavior.verse",
+            "file": "templates/llm_npc/llm_npc_behavior.verse"
+          }
+        ],
+        "order": 16
+      },
+      {
+        "id": "team_text_chat",
+        "name": "Team Text Chat",
+        "icon": "\ud83d\udcac",
+        "description": "One text chat channel per team (UEFN 42.40 text_channel): team color and a [Team N] label, players join on arrival and leave on exit, read-only players (SetCanType), per-player labels (SetLabel), channel on/off. Verse can't send or read messages. Compile-verified in 42.40.",
+        "folder": "TeamTextChat",
+        "files": [
+          {
+            "path": "team_text_chat_device.verse",
+            "file": "templates/team_text_chat/team_text_chat_device.verse"
+          }
+        ],
+        "order": 17
+      },
+      {
+        "id": "economy",
+        "name": "Economy Manager",
+        "icon": "\ud83d\udcb0",
+        "description": "Currencies + HUD canvas. Registers currency_provider. Needs Player Core.",
+        "folder": "Economy",
+        "connects": [
+          "registers:currency_provider",
+          "needs:PlayerCore"
+        ],
+        "files": [
+          {
+            "path": "economy_manager.verse",
+            "file": "templates/economy/economy_manager.verse"
+          },
+          {
+            "path": "economy_canvas_builder.verse",
+            "file": "templates/economy/economy_canvas_builder.verse"
+          },
+          {
+            "path": "economy_manager_device.verse",
+            "file": "templates/economy/economy_manager_device.verse"
+          }
+        ],
+        "order": 20
+      },
+      {
+        "id": "progression",
+        "name": "Progression Manager",
+        "icon": "\ud83d\udcc8",
+        "description": "XP / levels + HUD. Registers xp_awarder. Currency rewards when Economy present.",
+        "folder": "Progression",
+        "connects": [
+          "registers:xp_awarder",
+          "consumes:currency_provider",
+          "needs:PlayerCore"
+        ],
+        "files": [
+          {
+            "path": "progression_manager.verse",
+            "file": "templates/progression/progression_manager.verse"
+          },
+          {
+            "path": "progression_canvas_builder.verse",
+            "file": "templates/progression/progression_canvas_builder.verse"
+          },
+          {
+            "path": "progression_manager_device.verse",
+            "file": "templates/progression/progression_manager_device.verse"
+          }
+        ],
+        "order": 30
+      },
+      {
+        "id": "time_tracker",
+        "name": "Time Tracker",
+        "icon": "\u23f1\ufe0f",
+        "description": "Session / playtime + offline seconds. Registers playtime_provider.",
+        "folder": "TimeTracker",
+        "connects": [
+          "registers:playtime_provider",
+          "needs:PlayerCore"
+        ],
+        "files": [
+          {
+            "path": "player_time_tracker.verse",
+            "file": "templates/time_tracker/player_time_tracker.verse"
+          },
+          {
+            "path": "time_tracker_device.verse",
+            "file": "templates/time_tracker/time_tracker_device.verse"
+          }
+        ],
+        "order": 40
+      },
+      {
+        "id": "shop",
+        "name": "Shop Controllers",
+        "icon": "\ud83d\uded2",
+        "description": "Buy + currency exchange via ?currency_provider. Standalone; no-ops without Economy.",
+        "folder": "Shop",
+        "connects": [
+          "consumes:currency_provider",
+          "needs:PlayerCore"
+        ],
+        "files": [
+          {
+            "path": "shop_controller.verse",
+            "file": "templates/shop/shop_controller.verse"
+          },
+          {
+            "path": "currency_exchange_controller.verse",
+            "file": "templates/shop/currency_exchange_controller.verse"
+          }
+        ],
+        "order": 50
+      },
+      {
+        "id": "match_timer",
+        "name": "Match Timer",
+        "icon": "\u23f2\ufe0f",
+        "description": "Countdown/count-up controller + swappable timer_canvas builder.",
+        "folder": "MatchTimer",
+        "connects": [
+          "needs:PlayerCore"
+        ],
+        "files": [
+          {
+            "path": "timer_canvas_builder.verse",
+            "file": "templates/match_timer/timer_canvas_builder.verse"
+          },
+          {
+            "path": "match_timer_controller.verse",
+            "file": "templates/match_timer/match_timer_controller.verse"
+          }
+        ],
+        "order": 60
+      },
+      {
+        "id": "tycoon",
+        "name": "Tycoon",
+        "icon": "\ud83c\udfed",
+        "description": "Full plot tycoon: purchaseables, belt, pets, rebirth. Consumes Economy / Progression / Time Tracker (never owns currency/XP).",
+        "folder": "Tycoon",
+        "connects": [
+          "consumes:currency_provider",
+          "consumes:xp_awarder",
+          "consumes:playtime_provider",
+          "needs:PlayerCore"
+        ],
+        "files": [
+          {
+            "path": "purchaseable.verse",
+            "file": "templates/tycoon/purchaseable.verse"
+          },
+          {
+            "path": "plot_manager.verse",
+            "file": "templates/tycoon/plot_manager.verse"
+          },
+          {
+            "path": "tycoon_controller.verse",
+            "file": "templates/tycoon/tycoon_controller.verse"
+          },
+          {
+            "path": "prop_purchaseable.verse",
+            "file": "templates/tycoon/prop_purchaseable.verse"
+          },
+          {
+            "path": "generator_purchaseable.verse",
+            "file": "templates/tycoon/generator_purchaseable.verse"
+          },
+          {
+            "path": "dropper_purchaseable.verse",
+            "file": "templates/tycoon/dropper_purchaseable.verse"
+          },
+          {
+            "path": "conveyor_purchaseable.verse",
+            "file": "templates/tycoon/conveyor_purchaseable.verse"
+          },
+          {
+            "path": "upgrader_purchaseable.verse",
+            "file": "templates/tycoon/upgrader_purchaseable.verse"
+          },
+          {
+            "path": "npc_purchaseable.verse",
+            "file": "templates/tycoon/npc_purchaseable.verse"
+          },
+          {
+            "path": "pet_purchaseable.verse",
+            "file": "templates/tycoon/pet_purchaseable.verse"
+          },
+          {
+            "path": "dancefloor_purchaseable.verse",
+            "file": "templates/tycoon/dancefloor_purchaseable.verse"
+          },
+          {
+            "path": "hitable_purchaseable.verse",
+            "file": "templates/tycoon/hitable_purchaseable.verse"
+          },
+          {
+            "path": "shootable_purchaseable.verse",
+            "file": "templates/tycoon/shootable_purchaseable.verse"
+          },
+          {
+            "path": "plot_runtime.verse",
+            "file": "templates/tycoon/plot_runtime.verse"
+          }
+        ],
+        "order": 70
+      },
+      {
+        "id": "npc_ecosystem",
+        "name": "NPC Ecosystem (optional cat+dog example)",
+        "icon": "\ud83d\udc31",
+        "description": "OPTIONAL cat+dog example only. Default NPC pack is npc_core \u2192 Verse/NPCCore/. Apply this pack only if the user asked for the exact cat+dog island, with parent_relative=Content/AI after duplicating react clips into that folder.",
+        "folder": "CatReacts",
+        "files": [
+          {
+            "path": "cat_ai_helpers.verse",
+            "file": "templates/npc_ecosystem/cat_ai_helpers.verse"
+          },
+          {
+            "path": "cat_npc_behavior.verse",
+            "file": "templates/npc_ecosystem/cat_npc_behavior.verse"
+          },
+          {
+            "path": "dog_npc_behavior.verse",
+            "file": "templates/npc_ecosystem/dog_npc_behavior.verse"
+          },
+          {
+            "path": "cat_spawn_controller.verse",
+            "file": "templates/npc_ecosystem/cat_spawn_controller.verse"
+          }
+        ],
+        "order": 80
+      },
+      {
+        "id": "umg_widget",
+        "name": "UMG Widget Device",
+        "icon": "\ud83d\uddb1\ufe0f",
+        "description": "creative_device skeleton for driving a UW_* User Widget (Verse fields + field events awaited in a race-to-stop watcher; no Subscribe until 43.00) when the project has no Verse UI Kit; with the kit, use its driver pattern (skill verse_ui_kit). Uncomment the WIDGET lines after the widget exists in the Assets digest.",
+        "folder": "UMGWidget",
+        "files": [
+          {
+            "path": "umg_widget_device.verse",
+            "file": "templates/umg-widget/umg_widget_device.verse"
+          }
+        ],
+        "order": 65
+      },
+      {
+        "id": "custom_movement",
+        "name": "Custom Entity Movement (Experimental)",
+        "icon": "\ud83d\udeb6",
+        "description": "Fully custom player locomotion on a Scene Graph entity: 42.10 Move input action, editable speed/accel/friction/gravity/jump, OnSimulate delta loop (TickEvents.Subscribe is Epic-internal), Scene Graph orbit camera via fort_orbit_camera_modifier on the camera's modifier stack (AddModifier = parens) plus camera_director_component.AddCamera[...] (brackets), stock character parked in stasis. Experimental: cannot publish.",
+        "folder": "CustomMovement",
+        "files": [
+          {
+            "path": "player_movement_component.verse",
+            "file": "templates/custom_movement/player_movement_component.verse"
+          },
+          {
+            "path": "custom_movement_controller.verse",
+            "file": "templates/custom_movement/custom_movement_controller.verse"
+          }
+        ],
+        "order": 83
+      },
+      {
+        "id": "vp_screenspace_trace",
+        "name": "VP Screen-space Trace",
+        "icon": "\ud83c\udfaf",
+        "description": "Virtual Pointer tap/click \u2192 DeprojectViewportToWorld \u2192 FindSweepHits. TouchMapping + PointerSelect (publishable).",
+        "file": "templates/screenspace_trace_device.verse",
+        "order": 80
+      },
+      {
+        "id": "vp_swipe_detector",
+        "name": "VP Swipe Detector",
+        "icon": "\ud83d\udc46",
+        "description": "Per-player swipe / tap classifier (Up/Down/Left/Right) from PointerSelect Begin \u2192 Trigger \u2192 End. Publishable.",
+        "file": "templates/swipe_detector_device.verse",
+        "order": 81
+      },
+      {
+        "id": "vp_pinch_scale",
+        "name": "VP Pinch Scale (Experimental)",
+        "icon": "\ud83e\udd0f",
+        "description": "PointerZoom pinch / scroll / right-stick \u2192 scale a Scene Graph entity. Experimental: cannot publish.",
+        "file": "templates/pinch_scale_device.verse",
+        "order": 82
+      },
+      {
+        "id": "virtualpointer",
+        "name": "Virtual Pointer Pack",
+        "icon": "\ud83d\uddb1\ufe0f",
+        "description": "All three Virtual Pointer devices in Verse/VirtualPointer/: screen-space trace, swipe detector, pinch scale (Experimental).",
+        "folder": "VirtualPointer",
+        "files": [
+          {
+            "path": "screenspace_trace_device.verse",
+            "file": "templates/screenspace_trace_device.verse"
+          },
+          {
+            "path": "swipe_detector_device.verse",
+            "file": "templates/swipe_detector_device.verse"
+          },
+          {
+            "path": "pinch_scale_device.verse",
+            "file": "templates/pinch_scale_device.verse"
+          }
+        ],
+        "order": 79
+      }
+    ],
+    "dock.panels": [
+      {
+        "id": "tester",
+        "title": "UEFN Testing",
+        "defaultSide": "right",
+        "ui": "builtin:tester-dock"
+      }
+    ]
   },
   "backend": {
     "entry": "backend",

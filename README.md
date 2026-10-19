@@ -1,6 +1,10 @@
 # UEFN
 
-Core UEFN editor surface: actors, assets, creative devices, data tables, editor control, introspection, AI Python, project memory. Bundles uefn + datatables skills.
+Everything for the UEFN editor in one plugin: actors, assets, data tables, editor control, level design and worldgen, materials, modeling, Niagara VFX, Scene Graph, Verse (digests, compile, UMG, New-file templates), animation and retargeting, MetaHuman, physics, Virtual Pointer, testing and UEFN Logs. Bundles every UEFN skill.
+
+Since 1.1.0 this one plugin replaces UEFN Animation, Level Design, Materials, Modeling, Niagara, Scene Graph, Verse, Testing, Physics, Virtual Pointer, MetaHuman and UEFN Logs. Each part's code is a package under `backend/` (Animation's Unreal handlers are in `listener/`, Verse templates in `templates/`).
+
+Tests: `py -m pytest -q --import-mode=importlib backend`
 
 Desktop plugin for [UEFN-Ducky](https://github.com/UEFN-Ducky/UEFN-Ducky) (`uefn`).
 Install or update from **Settings → Store** in the app — do not install from a zip by hand.

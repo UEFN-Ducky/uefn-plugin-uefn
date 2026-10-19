@@ -1,0 +1,103 @@
+---
+description: "Verse fields in UMG (38.00+) — declare fields on a User Widget, bind with View Bindings, set from a creative_device, supported types, worked Style1/Style2 example"
+metadata:
+  order: 61
+  label: "UMG Verse fields (38.00+)"
+  default_enabled: false
+  load_condition: "Driving a UMG User Widget from Verse with Verse fields — Progress, message, material, texture, logic — or following the Epic 38.00 Verse fields tutorial"
+---
+
+## UMG Verse fields (38.00+)
+
+Starting with **Fortnite / UEFN 38.00**, you can define **Verse fields** directly on a UMG User Widget. They appear in the Variables panel, bind to widget properties via **View Bindings**, and reflect into the **Assets digest** so Verse can `set MyWidget.Field = value`.
+
+One-way for the initial release: **Verse → widget**. Widget → Verse clicks need **Verse field events** (39.40+) — see `umg_verse_field_events`.
+
+### Author the fields
+
+`add_verse_field(widget_path, field_name, field_type, default_value, event_parameters=[], mutable=True, visibility="public")`.
+Types (42.30, `list_verse_field_types`): `bool` (`logic`), `int`, `float`, `string`, `message`, `color`,
+`color_alpha`, `texture`, `material`, `event`. 42.30 changed the editor's AddVerseField to a nested
+`spec`; the tool sends it (and the old flat call on older builds). The result has `compiled` /
+`compile_error` — a field is not done until `compiled` is true.
+
+Change fields with `edit_verse_field` (retype, default, `mutable`, `visibility`, `new_name`),
+`duplicate_verse_field`, `remove_verse_field`.
+
+`event` fields (42.30: creatable, ≤1 bool/int/float parameter) are for clicks — `umg_verse_field_events`. They reflect as `event(tuple())` / `event(tuple(int))`: await them — no `Subscribe` in 42.40 (43.00 adds one: `events_subscriptions`).
+
+Name fields the kit's way (`verse_ui_kit` — Naming): bools `Is<Adjective>`, text ends `Text`, textures end `Texture`, events `On<Event>`; on a screen start with the child's name (`IsToggleButton1Active`, `Button1LabelText`). Keep fields to the minimum the screen needs. Default values of `message` fields are set in the Details panel — a manual step for the user.
+
+Bind with `bind_verse_field` (`umg_view_bindings`). Confirm with `list_verse_fields` and, after a Verse build, `get_verse_api` / `list_verse_types(digest="assets", name_filter="UW_")`.
+
+**42.30 (verified):** fields reach the Assets digest only once the widget's asset editor has been
+opened in the editor session — before that Verse gets E3506 "Unknown member". The field tools open
+and close the editor once per session for you (`verse_ready` in the result). Fields made another way:
+`open_asset_in_uefn` on the widget, then build Verse.
+
+### Drive from a creative_device
+
+```verse
+using { /Fortnite.com/Devices }
+using { /Verse.org/Simulation }
+using { /UnrealEngine.com/Temporary/UI }
+
+# Types UW_FieldsTest / MI_* come from Assets digest — never invent stub classes
+verse_fields_example := class(creative_device):
+    @editable Style1Volume : volume_device = volume_device{}
+    @editable Style2Volume : volume_device = volume_device{}
+    @editable AddWidgetVolume : volume_device = volume_device{}
+
+    Style1Message<localizes> : message = "Style 1!"
+    Style2Message<localizes> : message = "Style 2!"
+
+    var Widgets : [player]UW_FieldsTest = map{}
+    var Style1Material : MI_Style1ProgressBar = MI_Style1ProgressBar{}
+    var Style2Material : MI_Style2ProgressBar = MI_Style2ProgressBar{}
+    var VerseProgressValue : float = 0.0
+
+    OnBegin<override>()<suspends>:void =
+        AddWidgetVolume.AgentEntersEvent.Subscribe(AddWidget)
+        Style1Volume.AgentEntersEvent.Subscribe(EnterStyle1)
+        Style2Volume.AgentEntersEvent.Subscribe(EnterStyle2)
+
+    # One widget per player (a shared instance breaks with two players)
+    AddWidget(InAgent : agent):void =
+        if (Player := player[InAgent], PlayerUI := GetPlayerUI[Player], not Widgets[Player]):
+            Widget := UW_FieldsTest{}
+            set Widget.StyleText = Style1Message
+            if (set Widgets[Player] = Widget) {}
+            PlayerUI.AddWidget(Widget, player_ui_slot{ InputMode := ui_input_mode.None })
+
+    EnterStyle1(InAgent : agent):void =
+        if (Player := player[InAgent], Widget := Widgets[Player]):
+            set Widget.ProgressBarMaterial = Style1Material
+            if (VerseProgressValue < 1.0):
+                set VerseProgressValue += 0.1
+            set Widget.ProgressValue = VerseProgressValue
+            set Widget.StyleText = Style1Message
+
+    EnterStyle2(InAgent : agent):void =
+        if (Player := player[InAgent], Widget := Widgets[Player]):
+            set Widget.ProgressBarMaterial = Style2Material
+            if (VerseProgressValue < 1.0):
+                set VerseProgressValue += 0.1
+            set Widget.ProgressValue = VerseProgressValue
+            set Widget.StyleText = Style2Message
+```
+
+Replace `UW_FieldsTest` / `MI_*` / field names with **exact** digest identifiers from your project.
+
+### Rules that keep this working
+
+- Field names in Verse must match the UMG Verse-field names (digest is authoritative).
+- `message` fields: use `<localizes>` helpers or `message` literals — plain `string` will not type-check where `message` is required. For Epic PO / Export Localization readiness (named gatherable copy), load `skill_read_subskill("localization", "ui_ready")`.
+- Materials / textures: use the Verse ids from Assets digest (`MI_*`, texture names), usually created from `Fortnite > UI > Material` (see `umg_ui_materials`).
+- Updates apply when you `set` the field after the widget is on a `player_ui`. Binding re-eval is View Bindings' job — if nothing changes, check the binding direction and conversion function.
+- Multiplayer: one shared widget instance is a trap — see `umg_widgets`.
+
+### Related
+
+- Events from buttons: `umg_verse_field_events`
+- Binding / ToText / textures: `umg_view_bindings`
+- MCP inspect of member vars: `get_widget_blueprint_info`
