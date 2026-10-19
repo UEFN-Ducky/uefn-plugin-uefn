@@ -1,5 +1,5 @@
 ---
-source_plugin_id: tester
+source_plugin_id: uefn
 name: tester
 description: "UEFN testing suite — device-graph simulation, Verse harness asserts, session probes"
 license: MIT

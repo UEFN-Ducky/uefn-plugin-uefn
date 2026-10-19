@@ -1,8 +1,8 @@
 # UEFN
 
-Everything for the UEFN editor in one plugin: actors, assets, data tables, editor control, level design and worldgen, materials, modeling, Niagara VFX, Scene Graph, Verse (digests, compile, UMG, New-file templates), animation and retargeting, MetaHuman, physics, Virtual Pointer, testing and UEFN Logs. Bundles every UEFN skill.
+Everything for the UEFN editor in one plugin: actors, assets, data tables, editor control, level design and worldgen, materials, modeling, Niagara VFX, Scene Graph, Verse (digests, compile, UMG, New-file templates), animation and retargeting, MetaHuman, physics, Virtual Pointer, testing, UEFN Logs and NPC AI recipes. Bundles every UEFN skill, all MIT.
 
-Since 1.1.0 this one plugin replaces UEFN Animation, Level Design, Materials, Modeling, Niagara, Scene Graph, Verse, Testing, Physics, Virtual Pointer, MetaHuman and UEFN Logs. Each part's code is a package under `backend/` (Animation's Unreal handlers are in `listener/`, Verse templates in `templates/`).
+Since 1.1.0 this one plugin replaces UEFN Animation, Level Design, Materials, Modeling, Niagara, Scene Graph, Verse, Testing, Physics, Virtual Pointer, MetaHuman, UEFN Logs and the NPC AI & Enemies skill. Each part's code is a package under `backend/` (Animation's Unreal handlers are in `listener/`, Verse templates in `templates/`).
 
 Tests: `py -m pytest -q --import-mode=importlib backend`
 

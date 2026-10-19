@@ -1,5 +1,5 @@
 ---
-source_plugin_id: verse
+source_plugin_id: uefn
 name: verse
 description: "Writing Verse source — syntax, effects (no_rollback/transacts/decides), structured concurrency, compile-error fixes, system recipes, and finding APIs via digests. Source only: placed-device wiring and level ops → uefn skill; Scene Graph entities/prefabs → scenegraph skill."
 license: MIT

@@ -1,5 +1,5 @@
 ---
-source_plugin_id: metahuman
+source_plugin_id: uefn
 name: metahuman
 description: "MetaHuman for UEFN — create and edit in MetaHuman Creator, Mesh to MetaHuman, assemble with UEFN Export, import/migrate from UE, wire NPC Spawner, face/body animation, LOD/groom performance"
 license: MIT

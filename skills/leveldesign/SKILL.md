@@ -1,5 +1,5 @@
 ---
-source_plugin_id: leveldesign
+source_plugin_id: uefn
 name: leveldesign
 description: "UEFN level design — spatial awareness, blockout, player flow, combat/spawns, full-game director, themes, lighting, cinematic composition, procedural generation"
 license: MIT

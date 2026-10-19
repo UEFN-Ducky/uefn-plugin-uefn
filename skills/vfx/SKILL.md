@@ -1,5 +1,5 @@
 ---
-source_plugin_id: vfx
+source_plugin_id: uefn
 name: vfx
 description: "Niagara VFX in UEFN — assemble systems from stock modules via MCP (emitters, renderers, project particle meshes), place them, drive user parameters; V2 InitializeParticle only, ParticleState or particles never die, never execute_python, never probe assets"
 license: MIT

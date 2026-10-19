@@ -1,6 +1,14 @@
 ---
+source_plugin_id: uefn
 name: uefn-logs
 description: Read the real UEFN Output Log (Verse Print / LogVerse lines from play sessions) and the Fortnite client log. Use when a play test "did nothing", to see what Verse printed, or to feed logs into a workflow agent.
+license: MIT
+metadata:
+  label: UEFN Logs
+  version: 1
+  author: UEFN-Ducky
+  copyright: Copyright 2026 Mindful Path Company, LLC
+  allow_redistribute: true
 ---
 
 # UEFN Logs

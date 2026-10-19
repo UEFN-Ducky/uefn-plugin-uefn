@@ -1,5 +1,5 @@
 ---
-source_plugin_id: modeling
+source_plugin_id: uefn
 name: modeling
 description: "Model and process meshes in UEFN — import FBX/glTF, LODs, collision, UVs, Nanite, and Geometry Scripting (booleans, remesh, repair, bake)"
 license: MIT

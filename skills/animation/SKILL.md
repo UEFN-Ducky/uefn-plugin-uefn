@@ -1,5 +1,5 @@
 ---
-source_plugin_id: animation
+source_plugin_id: uefn
 name: animation
 description: "Create, import, retarget, bake, and PLAY custom skeletal animations in UEFN — Control Rig / Level Sequence authoring, Mixamo & FBX import, IK Rig + IK Retargeter with retarget-pose fixes, bake to AnimSequence, Animated Mesh device playback, player GetPlayAnimationController (full override + additive overlay), NPC AnimPresets, and skeleton sockets"
 license: MIT

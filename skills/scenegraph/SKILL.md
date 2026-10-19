@@ -1,5 +1,5 @@
 ---
-source_plugin_id: scenegraph
+source_plugin_id: uefn
 name: scenegraph
 description: "UEFN Scene Graph — use when the task is entities, components, or Entity Prefabs: create/edit them via Epic EntityToolset + Ducky prefab helpers, query the exact Verse API from digests, author Verse components that compile and actually move, grant stock items/weapons through inventories, custom Armory weapon prefabs, custom non-weapon item prefabs, template abilities (fort_template_ability / fort_item_ability_component), Scene Graph cameras + orbit camera modifiers, and fully custom entity player controllers (Move input, custom gravity/jump). Not for general Verse source (verse skill) or placed Creative devices (uefn skill)."
 license: MIT

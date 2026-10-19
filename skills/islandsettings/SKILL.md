@@ -1,5 +1,5 @@
 ---
-source_plugin_id: verse
+source_plugin_id: uefn
 name: islandsettings
 description: "UEFN Island Settings — CORE gameplay session setup: MaxPlayers, starting class, teams, spawn rules. ALWAYS pair MaxPlayers with one Player Spawn Pad per slot. Use when setting up a game for N players, changing max players, starting class, matchmaking, or Device_ExperienceSettings. (Island Settings toy options; the Verse team API lives in verse/sys_teams)"
 license: MIT
