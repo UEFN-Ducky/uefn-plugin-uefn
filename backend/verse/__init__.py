@@ -13,14 +13,26 @@ def _templates() -> list[dict[str, Any]]:
     return [r for r in rows if isinstance(r, dict)]
 
 
-def _find(template_id: str) -> dict[str, Any] | None:
+def _find(template_id: str, rows: list[dict[str, Any]] | None = None) -> dict[str, Any] | None:
+    """Match a bare id or the picker's ``plugin:<plugin_id>:<id>`` form."""
     tid = (template_id or "").strip()
+    pid = ""
+    if tid.startswith("plugin:") and tid.count(":") >= 2:
+        _, pid, tid = tid.split(":", 2)
     if not tid:
         return None
-    for row in _templates():
-        if str(row.get("id") or "") == tid:
+    for row in _templates() if rows is None else rows:
+        if str(row.get("id") or "") == tid and (not pid or str(row.get("plugin_id") or "") == pid):
             return row
     return None
+
+
+def _unknown(template_id: str) -> str:
+    ids = ", ".join(str(r.get("id")) for r in _templates()) or "none: no Store plugin with Verse templates is on"
+    return json.dumps(
+        {"ok": False, "error": f"unknown template_id: {template_id} (templates: {ids})"},
+        indent=2,
+    )
 
 
 def _register_template_tools(api) -> None:
@@ -64,10 +76,7 @@ def _register_template_tools(api) -> None:
         """
         row = _find(template_id)
         if not row:
-            return json.dumps(
-                {"ok": False, "error": f"unknown template_id: {template_id}"},
-                indent=2,
-            )
+            return _unknown(template_id)
         files = row.get("files") or []
         pack = []
         if isinstance(files, list) and files:
@@ -103,10 +112,7 @@ def _register_template_tools(api) -> None:
         """
         row = _find(template_id)
         if not row:
-            return json.dumps(
-                {"ok": False, "error": f"unknown template_id: {template_id}"},
-                indent=2,
-            )
+            return _unknown(template_id)
         from frontend.ui_web.project_files import (
             create_project_folder,
             create_project_verse_file,
@@ -171,8 +177,22 @@ def _register_template_tools(api) -> None:
                             made_dirs.add(nxt)
                     else:
                         dir_path = nxt
-                result = create_project_verse_file(dir_path, file_name, item["content"])
-                created.append(result["path"])
+                # Re-applying a folderless template: number the file instead of failing.
+                stem, dot, ext = file_name.rpartition(".")
+                for n in range(0, 50):
+                    candidate = file_name if n == 0 else (f"{stem}{n + 1}.{ext}" if dot else f"{file_name}{n + 1}")
+                    try:
+                        result = create_project_verse_file(dir_path, candidate, item["content"])
+                        created.append(result["path"])
+                        break
+                    except ValueError as exc:
+                        if "Already exists" not in str(exc):
+                            raise
+                else:
+                    return json.dumps(
+                        {"ok": False, "error": f"could not create file {file_name}", "created": created},
+                        indent=2,
+                    )
         except Exception as exc:  # noqa: BLE001
             return json.dumps({"ok": False, "error": str(exc)}, indent=2)
 
