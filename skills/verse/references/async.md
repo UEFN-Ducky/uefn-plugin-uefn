@@ -19,6 +19,8 @@ A `<suspends>` function may `Sleep`, `Await` events, and call other `<suspends>`
 functions. Calling one from another **waits** for it to finish.
 
 ```verse
+using { /Verse.org/Simulation }
+
 OnBegin<override>()<suspends> : void =        # the entry point IS async
     Trigger.TriggeredEvent.Subscribe(OnActivated)
     spawn{ GameLoop() }                       # lives as long as the device

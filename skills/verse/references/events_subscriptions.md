@@ -35,6 +35,8 @@ in UEFN 42.40** (Oct 16 2026). Concurrency basics (`spawn`, `race`, `branch`): `
 ### Subscribe (listenable)
 
 ```verse
+using { /Verse.org/Simulation }
+
 OnBegin<override>()<suspends>:void =
     Sub := Button.InteractedWithEvent.Subscribe(OnPressed)   # keep it to unsubscribe
     GetPlayspace().PlayerAddedEvent().Subscribe(OnPlayerAdded)

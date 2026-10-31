@@ -60,6 +60,7 @@ parallel API per screen).
 ```verse
 using { /UnrealEngine.com/Temporary/UI }
 using { /Fortnite.com/UI }
+using { /Verse.org/Simulation }
 
 # Prefer MakeUiLabelButton(PrimaryStyle(), "CONFIRM") when a shared module exists.
 Ui := MakeUiLabelButton(PrimaryStyle(), "CONFIRM")

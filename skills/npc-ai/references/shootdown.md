@@ -13,6 +13,12 @@ Source: `enemy_projectile_shootdown.verse` + helpers in `enemy_combat_helpers.ve
 ## Device — place one in the level
 
 ```verse
+using { /Fortnite.com/Devices }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+using { /Verse.org/Input }
+using { /Fortnite.com/Input }                   # Character.RangedWeaponMapping
+using { /Verse.org/Simulation }
+
 enemy_projectile_shootdown<public> := class(creative_device):
     @editable KillVFX:?particle_system = false
     @editable MageFireballVFX:?particle_system = false

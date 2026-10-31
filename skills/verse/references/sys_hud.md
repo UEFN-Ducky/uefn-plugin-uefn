@@ -27,6 +27,9 @@ in the match.
 `GetPlayerUI[]` is failable — always guard it:
 
 ```verse
+using { /UnrealEngine.com/Temporary/UI }
+using { /Verse.org/Simulation }
+
 if (Player := player[Agent], PlayerUI := GetPlayerUI[Player]):
     PlayerUI.AddWidget(MyCanvas, player_ui_slot{ InputMode := ui_input_mode.None })
 ```

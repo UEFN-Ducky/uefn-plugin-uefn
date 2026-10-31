@@ -21,6 +21,8 @@ builds English at runtime (`Message(BuiltString)`) is **not** fully L10N-ready.
 2. **Prefer named literals** (stable gather keys), not only a catch-all helper:
 
 ```verse
+using { /Verse.org/Simulation }
+
 ShopTitle<localizes> : message = "Shop"
 BuyButton<localizes> : message = "Buy"
 NotEnoughFunds<localizes> : message = "Not enough funds"

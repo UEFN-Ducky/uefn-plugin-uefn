@@ -22,6 +22,7 @@ Pinch is a continuous input for camera zoom and object scaling. The pinch magnit
 using { /Verse.org/Input }
 using { /Verse.org/Input/UI }
 using { /Verse.org/SpatialMath }
+using { /Verse.org/Simulation }
 
 EnableCursorZoom(Player : player):void =
     if (PlayerInput := GetPlayerInput[Player]):

@@ -18,6 +18,9 @@ Players live in an `[agent]game_player` map — agent is the key you get from
 every event:
 
 ```verse
+using { /Fortnite.com/Game }
+using { /Verse.org/Simulation }
+
 var AllPlayers <private> : [agent]game_player = map{}
 
 GetAllGamePlayers<public>()<transacts> : [agent]game_player = AllPlayers

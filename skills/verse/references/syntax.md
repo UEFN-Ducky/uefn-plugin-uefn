@@ -52,6 +52,8 @@ inside `if (…)`, `if:`, `for` filters, `[]` or a `<decides>` body (E3512). Acc
 
 ### Control flow (blocks are `:` + indent, or `{ …; … }`)
 ```verse
+using { /Verse.org/Simulation }
+
 if (Cond):
     DoThing()
 else:
@@ -61,7 +63,7 @@ for (Item : Collection):
     Print("{Item}")
 
 for (I := 0..9):        # inclusive range
-    Use(I)
+    HandleIndex(I)
 
 loop:
     if (Done?):

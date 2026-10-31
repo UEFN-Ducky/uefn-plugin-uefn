@@ -22,6 +22,8 @@ A type is a name bound with `:=` to a `class`/`struct`/`enum`/`interface`/`modul
 body. The body is `:` + indent, **or** `{ … }` braces — both are valid Verse.
 
 ```verse
+using { /UnrealEngine.com/Temporary/UI }
+
 my_thing := class:            # indent style
     Field : int = 0
 

@@ -33,6 +33,9 @@ join and frees it on leave. Systems keep **arrays of devices** and index them by
 slot instead of each running their own allocation:
 
 ```verse
+using { /Fortnite.com/Devices }
+using { /Verse.org/Simulation }
+
 @editable PlayerManager : player_manager = player_manager{}
 @editable Teleporters : []teleporter_device = array{}       # one per slot, in order
 

@@ -15,6 +15,9 @@ Detect world objects (Scene Graph entities, props with collision) under the Virt
 ## Deproject
 
 ```verse
+using { /Verse.org/Input }
+using { /Verse.org/Simulation }
+
 TraceFromClick(Player : player, ClickX : float, ClickY : float)<reads>:deproject_results =
     Player.DeprojectViewportToWorld(vector3{Left := ClickX, Up := ClickY, Forward := 0.0})
 ```

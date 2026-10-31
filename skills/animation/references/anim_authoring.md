@@ -132,6 +132,10 @@ Fully code-authored at runtime, no editor assets, props only (transform, not
 bones). Verify exact signatures via `search_verse_digest` / `get_verse_api`:
 
 ```verse
+using { /Fortnite.com/Devices/CreativeAnimation }
+using { /Fortnite.com/Devices/CreativeAnimation/InterpolationTypes }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+
 if (AC := MyProp.GetAnimationController[]):
     Keyframes : []keyframe_delta = array:
         keyframe_delta:

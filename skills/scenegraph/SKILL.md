@@ -5,7 +5,7 @@ description: "UEFN Scene Graph — use when the task is entities, components, or
 license: MIT
 metadata:
   label: "UEFN Scene Graph"
-  version: 27
+  version: 28
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC

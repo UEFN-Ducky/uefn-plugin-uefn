@@ -16,6 +16,8 @@ either silently loses data or breaks loads. The `Version` field is your safety n
 ### Why every persistable table carries a Version
 
 ```verse
+using { /Verse.org/Simulation }
+
 game_player_table := class<final><persistable>:
     Version <public> : int = 0        # bump this when the schema changes
     Stats   <public> : player_stats = player_stats{}

@@ -32,6 +32,8 @@ system shares the same store. Type names below are generic — adapt to your gam
 **1. A module-level `weak_map`** (the store):
 
 ```verse
+using { /Verse.org/Simulation }
+
 var PlayerStatsMap <public> : weak_map(player, game_player_table) = map{}
 ```
 

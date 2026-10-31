@@ -47,6 +47,11 @@ EnableSidestep=false, FocusYawOffsetDeg=0.0 on all.
 ## `enemy_archer_behavior` (exact fire call)
 
 ```verse
+using { /Fortnite.com/AI }
+using { /Fortnite.com/Devices }
+using { /Verse.org/Assets }
+using { /Verse.org/Simulation }
+
 enemy_archer_behavior<public> := class(npc_behavior):
     @editable AttackAnim:?animation_sequence = false
     @editable ArrowProp:creative_prop_asset = DefaultCreativePropAsset  # unused for flight; keep for NPCDef slots

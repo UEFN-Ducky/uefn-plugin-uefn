@@ -19,13 +19,15 @@ failable expression whose success drives the branch. Bindings made in the head
 are in scope in the body.
 
 ```verse
+using { /Verse.org/Simulation }
+
 if (CurrentAmount >= Price):          # plain logic test
     Buy()
 else:
     Deny()
 
 if (MyPlayer := AllPlayers[Agent]):   # map lookup that may fail; binds MyPlayer on success
-    Use(MyPlayer)
+    UsePlayer(MyPlayer)
 
 if (A := Agent?):                     # unwrap an option; body runs only if it held a value
     Print("{A}")

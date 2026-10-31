@@ -25,6 +25,7 @@ says to enable **Scene Graph Experimental Features**; if `get_verse_api({"name":
 
 ```verse
 using { /UnrealEngine.com/Abilities }
+using { /Fortnite.com/Abilities }
 ```
 
 | Part | Declaration | Role |

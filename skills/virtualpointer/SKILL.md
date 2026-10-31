@@ -4,7 +4,7 @@ description: "UEFN Virtual Pointer — cross-platform pointer input via Verse En
 license: MIT
 metadata:
   label: UEFN Virtual Pointer
-  version: 6
+  version: 7
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -96,6 +96,7 @@ Handler signatures must match exactly (e.g. `OnPointerUp(Arg : tuple(player, flo
 ```verse
 using { /Verse.org/Input }
 using { /Verse.org/Input/UI }
+using { /Verse.org/Simulation }
 
 AddTouchMapping(Player : player):void =
     if (PlayerInput := GetPlayerInput[Player]):

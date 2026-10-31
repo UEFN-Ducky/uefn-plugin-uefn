@@ -21,6 +21,8 @@ a failure context (`if (…)` head, `if:` block, `for` filter, `[]` argument, or
 `<decides>` body).
 
 ```verse
+using { /Verse.org/Simulation }
+
 # before
 AliveCount() : int = …
 if (AliveCount() = 0):                     # 3512

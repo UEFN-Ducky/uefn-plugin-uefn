@@ -13,9 +13,7 @@ dropper_purchaseable <public> := class<concrete>(purchaseable):
             if (Belt := Plot.FindConveyor(ConveyorIndex)?):
                 Belt.LinkDropper(Self, WaypointIndex)
                 set LinkedConveyor = ConveyorIndex
-        Interval := DropInterval
-        if (Interval <= 0.0):
-            set Interval = 2.0
+        Interval := if (DropInterval > 0.0) then DropInterval else 2.0
         Gen := RunId
         loop:
             Sleep(Interval)

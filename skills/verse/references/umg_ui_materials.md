@@ -55,6 +55,8 @@ Halftone stays hidden until hover. The highlight animation fades opacity (`umg_a
 4. In Verse (after digest refresh):
 
 ```verse
+using { /Verse.org/Simulation }
+
 var Style1Material : MI_Style1ProgressBar = MI_Style1ProgressBar{}
 var Style2Material : MI_Style2ProgressBar = MI_Style2ProgressBar{}
 

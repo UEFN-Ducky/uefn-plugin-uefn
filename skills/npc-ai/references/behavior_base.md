@@ -27,6 +27,13 @@ When `EnemyStraightChaseTest = true` (current Roguelike default):
 Set to `false` to restore pack spread + sidestep.
 
 ```verse
+using { /Fortnite.com/AI }
+using { /Fortnite.com/Characters }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+using { /Verse.org/Assets }
+using { /Verse.org/Random }
+using { /Verse.org/Simulation }
+
 EnemyStraightChaseTest<public>:logic = true
 ```
 

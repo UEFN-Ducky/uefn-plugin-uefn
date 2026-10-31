@@ -43,6 +43,12 @@ Every enemy type is a `class(npc_behavior)` with `@editable` tuning and an
 ```verse
 using { /Verse.org/Assets }
 using { /Fortnite.com/Characters }
+using { /Fortnite.com/AI }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+using { /Verse.org/Random }
+using { /Verse.org/SceneGraph }
+using { /Verse.org/SceneGraph/KeyframedMovement }
+using { /Verse.org/Simulation }
 melee_enemy_behavior<public> := class(npc_behavior):
     @editable AttackAnim:?animation_sequence = false
     @editable HitRange:float = 220.0

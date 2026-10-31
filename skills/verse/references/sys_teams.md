@@ -14,6 +14,8 @@ Teams come from the playspace's **team collection**. Member names are as shown â
 ### The team collection
 
 ```verse
+using { /Verse.org/Simulation }
+
 TeamCollection := GetPlayspace().GetTeamCollection()   # fort_team_collection
 AllTeams := TeamCollection.GetTeams()                  # []team
 ```

@@ -36,6 +36,9 @@ Repeating rows are one card widget in a stack.
 2. Show — **SetFocus before AddWidget** (required for controller):
 
 ```verse
+using { /UnrealEngine.com/Temporary/UI }
+using { /Verse.org/Simulation }
+
 ShowMenu(Agent : agent) : void =
     if (Player := player[Agent], PlayerUI := GetPlayerUI[Player]):
         set MenuCanvas = BuildMenuCanvas()

@@ -29,6 +29,8 @@ table; a `economy_save_service` does the rebuild-and-store (see
 `persistence`). Each currency is name + value + scale index:
 
 ```verse
+using { /Verse.org/Simulation }
+
 currency_data := class<final><persistable>:
     CurrencyName <public> : string = ""
     Value <public> : float = 0.0

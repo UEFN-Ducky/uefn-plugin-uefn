@@ -24,6 +24,7 @@ using { /Fortnite.com/Characters }
 using { /Fortnite.com/Devices }
 using { /Fortnite.com/Playspaces }
 using { /Verse.org/Simulation }
+using { /Fortnite.com/Game }
 ```
 
 ### The API (digest-verified)

@@ -47,6 +47,10 @@ minigame_instance (class<unique> or concrete+unique)
 ### Dynamic grid on canvas
 
 ```verse
+using { /UnrealEngine.com/Temporary/UI }
+using { /Verse.org/Simulation }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+
 # After AddWidget of root canvas:
 InitializeCells() : void =
     for (Row := 0..Rows - 1):

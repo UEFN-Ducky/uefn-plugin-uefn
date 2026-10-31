@@ -37,6 +37,8 @@ player_time_tracker_device             → @editable PlayerManager; Subscribe co
 ### Persistable time record
 
 ```verse
+using { /Verse.org/Simulation }
+
 player_time_data := class<final><persistable>:
     FirstLoginTime <public> : float = 0.0    # 0.0 = never set (new player)
     LastLoginTime  <public> : float = 0.0

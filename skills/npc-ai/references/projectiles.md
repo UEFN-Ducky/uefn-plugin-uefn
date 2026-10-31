@@ -29,6 +29,16 @@ flowchart TD
 ## Centralized damage
 
 ```verse
+using { /Fortnite.com/AI }
+using { /Fortnite.com/Characters }
+using { /UnrealEngine.com/Assets }
+using { /UnrealEngine.com/BasicShapes }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+using { /Verse.org/Assets }
+using { /Verse.org/SceneGraph }
+using { /Verse.org/SceneGraph/KeyframedMovement }
+using { /Verse.org/Simulation }
+
 EnemyApplyHitDamage<public>(Target:fort_character, Amount:float, Tag:string):void =
     if (Target.IsActive[]):
         Print("{Tag} dmg={Amount}")

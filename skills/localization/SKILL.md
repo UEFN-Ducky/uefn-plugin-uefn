@@ -5,7 +5,7 @@ description: "UEFN Text Localization — project settings, Export Localization P
 license: MIT
 metadata:
   label: UEFN Text Localization
-  version: 4
+  version: 5
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true

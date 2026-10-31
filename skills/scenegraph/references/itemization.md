@@ -24,6 +24,8 @@ using { /Verse.org/Simulation }        # agent (which IS an entity)
 using { /Fortnite.com/Devices }        # trigger_device and friends
 using { /Fortnite.com/Itemization }    # fort_item_pickup_interactable_component, rarities
 using { /UnrealEngine.com/Itemization }  # item_component, inventory_component
+using { /Fortnite.com/Items }
+using { /Fortnite.com/Weapons }
 ```
 
 Add `/Verse.org/SpatialMath` only when you place items in the world — and then

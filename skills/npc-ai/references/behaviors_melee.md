@@ -30,6 +30,13 @@ EnableSidestep defaults **false** on all; FocusYawOffsetDeg = 0.0.
 ## `enemy_melee_behavior`
 
 ```verse
+using { /Fortnite.com/AI }
+using { /Fortnite.com/Devices }
+using { /UnrealEngine.com/Assets }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+using { /Verse.org/Assets }
+using { /Verse.org/Simulation }
+
 enemy_melee_behavior<public> := class(npc_behavior):
     @editable AttackAnim:?animation_sequence = false
     @editable HitRange:float = 220.0

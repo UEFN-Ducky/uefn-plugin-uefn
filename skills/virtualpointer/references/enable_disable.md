@@ -17,6 +17,7 @@ Virtual Pointer is enabled per player by adding the `TouchMapping` input mapping
 ```verse
 using { /Verse.org/Input }
 using { /Verse.org/Input/UI }
+using { /Verse.org/Simulation }
 
 AddTouchMapping(Player : player):void =
     if (PlayerInput := GetPlayerInput[Player]):

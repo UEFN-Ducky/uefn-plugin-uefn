@@ -33,6 +33,9 @@ inventory_manager_device                  → SubscribePlayerConnected + Initial
 ### Persistable shapes
 
 ```verse
+using { /Verse.org/Assets }
+using { /Verse.org/Simulation }
+
 inventory_entry := class<final><persistable>:
     ItemId <public> : string = ""
     Quantity <public> : int = 0

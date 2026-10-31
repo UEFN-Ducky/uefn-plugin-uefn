@@ -17,6 +17,9 @@ member, re-check it then (`search_verse_digest("analytics")` / `("accolade")`).
 ### The two devices
 
 ```verse
+using { /Fortnite.com/Devices }
+using { /Verse.org/Simulation }
+
 @editable PurchaseAnalytics : analytics_device = analytics_device{}   # .Submit(Agent)
 @editable PurchaseAccolade  : accolades_device = accolades_device{}   # .Award(Agent)
 ```

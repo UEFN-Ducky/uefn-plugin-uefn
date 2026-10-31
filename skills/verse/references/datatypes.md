@@ -71,11 +71,11 @@ var PlayerStatsMap : weak_map(player, game_player_table) = map{}
 Arr.Length                                  # element count (int)
 set UpdatedCurrencies += array{NewEntry}    # append one item (builds a new array)
 for (Item : Arr):                           # iterate elements
-    Use(Item)
+    HandleItem(Item)
 for (I := 0..Arr.Length - 1):               # iterate indices
     UseAt(I)
 if (First := Arr[0]):                       # safe first element
-    Use(First)
+    HandleItem(First)
 Pick := GetRandomInt(0, Arr.Length - 1)     # random index (with /Verse.org/Random)
 ```
 

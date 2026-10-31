@@ -24,6 +24,12 @@ Names below are generic — adapt them to your game.
 ### The three data shapes
 
 ```verse
+using { /UnrealEngine.com/Temporary/UI }
+using { /Verse.org/Assets }
+using { /Verse.org/Simulation }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+using { /Verse.org/Colors }
+
 # 1. Persistent — what's saved per player
 player_level := class<final><persistable>:
     TotalLevelXP <public> : int = 0

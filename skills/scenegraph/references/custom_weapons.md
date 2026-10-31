@@ -369,15 +369,28 @@ custom_weapon_controller_device := class(creative_device):
             if (IC := Gun.GetComponent[item_component], Parent := IC.GetParentInventory[]):
                 Parent.RemoveItem(Gun)
 
+    # One watcher per player. Every pass waits, so holding no gun never spins the loop
+    # (a loop that does not wait hits the computation limit); it ends when the player
+    # leaves, because OnPlayerRemoved clears IsWatching.
     WatchHolster(Agent:agent)<suspends>:void =
         loop:
-            for (Gun : HeldGnomeGuns(Agent)):
-                if (Weapon := Gun.GetComponent[fort_weapon_component]):
-                    Weapon.HolsterChangedEvent.Await()
+            if (Player := player[Agent], not IsWatching[Player]?):
+                break
+            if (Gun := HeldGnomeGuns(Agent)[0], Weapon := Gun.GetComponent[fort_weapon_component]):
+                Changed := race:
+                    block:
+                        Weapon.HolsterChangedEvent.Await()
+                        true
+                    block:
+                        Sleep(1.0)              # re-check IsWatching at least once a second
+                        false
+                if (Changed?):
                     if (Weapon.IsHolstered = true):
                         Print("Gun holstered")
                     else:
                         Print("Gun unholstered")
+            else:
+                Sleep(0.5)                      # no gun held: wait, then look again
             Sleep(0.1)
 ```
 

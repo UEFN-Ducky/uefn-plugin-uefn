@@ -123,6 +123,7 @@ the bus will deliver `OnPlayerJoined` later.
 
 ```verse
 using { /Fortnite.com/Devices }
+using { /Verse.org/Simulation }
 player_connected_to_game <public> := type{_(GamePlayer : game_player):void}
 player_removed_from_game <public> := type{_(GamePlayer : game_player):void}
 

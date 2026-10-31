@@ -29,6 +29,9 @@ expect input triggers to replace modal clicks.
 ### input_trigger_device pattern
 
 ```verse
+using { /Fortnite.com/Devices }
+using { /Verse.org/Simulation }
+
 @editable MoveLeft : input_trigger_device = input_trigger_device{}
 @editable MoveRight : input_trigger_device = input_trigger_device{}
 @editable ActionConfirm : input_trigger_device = input_trigger_device{}

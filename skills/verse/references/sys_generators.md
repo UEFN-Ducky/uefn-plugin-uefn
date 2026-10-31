@@ -29,6 +29,9 @@ Model each producer with its rate, level, and cost curve. Keep it `<concrete>` s
 it can be an `@editable` array element:
 
 ```verse
+using { /Fortnite.com/Devices }
+using { /Verse.org/Simulation }
+
 generator_tier := class<concrete>():
     @editable RatePerSecond : float = 1.0
     @editable UpgradeCost : int = 100
