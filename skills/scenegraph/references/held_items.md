@@ -47,6 +47,14 @@ empty — `islandsettings` `recipes`).
 3. Save. After a Verse build the prefab is a class in the Assets digest —
    `list_verse_types(digest="assets", name_filter="Lantern")` — use that name in Verse.
 
+`create_empty_prefab` / `create_prefab_from_entities` cannot make a template prefab (they
+lose the template's components). Once the project has **one** Held Item prefab, make every
+other held item from it with `duplicate_prefab(source_prefab="/MyIsland/Prefabs/Lantern.Lantern",
+prefab_name="Flashlight")`: the copy keeps all the template's components. Find the source
+with `search_assets`, then swap the copy's mesh and icon in the prefab editor
+(`open_asset_in_uefn`). Only the very first one needs the Content Drawer step above; ask the
+person for that one click instead of saying it can't be done.
+
 ## Grant and equip from Verse
 
 ```verse
