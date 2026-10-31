@@ -138,7 +138,9 @@ Digest may also expose related types (e.g. camera director) — confirm with
 
 ### Project Verse components
 
-Custom `*_component` classes appear only **after** Verse compiles.
+Custom `*_component` classes appear only **after** Verse compiles. Writing one:
+`verse_authoring` (lifecycle, stopping work in `OnEndSimulation`, interfaces for
+behaviour several components share).
 
 Resolution order in EntityToolset `AddComponent`:
 

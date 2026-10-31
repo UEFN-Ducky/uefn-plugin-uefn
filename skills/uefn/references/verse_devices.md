@@ -31,6 +31,11 @@ SERIAL: one mutating/editor call per assistant message..
 already exists, **reuse it**. Never spawn `_v2` / `_Test` / a second
 `VerseDevice_C` to get hashes or to rewrite a field.
 
+**Never move or rename a placed class's `.verse` file** (or its folder). The
+class path is the folder path: every placed instance loses its class and all its
+wiring. If it must move: compile the new location, place one new device, wire it,
+then delete the old placement.
+
 **First array item** (field empty) — same device, one call:
 
 ```

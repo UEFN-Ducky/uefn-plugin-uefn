@@ -9,6 +9,11 @@ metadata:
 
 ## Movement & transforms
 
+**This is the one motion page.** Every skill that moves, animates, attaches or
+carries anything at runtime links here: keyframed movement for timed motion,
+`MoveTo` for one glide, origins for following, a moved `chair_device` for
+carrying a player. Never animate by writing a transform every tick.
+
 `SetEntityTransform` / `SetLocalTransform` here are **Scene Graph entities**, not
 Fortnite Creative devices. Never actor-scale buttons, triggers, or volumes —
 those resize via Details Width/Height/zone (`SetDeviceProperty`).

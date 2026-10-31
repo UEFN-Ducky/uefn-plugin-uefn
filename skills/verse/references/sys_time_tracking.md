@@ -18,11 +18,12 @@ same player-manager bus as every other system** (`sys_architecture`,
 
 | Clock | Survives sessions? | Use for |
 |-------|--------------------|---------|
-| Simulation elapsed time | No — resets every session | In-session deltas (timers, tick accrual) |
-| Epoch seconds (real-world) | Yes — wall-clock time | Login timestamps, offline elapsed, total playtime |
+| `GetSimulationElapsedTime()` (`<transacts>`) | No — resets every session | In-session deltas (timers, tick accrual) |
+| `GetSecondsSinceEpoch()` (`<reads>`) | Yes — wall-clock time | Login timestamps, offline elapsed, total playtime |
 
-Search the digest for the epoch-seconds API. Store that float in persistable
-fields — never store simulation elapsed time if you need it after leave/rejoin.
+Store the epoch float in persistable fields — never store simulation elapsed time
+if you need it after leave/rejoin. Countdowns and stopwatches inside a match:
+`sys_rounds_timers` "Which clock".
 
 ### Layers (same five-part shape)
 

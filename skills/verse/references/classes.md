@@ -43,10 +43,10 @@ Specifiers and what each buys you:
 | `class(tag)` | A **tag** for `FindCreativeObjectsWithTag(collectable_coins)` (pass the tag **type**; `GetCreativeObjectsWithTag` and the tag-instance overload are deprecated in 42.40). Write it `collectable_coins := class(tag){}` |
 | `class()` / `class:` | Plain class — a helper/manager you `new` yourself. `save_service := class():` |
 | `<concrete>` | **Every field has a default**, so it can be made with `{}` and used as an `@editable` struct or array element. `tower_data := class<concrete>():` |
-| `<unique>` | **Reference identity** — instances are distinct and comparable/allocated; needed for stateful helper objects. `game_player := class<unique>():` |
+| `<unique>` | **Reference identity** — instances compare with `=` / `<>` and can be map keys; needed for stateful helper objects. `game_player := class<unique>():` (devices are **not** comparable — track them by index, 3509) |
 | `<final>` | Cannot be subclassed. Pair with `<persistable>`. |
 | `<persistable>` | Instances can be stored in a `weak_map` and survive between sessions. **Must** be `<final>` and hold only persistable data. `player_level := class<final><persistable>:` → see the `persistence` reference. |
-| `<abstract>` | Cannot be instantiated directly — only subclassed. |
+| `<abstract>` | Cannot be built with `{}`; may declare functions without a body that every concrete child must define. |
 | `<transacts>` | Instances are usable inside `<transacts>` contexts (rollback-safe). Combines as `class<concrete><unique><transacts>()`. |
 
 Specifiers stack: `mini_game_instance := class<concrete><unique><transacts>():`.
@@ -127,36 +127,107 @@ game_phase := enum{ Warmup, Active, Ended }
 team := enum{ Red, Blue }
 ```
 
-Refer to a case as `game_phase.Active`. Match with `case` (see the
-`control_flow` reference).
+Refer to a value as `game_phase.Active`; compare with `=` / `<>`; match with `case`
+(a `case` that lists every value needs no `_`; one over `int` / `string` does —
+`control_flow`). An `@editable` enum field is a Details dropdown:
+`@editable StartPhase : game_phase = game_phase.Warmup`.
 
-### interface (language-standard)
+Enums are bare: write the helpers you need beside them — `ToString` (used
+automatically by `"{Phase}"`), `ToInt`, an int-to-enum converter (`functions`).
+Do not add a sentinel value (`Size`) at the end: every `case` then needs an arm for
+it and it shows in the Details dropdown.
 
-```verse
-healer := interface:
-    Heal(Agent : agent) : void
-
-medic := class(healer):
-    Heal<override>(Agent : agent) : void = # …
-```
-
-A class lists a superclass first, then any interfaces, in the `class(…)` parens.
-Override an inherited/interface method with `<override>` — exactly how devices
-override `OnBegin`.
-
-### Parametric types (generics)
-
-A type or function can take a `type` parameter — useful for reusable event
-wrappers that carry extra data:
+### Inheritance and overrides
 
 ```verse
-wrapper_agent(t : type) := class():
-    ExtraData : t
-    OutputFunc : tuple(agent, t) -> void
-    InputFunc(Agent : agent) : void = OutputFunc(Agent, ExtraData)
+powerup := class<abstract><unique>:
+    @editable EquipButton : button_device = button_device{}
+    Name : string = "None"
+
+    Init() : void =
+        EquipButton.InteractedWithEvent.Subscribe(Equip)
+
+    Equip(Agent : agent) : void = {}
+
+    ApplyEffect(Target : agent) : void          # no body: every concrete child defines it
+
+instakill_powerup := class<concrete><final>(powerup):
+    Name<override> : string = "Instakill"       # fields can be overridden too
+
+    Init<override>() : void =
+        (super:)Init()                          # run the parent's version as well
+
+    ApplyEffect<override>(Target : agent) : void =
+        if (FortCharacter := Target.GetFortCharacter[]):
+            FortCharacter.Damage(99999.0)
 ```
 
-`where t : type` on a function does the same inline.
+- One parent class; `<override>` on every function or field that replaces the
+  parent's, including a parent function with no body.
+- `(super:)Name()` calls the parent's version; if the direct parent did not
+  override it, the call reaches the nearest ancestor that did.
+- A variable of the parent type holds any child (`var Current : ?powerup = false`),
+  and calls run the child's version.
+- **Details shows a subclass picker** for an `@editable` field typed as an abstract
+  parent: `@editable Powerups : []powerup = array{}` lets a designer choose a
+  concrete child per element and edit its fields. The children must be
+  `<concrete>`.
+
+### interface
+
+A class has one parent class but **any number of interfaces**, so behaviour shared
+by unrelated classes lives in an interface.
+
+```verse
+edible := interface:
+    Eat() : void =
+        Print("Eaten")
+
+fruit := class:
+    Sweetness : float = 1.0
+
+apple := class(fruit, edible){}                 # parent class first, then interfaces
+sandwich := class(edible){}                     # interfaces alone are fine
+
+TryEat(Food : fruit) : void =
+    if (Meal := edible[Food]):                  # cast to the interface; fails if not edible
+        Meal.Eat()
+```
+
+- An interface works as a field, variable or array type (`Lunch : edible = sandwich{}`).
+- When two interfaces declare the same name, qualify it:
+  `(initializable:)Init<override>() : void =`, call `(resettable:)Init()`, read
+  `(resettable:)Counter`. Qualifying even without a clash makes the source obvious.
+- Scene Graph components must inherit `component`, so an interface is how a
+  component gets shared behaviour (`design_patterns`).
+
+### Generic (parametric) classes
+
+A class can take type parameters; a type used as a map key must be
+`subtype(comparable)`:
+
+```verse
+scoreboard(key_type : subtype(comparable), score_type : type) := class:
+    var Board : [key_type]score_type = map{}
+
+    SetScore(Key : key_type, Score : score_type) : void =
+        if (set Board[Key] = Score) {}
+
+    GetScore(Key : key_type)<transacts><decides> : score_type =
+        Board[Key]
+
+# as a device field:
+Scores : scoreboard(player, int) = scoreboard(player, int){}
+```
+
+**Parse order.** If a file that uses a generic class is parsed before the file that
+declares it, the build fails with "can't access the function from a preceding type",
+which does not name the cause. Put generic classes in a Content-level folder that
+sorts first (`Content/Archetypes/`, above `Content/Verse/`), and inside one file put
+helper functions **below** the generic classes they use. Pools and function wrappers
+built this way: `design_patterns`, `functions`.
+
+Generic functions (`where t : type`) are in `functions`.
 
 ### Subclassing a device — the canonical entry point
 

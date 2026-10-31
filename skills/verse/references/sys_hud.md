@@ -53,7 +53,7 @@ ShowFor<public>(Agent : agent) : void =
     if (Player := player[Agent], PlayerUI := GetPlayerUI[Player]):
         NewCanvas := BuildCanvas()
         PlayerUI.AddWidget(NewCanvas, player_ui_slot{ InputMode := ui_input_mode.None })
-        if (set PlayerCanvases[Agent] = NewCanvas): {}
+        if (set PlayerCanvases[Agent] = NewCanvas) {}
 
 RemoveFor<public>(Agent : agent) : void =
     if (Player := player[Agent], PlayerUI := GetPlayerUI[Player], Old := PlayerCanvases[Agent]):
@@ -66,6 +66,12 @@ RemoveFor<public>(Agent : agent) : void =
 
 **Remove a player's widgets on leave** (subscribe to the player-removed event) or
 the map leaks and you leak references to their canvases.
+
+**UMG widgets (the default)** follow the same shape: a `[player]UW_MyHud` map, one
+widget instance per player created on join or first show, `set Widget.Field = …`
+when the value changes, `RemoveWidget` and drop the entry on leave. Recipe:
+`umg_verse_fields`. One shared widget instance shows the last writer's values to
+everyone.
 
 ### Two ways to update: mutate vs rebuild
 

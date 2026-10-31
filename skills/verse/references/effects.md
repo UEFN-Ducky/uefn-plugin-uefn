@@ -69,6 +69,19 @@ Rule of thumb: **every getter, setter and small helper gets `<transacts>`** unle
 it needs `<suspends>`. Reserve "no specifier" for handlers whose body would not
 compile as `<transacts>` (they call default functions or do `spawn`).
 
+**Device getters with no effect.** Some Epic getters are declared without one, so
+they are `no_rollback` too — read the digest line. Bind them on the line before:
+
+```verse
+# conditional_button_device: GetItemCount<public>(Agent:agent, KeyItemIndex:int):int
+Keys := KeyButton.GetItemCount(Agent, 0)        # KeyItemIndex is 0-based
+if (Keys >= KeysNeeded):
+    Door.Open(Agent)
+```
+
+Reading your own class fields — `var`s included — is fine in `<transacts>` and
+`<decides>` bodies; only **calls** to no-effect functions break them.
+
 ### Field initialisers must converge (E3582)
 
 ```verse

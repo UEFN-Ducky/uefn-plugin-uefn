@@ -1,5 +1,5 @@
 ---
-description: "creative_device pattern — @editable fields, OnBegin, subscribing to device/player events, agents vs players, GetPlayspace, and the wrapper helpers"
+description: "creative_device pattern — @editable fields, OnBegin, subscribing to device/player events, what each event sends (handler payload table), agents vs players, GetPlayspace, never moving a placed device file, and the wrapper helpers"
 metadata:
   order: 7
   label: "Devices, @editable & events"
@@ -26,7 +26,7 @@ buy_with_currency := class(creative_device):
     @editable Buttons : []button_device = array{}
     @editable ItemGranter : item_granter_device = item_granter_device{}
     @editable var Price : int = 100
-    Message<localizes>(String : string):message = "{String}"
+    Message<localizes>(String : string) : message = "{String}"
 
     OnBegin<override>()<suspends> : void =
         for (Button : Buttons):
@@ -60,6 +60,11 @@ Group related references into a `struct<concrete>()` (see `classes`) so one
 `@editable` exposes a whole bundle — e.g. a `round_timers` struct holding every
 `timer_device`, or a `team_devices` struct holding a team's granters and messages.
 
+**Never move or rename a `.verse` file that holds a placed device's class.** The
+class path changes, every placed instance loses its class and its wired
+references, and they must be re-placed and re-wired. Pick the folder before the
+first build (`modules`).
+
 > Wiring the *actual* placed references (which prop/device a field points to) is
 > done with MCP `wire_verse_device_ref` / `wire_verse_device_array` /
 > `set_verse_editable` (**one field per turn** — never parallel wire/spawn;
@@ -90,7 +95,21 @@ FortChar.EliminatedEvent().Subscribe(OnEliminated)          # character = method
 
 The exact event name and whether it's `Event` or `Event()` comes from the
 **digest** — search it (`search_verse_digest("trigger_device")`) rather than
-guessing. Handler signatures are usually `(Agent : agent)` or `(Agent : ?agent)`.
+guessing.
+
+### What each event sends
+
+The handler takes **exactly** the payload type — a missing parameter is "expects
+agent->void, but this argument is of type tuple->void", a wrong one is 3509.
+
+| Payload | Events (42.40 digest) | Handler |
+|---------|-----------------------|---------|
+| `agent` | `button_device.InteractedWithEvent`, `conditional_button_device.ActivatedEvent`, `item_granter_device.ItemGrantedEvent`, `volume_device` / `capture_area_device.AgentEntersEvent`, `player_spawner_device.SpawnedEvent`, `timed_objective_device.CompletedEvent`, `elimination_manager_device.EliminatedEvent` | `(Agent : agent)` |
+| `?agent` (may be empty) | `trigger_device.TriggeredEvent`, `timer_device.SuccessEvent` / `FailureEvent`, `elimination_manager_device.EliminationEvent`, `sentry_device.EliminatedEvent` | `(MaybeAgent : ?agent)`, then `if (Agent := MaybeAgent?)` |
+| `tuple(agent, float)` | `input_trigger_device.ReleasedEvent` (seconds held) | `(Result : tuple(agent, float))`, `Result(0)` |
+| `device_ai_interaction_result` | `npc_spawner_device` / `guard_spawner_device` / `creature_spawner_device.EliminatedEvent` | `Result.Source` = who did it, `Result.Target` = the NPC; both `?agent` |
+| `elimination_result` | `fort_character.EliminatedEvent()` | `Result.EliminatedCharacter`, `Result.EliminatingCharacter?` (empty for falls and storms) |
+| `damage_result` | `fort_character.DamagedEvent()` / `DamagedShieldEvent()` | `Result.Amount`, `Result.Instigator?` (`sys_damage_health`) |
 
 To wait for a single occurrence instead of subscribing, use `.Await()` in a
 `<suspends>` context (see the `async` reference).
@@ -124,7 +143,7 @@ then:
 Declare a tiny `<localizes>` helper and pass built messages to HUD/UI devices:
 
 ```verse
-Message<localizes>(String : string):message = "{String}"
+Message<localizes>(String : string) : message = "{String}"
 # …
 ErrorHudMessage.SetText(Message("Not enough {CurrencyName}!"))
 ErrorHudMessage.Show(Agent)

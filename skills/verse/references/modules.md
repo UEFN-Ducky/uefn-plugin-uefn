@@ -1,5 +1,5 @@
 ---
-description: "Project structure — module declarations, using {} imports (engine paths vs project modules), how folders map to modules, making nested and asset folders <public> (Script error 3593), and cross-file references"
+description: "Project structure — module declarations, using {} imports (engine paths vs project modules), how folders map to modules, making nested and asset folders <public> (Script error 3593), module-level var rules, parse order for generic classes, moving files, and cross-file references"
 metadata:
   order: 11
   label: "Modules, using & file layout"
@@ -158,9 +158,28 @@ AllPlayers := MyPlayerManager.GetAllGamePlayers()
 ```
 
 - Only `<public>` members cross module boundaries — mark them explicitly.
-- Module-level `var`s (like `var PlayerStatsMap <public> : weak_map(...)`) become
-  shared global state once imported. Use sparingly and keep them `<public>` only
-  when other systems truly need them.
+- A module-level `var` must be a `weak_map`: `var PlayerStatsMap<public> :
+  weak_map(player, player_stats) = map{}` (persistent) or `weak_map(session, t)`
+  (one value for this match, not saved). A plain `var Count : int` outside a class
+  does not compile. Session state belongs on a manager device instead — reach for
+  `weak_map(session, …)` only when there is no device to hold it.
+- Imported module-level `var`s are shared global state. Keep them `<public>` only
+  when other systems truly need them; persistent ones count toward the four-map
+  cap (`persistence`).
+
+### Parse order — generic classes first
+
+Verse reads folders in name order. A generic (parametric) class used from a file
+parsed **before** it gives "can't access the function from a preceding type".
+Put generic classes in a Content-level folder that sorts first
+(`Content/Archetypes/`, declared `<public>` like any folder beside `Verse/`), and
+in that file put helper functions **below** the classes (`classes`).
+
+### Moving files
+
+A placed device's class path is its folder path. Moving or renaming its `.verse`
+file breaks every placed instance and its wiring — choose the folder before the
+first build (`devices`). Plain classes and helpers can move freely; rebuild after.
 
 ### File organization conventions
 

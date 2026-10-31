@@ -95,6 +95,13 @@ Nested folders by area/system (`Hub/Spawners`, `Hub/Teleporters`, `Area1/Combat`
 
 **Granters:** Epic `ListDeviceAssets` → pick the Item Granter asset → `PlaceDevice` → `SetDeviceProperty` per option. Offline fallback: `search_assets(search="Item_Granter", directory="/Game/Creative")` → `spawn_actor(asset_path="…BP_Creative_Item_Granter…_C", …)` (full `_C` suffix from the search hit).
 
+**Granter driven from Verse:** `GrantItem(Agent)` grants the current item;
+`CycleToRandomItem(Agent)` / `CycleToNextItem(Agent)` only **select** the next
+item unless the granter's **Grant on Cycle** option is on — set it with
+`SetDeviceProperty` on every granter Verse cycles, or nothing is granted.
+Random loadouts: one granter per slot (several items each, Grant on Cycle on),
+cycled once each from the Verse handler.
+
 **Teleporter (built-in Creative device):**
 
 ```

@@ -65,9 +65,9 @@ InitializePlayer(Agent : ?agent) : void =
     then:
         if (Existing := PlayerStatsMap[Player]):
             if (Existing.Version < CurrentSaveVersion):
-                if (set PlayerStatsMap[Player] = MigrateTable(Existing)): {}   # upgrade in place
+                if (set PlayerStatsMap[Player] = MigrateTable(Existing)) {}   # upgrade in place
         else:
-            if (set PlayerStatsMap[Player] = game_player_table{ Version := CurrentSaveVersion }): {}
+            if (set PlayerStatsMap[Player] = game_player_table{ Version := CurrentSaveVersion }) {}
 ```
 
 ### The migration function (step through versions)

@@ -1,10 +1,10 @@
 ---
-description: "Score keeping & leaderboards — persistent vs per-session scores, the reference-class trick for cheap updates, sorting, per-player leaderboard canvases, and rank rewards"
+description: "Score keeping & leaderboards — persistent vs per-session scores, the reference-class trick for cheap updates, sorting without rebuilding arrays, per-player leaderboard canvases, rank rewards, and king of the hill"
 metadata:
   order: 22
   label: "Game systems — scoring & leaderboards"
   default_enabled: false
-  load_condition: "Building score keeping, kill/death tracking, streaks, leaderboards, ranks, or rank-based rewards"
+  load_condition: "Building score keeping, kill/death tracking, streaks, leaderboards, ranks, rank-based rewards, or a king-of-the-hill / zone-control score"
 ---
 
 ## Score keeping & leaderboards
@@ -40,7 +40,7 @@ stats_save_service := class():
             OldTable := PlayerStatsMap[Player]
         then:
             NewStats := player_stats{ Kills := OldTable.Stats.Kills + 1, HighestStreak := OldTable.Stats.HighestStreak, Points := OldTable.Stats.Points }
-            if (set PlayerStatsMap[Player] = UpdatePlayerStats(OldTable, NewStats)): {}
+            if (set PlayerStatsMap[Player] = UpdatePlayerStats(OldTable, NewStats)) {}
 ```
 
 **Per-session** — a `class` is a **reference type**, so mutating a field on the
@@ -56,7 +56,7 @@ score_manager := class():
     var Scores : [agent]session_score = map{}
     InitializeScore<public>(Agent : agent) : void =
         if (not Scores[Agent]):
-            if (set Scores[Agent] = session_score{}): {}
+            if (set Scores[Agent] = session_score{}) {}
     AddKill<public>(Agent : agent) : void =
         if (Score := Scores[Agent]):
             set Score.Kills += 1            # mutates the stored object directly
@@ -64,7 +64,7 @@ score_manager := class():
     RemoveScore<public>(Agent : agent) : void =            # call on player leave
         var NewMap : [agent]session_score = map{}
         for (A -> S : Scores, A <> Agent):
-            if (set NewMap[A] = S): {}
+            if (set NewMap[A] = S) {}
         set Scores = NewMap
 ```
 
@@ -77,8 +77,9 @@ Typical flow: `score_manager` subscribes to the player manager's elimination eve
 
 ### Building a leaderboard (snapshot → sort)
 
-Snapshot the score map into a display `struct`, then sort. Use an explicit bubble
-sort — no dependency on a sort API:
+Snapshot the score map into a display `struct` with a for-expression, then sort.
+Each entry's place is how many entries are ahead of it; no array is rebuilt inside
+a loop:
 
 ```verse
 leaderboard_entry := struct:
@@ -86,21 +87,27 @@ leaderboard_entry := struct:
     Kills : int
     Points : int
 
-var Entries : []leaderboard_entry = array{}
-for (Agent -> Score : ScoreManager.GetAllScores()):
-    set Entries += array{ leaderboard_entry{ PlayerAgent := Agent, Kills := Score.Kills, Points := Score.Points } }
+# Number of entries ahead of Entry: more points, or the same points earlier in the list.
+PlaceOf(Entries : []leaderboard_entry, Index : int, Entry : leaderboard_entry)<transacts> : int =
+    Higher := for (Other : Entries, Other.Points > Entry.Points) do Other
+    TiedBefore := for (J -> Other : Entries, J < Index, Other.Points = Entry.Points) do Other
+    Higher.Length + TiedBefore.Length
 
-# bubble sort by Points, descending
-for (I := 0..Entries.Length - 1):
-    for (J := 0..Entries.Length - I - 2):
-        if (A := Entries[J], B := Entries[J + 1], A.Points < B.Points):
-            var Tmp : []leaderboard_entry = array{}
-            for (K := 0..Entries.Length - 1):
-                if (K = J): set Tmp += array{B}
-                else if (K = J + 1): set Tmp += array{A}
-                else if (E := Entries[K]): set Tmp += array{E}
-            set Entries = Tmp
+# Highest points first; ties keep their order.
+SortByPoints(Entries : []leaderboard_entry)<transacts> : []leaderboard_entry =
+    Places := for (I -> Entry : Entries) do PlaceOf(Entries, I, Entry)
+    for (Place := 0..Entries.Length - 1, Index := Places.Find[Place], Entry := Entries[Index]) do Entry
+
+# caller
+MakeEntry(Agent : agent, Score : session_score)<transacts> : leaderboard_entry =
+    leaderboard_entry{PlayerAgent := Agent, Kills := Score.Kills, Points := Score.Points}
+
+Snapshot := for (Agent -> Score : ScoreManager.GetAllScores()) do MakeEntry(Agent, Score)
+Sorted := SortByPoints(Snapshot)
 ```
+
+Fine for a lobby (up to 100 players). Rebuild the board when a score changes, not
+on a timer. A sort that takes its rule as a comparator: `functions`.
 
 ### Displaying it per player
 
@@ -137,3 +144,42 @@ rank_reward_manager := class():
 
 Track current assignments in `[agent]int` so you can clear last round's rewards
 before applying this round's.
+
+### King of the hill
+
+One point per second to the only player on the hill; two or more is contested and
+nobody scores. `mutator_zone_device.GetAgentsInVolume()` reads who is inside, so
+the scoring tick needs no enter/exit bookkeeping:
+
+```verse
+using { /Fortnite.com/Devices }
+using { /Verse.org/Simulation }
+
+king_of_the_hill_device := class(creative_device):
+    @editable Hill : mutator_zone_device = mutator_zone_device{}
+    @editable EndGame : end_game_device = end_game_device{}
+    @editable PointsPerSecond : int = 1
+    @editable PointsToWin : int = 60
+
+    var HillPoints : [agent]int = map{}
+
+    OnBegin<override>()<suspends> : void =
+        loop:
+            Sleep(1.0)
+            Occupants := Hill.GetAgentsInVolume()
+            if (Occupants.Length = 1, King := Occupants[0]):
+                AwardHill(King)
+
+    AwardHill(King : agent) : void =
+        NewTotal := (HillPoints[King] or 0) + PointsPerSecond
+        if (set HillPoints[King] = NewTotal) {}
+        if (NewTotal >= PointsToWin):
+            EndGame.Activate(King)
+```
+
+- Team hill: contested when the occupants belong to more than one team
+  (`GetPlayspace().GetTeamCollection().GetTeam[Agent]`, `sys_teams`); award the
+  team.
+- Feed the points into the session `score_manager` above, and update the HUD from
+  `AwardHill`, not from a separate loop.
+- Remove a leaving player's entry (`SubscribePlayerRemoved`).

@@ -1,5 +1,5 @@
 ---
-description: "Round flow & timers — the game state machine (phase functions chained by events), custom timer devices with typed events, and real delta-time loops with GetSimulationElapsedTime"
+description: "Round flow & timers — the game state machine (phase functions chained by events), custom timer devices with typed events, which clock to use, and drift-free countdowns that update the HUD only when the shown second changes"
 metadata:
   order: 25
   label: "Game systems — rounds, phases & timers"
@@ -79,37 +79,48 @@ custom_timer_device := class(creative_device):
 Consumers wire phase advancement to the finished event:
 `RoundTimers.HoldPhaseTimer.SubscribeTimerFinished(OnHoldPhaseDone)`.
 
-### Real delta-time loops
+### Which clock
 
-Time a loop off the wall clock with `GetSimulationElapsedTime()` and subtract a
-delta each tick — don't assume `Sleep` is exact:
+| Need | Use |
+|------|-----|
+| Wait once | `Sleep(Seconds)` |
+| A countdown or stopwatch | a deadline on `GetSimulationElapsedTime()` (`<transacts>`, resets each session), checked ~10 times a second |
+| Motion every frame | nothing in Verse — keyframed movement (scenegraph `movement_transforms`) |
+| Real-world time across sessions (logins, offline earnings) | `GetSecondsSinceEpoch()` (`<reads>`) → `sys_time_tracking` |
+
+Never count `Sleep(1.0)` passes as seconds: each pass runs a little long, so the
+count drifts. Measure against the clock instead.
+
+### Countdown loop (no drift, no per-frame HUD)
 
 ```verse
 RunTimer()<suspends> : void =
-    if (RunTimerIsRunning?): return          # single-instance guard
-    set RunTimerIsRunning = true
-    var LastTime : float = GetSimulationElapsedTime()
+    if (IsRunning?):
+        return                                  # one loop per timer
+    set IsRunning = true
+    EndTime := GetSimulationElapsedTime() + TimerDuration
+    var ShownSeconds : int = -1
     loop:
-        if (IsRunning = false): break         # external stop
-        if (CountDown? and CurrentTime <= 0.0):
-            for (Event : TimerFinishedEvents): Event(CurrentTime)   # fire, then
-            set IsRunning = false; break                            # stop
-        Now := GetSimulationElapsedTime()
-        set CurrentTime -= (Now - LastTime)   # advance by real delta
-        set LastTime = Now
-        UpdateTimerUI()
-        Sleep(0.0)                            # yield one frame — required
+        if (not IsRunning?):
+            break                               # Stop() clears the flag
+        Remaining := EndTime - GetSimulationElapsedTime()
+        if (Remaining <= 0.0):
+            set IsRunning = false
+            for (Callback : TimerFinishedEvents):
+                Callback(0.0)
+            break
+        if (Seconds := Ceil[Remaining], Seconds <> ShownSeconds):
+            set ShownSeconds = Seconds
+            UpdateTimerUI(Seconds)              # only when the number changes
+        Sleep(0.1)
 ```
 
-Patterns to copy:
-
-- **Single-instance guard** (`RunTimerIsRunning`) so `Start()` twice doesn't run two
+- **Single-instance guard** (`IsRunning`) so `Start()` twice doesn't run two
   loops.
-- **Fire the finished event, then set `IsRunning = false` and `break`.**
-- **`Sleep(0.0)` every iteration** to yield — a loop with no yield hangs the game
-  (see `async`).
-- Only fire per-second events when `Floor[CurrentTime]` changes
-  (`LastSecondFired`) to avoid spamming subscribers every frame.
+- **Fire the finished callbacks, then `break`.** Subscribers advance the phase.
+- `Sleep(0.1)` is plenty for a seconds display; `Sleep(0.0)` (every frame) only
+  for logic that must react within a frame, and never with UI work inside.
+- A per-player countdown also races the player's stop event (`async`).
 
 ### Countdowns you don't need to hand-roll
 

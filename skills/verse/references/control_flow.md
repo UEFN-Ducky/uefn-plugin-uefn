@@ -34,6 +34,19 @@ if (A := Agent?):                     # unwrap an option; body runs only if it h
 - Compare with `=` (equal) and `<>` (not-equal) **inside** a failure context:
   `if (Currency.CurrencyName = CurrencyName):`.
 - Chain conditions with `and` / `or` / `not`: `if (Dist <= Range and Dist < ClosestDistance):`.
+- `<>` is not-equal; `><` is not an operator. Strings compare only with `=` and `<>`.
+- A `logic` needs `?` to become a test (`if (Done?):`); comparisons fail or succeed
+  on their own.
+- Chain a second test with `else if (…):`:
+
+```verse
+if (CanEscape[Agent, GoldCount]):
+    Lock.Open(Agent)
+else if (ConditionalButton.IsHoldingItem[Agent, 1]):   # key items are 0-based
+    Lock.Open(Agent)
+else:
+    Print("Escape conditions not met")
+```
 
 ### The `if: / then: / else:` block form
 
@@ -88,11 +101,15 @@ for (Row := 0..GridHeight - 1):
         Cell(Row, Col)
 ```
 
-- `A..B` is an **inclusive** range, so index arrays with `0..Arr.Length - 1`.
+- `A..B` is an **inclusive** range: `0..10` runs 11 times, `0..Count - 1` runs
+  `Count` times, and `10..0` runs **zero** times (start must be ≤ end).
+- `for (Index -> Item : Arr)` gives each element with its 0-based index. It works on
+  arrays and maps, not on generators (`FindCreativeObjectsWithTag`,
+  `FindDescendantEntities`) — count with a `var` there.
 - The filter clause (form 3) is any failable expression; items that fail it are
   skipped, not aborted.
-- `for` collects results into an array if used as an expression; most game code
-  uses it purely for side effects.
+- `for` used as an expression builds an array (the last line of each pass is the
+  element) — the way to build arrays without `+=` (`datatypes`).
 
 ### `loop` — infinite until `break`
 
@@ -108,7 +125,11 @@ MovementLoop<private>()<suspends> : void =
         Sleep(MoveSpeed)      # yield each iteration — never a busy loop
 ```
 
-A `loop` with no `Sleep`/`Await` inside a frame will hang the game — always yield.
+Every `loop` must wait (`Sleep`, an `Await`) or reach a `break`. A loop with
+neither is rejected by the compiler; one whose only `break` can never run
+(`if (false?): break`) **compiles but crashes Verse at runtime**. Code after an
+endless `loop` in the same function never runs — spawn long-lived loops from their
+own function (`async`).
 
 ### `case` — match a value
 
@@ -118,6 +139,11 @@ case (Phase):
     game_phase.Ended  => ShowResults()
     _ => DoNothing()          # _ is the default branch (the only place `_` is legal — never as a binding name)
 ```
+
+- A `case` over an enum that lists **every** value needs no `_`.
+- A `case` over `int`, `string` or an open enum (42.40 ability enums) must end with
+  `_ => …`.
+- An arm can hold several lines: put them indented under `Value =>`.
 
 Use `case` for enums and fixed value sets; use `if`/`else` chains for ranges and
 compound conditions.

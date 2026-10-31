@@ -153,6 +153,12 @@ need `/Verse.org/SceneGraph`; `GetPlayspace()` needs `/Fortnite.com/Playspaces`;
 - A handler typed `(Player : player)` subscribed to a `listenable(agent)` → match the
   payload exactly (`Arg : agent`, or `Arg : tuple(agent, float)` for
   `ReleasedEvent`).
+- "expects a value of type agent->void, but this argument is of type tuple->void" →
+  the handler has **no** parameter; add the one the event sends
+  (`OnPressed(Agent : agent) : void`). `trigger_device` sends `?agent` (`devices`).
+- "no match for int / float" (also `+`, `-`) → only `*` mixes `int` and `float`;
+  convert first: `(Count * 1.0) / 8.0`. A float literal needs its decimal point
+  (`0.0`, not `0`).
 
 ### 3524 — "Must be an array, map, or generator after ':' inside for" (3 hits)
 
@@ -229,6 +235,15 @@ unbalanced `{` `}` or `(` `)`, or a stray `:` at the end of a one-line `if`.
 
 An Assets-digest module that is not in this project. The asset folder must exist
 under `Content/` and the project must have been built once so the digest lists it.
+
+### Messages to recognise (code varies)
+
+| Message | Cause | Fix |
+|---------|-------|-----|
+| "… has a suspends effect, which is not allowed in an immediate context" | `Sleep` / `Await` / a `<suspends>` call in a function without `<suspends>` | add `<suspends>`, or `spawn{ … }` it (`async`) |
+| "can't access the function from a preceding type" | a generic class is parsed after the file (or the line) that uses it | move generic classes to a Content-level folder that sorts first; helpers below the classes (`classes`) |
+| "Branch is not currently supported in loops" | `branch` inside a `loop` / `for` body | `spawn`, or a `race` (`async`) |
+| a loop "needs a sub-expression that is async or break" | `loop:` with no `Sleep` / `Await` / `break` | wait each pass, or break (`control_flow`) |
 
 ### Tool-side errors that look like compile errors
 

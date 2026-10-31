@@ -1,10 +1,10 @@
 ---
-description: "Character damage, healing, health/shield and elimination in Verse — the healthful / damageable / healable / shieldable interfaces on fort_character, DamagedEvent/HealedEvent/EliminatedEvent payloads, who-hit-whom, respawn via player_spawner_device"
+description: "Character damage, healing, health/shield and elimination in Verse — the healthful / damageable / healable / shieldable interfaces on fort_character, DamagedEvent/HealedEvent/EliminatedEvent payloads, who-hit-whom, self-damage filter, shield-or-health hit race, stasis freeze, respawn via player_spawner_device"
 metadata:
   order: 12
   label: "Damage, health, shields & elimination"
   default_enabled: false
-  load_condition: "Applying or reacting to damage/healing, reading or setting health/shield, detecting eliminations and the eliminator, or respawning players"
+  load_condition: "Applying or reacting to damage/healing, reading or setting health/shield, detecting eliminations and the eliminator, freezing players (stasis), or respawning players"
 ---
 
 ## Damage, health, shields & elimination
@@ -112,6 +112,36 @@ damage_tracker_device := class(creative_device):
             Print("eliminated by the environment")
 ```
 
+**Self-damage** (own rockets, falls with the player as instigator) reports the
+victim as its own instigator. Ignore it before awarding anything:
+
+```verse
+OnDamaged(Result : damage_result) : void =
+    if:
+        VictimFC := fort_character[Result.Target]
+        Inst := Result.Instigator?
+        AttackerFC := fort_character[Inst]
+        AttackerFC <> VictimFC                  # not self-damage
+        Attacker := AttackerFC.GetAgent[]
+    then:
+        AwardHit(Attacker, Result.Amount)
+```
+
+**Any hit, shield or health.** Damage that only removes shield fires
+`DamagedShieldEvent`, not `DamagedEvent`. To wait for "was hit at all", race both
+(both send `damage_result`):
+
+```verse
+WaitForHit(FC : fort_character)<suspends> : damage_result =
+    race:
+        FC.DamagedEvent().Await()
+        FC.DamagedShieldEvent().Await()
+```
+
+**Stop on elimination.** A per-player effect (burning, a countdown, a carried
+item) races `FC.EliminatedEvent().Await()` so it ends when the player goes down,
+plus the leave signal (`async`, stop events).
+
 `player_manager` (Player Core template) already fans `EliminatedEvent` out as
 `elimination_event(EliminatedPlayer : agent, EliminatingPlayer : ?agent)`; use
 `SubscribeElimination` there instead of re-subscribing per system.
@@ -138,6 +168,20 @@ OnSpawned(NewAgent : agent) : void =
 To force a respawn from Verse, eliminate the character (`FC.Damage(FC.GetHealth())`)
 and let the spawner rules place them again; `TeleportTo[]` moves a live character
 without a respawn.
+
+### Freeze a player (stasis)
+
+```verse
+FreezeFor(Agent : agent, Seconds : float)<suspends> : void =
+    if (FC := Agent.GetFortCharacter[]):
+        FC.PutInStasis(stasis_args{AllowTurning := true, AllowFalling := false, AllowEmotes := false})
+        defer:
+            FC.ReleaseFromStasis()          # runs even if the task is cancelled
+        Sleep(Seconds)
+```
+
+`PutInStasis` / `ReleaseFromStasis` are `<transacts>`. Release in `defer` so a
+cancelled or raced task never leaves the player frozen.
 
 ### Gotchas
 

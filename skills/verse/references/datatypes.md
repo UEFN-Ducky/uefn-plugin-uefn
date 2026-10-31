@@ -76,9 +76,57 @@ if (First := Arr[0]): …                     # safe first element
 GetRandomInt(0, Arr.Length - 1)             # random index (with /Verse.org/Random)
 ```
 
-Build arrays functionally — accumulate into a `var []t` with `+=` inside a `for`,
-then store the result. Maps update with a failable `set`:
-`if (set PlayerStatsMap[Player] = NewTable):`.
+**Build arrays with a `for` expression**, never with `+=` inside a loop. Each `+=`
+copies the whole array, so appending N items one at a time costs about N²/2
+copies — a lag source in big levels. The last line of each pass is the element;
+head filters drop passes:
+
+```verse
+Numbers := for (X := 0..42) do X
+Alive := for (Agent : Agents, FortCharacter := Agent.GetFortCharacter[], FortCharacter.IsActive[]) do Agent
+set ActiveDucks = for (Index -> Duck : Shuffle(PropManipulators), Index < NumDucks):
+    Duck.ShowProps()
+    Duck
+```
+
+`+=` is fine for a rare one-off append (registering a callback, adding one item).
+
+More array methods (`/Verse.org/Verse`, no `using`; all return a new array):
+
+| Method | Returns | Fails when |
+|--------|---------|------------|
+| `Arr.Find[Item]` | index of the first match | not found |
+| `Arr.RemoveFirstElement[Item]` / `Arr.RemoveAllElements(Item)` | array without it | first form: not found |
+| `Arr.RemoveElement[Index]`, `Arr.Remove[Start, Stop]` | array without those | bad index |
+| `Arr.Insert[Index, Items]`, `Arr.ReplaceElement[Index, Item]` | changed array | bad index |
+| `Arr.Slice[Start, Stop]` / `Arr.Slice[Start]` | part of the array | bad index |
+| `Arr.ReplaceFirstElement[Old, New]` / `Arr.ReplaceAllElements(Old, New)` | changed array | first form: not found |
+
+Element type must be `comparable` for the find/remove/replace-by-value forms.
+`set Arr[I] = X` fails unless index `I` already exists — append instead.
+`Shuffle(Arr)` (`/Verse.org/Random`) returns a random order; shuffle then take the
+first N to pick N distinct items. Sorting takes a comparator function (`functions`).
+
+### Maps
+
+```verse
+var StartTimes : [agent]float = map{}                     # usually a var
+Names : [int]string = map{0 => "Zero", 1 => "One"}        # fixed pairs use =>
+
+if (set StartTimes[Agent] = GetSecondsSinceEpoch()) {}    # write: failable
+if (StartTime := StartTimes[Agent]):                       # read: fails if absent
+    Print("{StartTime}")
+for (Key -> Value : StartTimes):                           # iterate
+    Print("{Value}")
+```
+
+- Keys must be comparable: `int`, `float`, `string`, `agent`, `player`, enums, and
+  classes marked `<unique>`. Devices are not comparable (3509) — key by index.
+- Maps cannot be `@editable`; arrays can.
+- There is no in-place remove: rebuild without the key
+  (`for (K -> V : Map, K <> Gone, set NewMap[K] = V) {}`, or the generic
+  `RemoveKey` in `functions`). **Session maps only** — never remove keys from a
+  persistence `weak_map` (`persistence`).
 
 ### Tuples
 
@@ -100,8 +148,10 @@ Check which one your `using` brings in.
 - `+ - * /` on numbers. **`/` on two `int`s is failable and yields `rational`**,
   not `int` — it only compiles inside a failure context and cannot be passed where
   an `int` is expected. Convert to float first (`X * 1.0`) and use `Floor[]`:
-  `if (Mins := Floor[(Total * 1.0) / 60.0])`. `int` and `float` never mix in one
-  expression.
+  `if (Mins := Floor[(Total * 1.0) / 60.0])`.
+- `int * float` gives a `float` — that is how `* 1.0` converts. `+`, `-` and `/`
+  between an `int` and a `float` do not compile ("no match for int / float").
+- `Floor[X] or 0` supplies a value when the failable call fails.
 - Compare: `< <= > >=`, and `=` / `<>` (equal / not-equal) **in a failure
   context**: `if (Found = false):`, `for (…, Key <> OutAgent):`.
 - Combine: `and`, `or`, `not` — `if (Dist <= Range and Dist < ClosestDistance):`.

@@ -322,7 +322,7 @@ using { /Verse.org/Simulation/Tags }
 using { /UnrealEngine.com/Temporary/Diagnostics }
 using { /Verse.org/Assets }   # prefab class after compile
 
-my_item_tag := class(tag):
+my_item_tag := class(tag){}
 
 GetFirstInventory(Agent:agent)<transacts><decides>:inventory_component =
     (for (Inv : Agent.FindDescendantComponents(inventory_component)) do Inv)[0]

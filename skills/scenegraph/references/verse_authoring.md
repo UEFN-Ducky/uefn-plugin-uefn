@@ -138,6 +138,54 @@ mover_component := class<final_super>(component):
 - For timed or looping animation prefer `keyframed_movement_component` over
   ticking a transform yourself — see `movement_transforms`.
 
+### Stopping component work
+
+- `OnSimulate` is cancelled before `OnEndSimulation`, so loops run **inside** it
+  with `sync` / `race` stop with the component. A `spawn{}` from a component
+  outlives it — use one only with a stop event signalled in `OnEndSimulation`
+  (verse `async`).
+- Every `.Subscribe` returns a `cancelable`; keep them and cancel them in
+  `OnEndSimulation`.
+
+```verse
+beacon_component := class<final_super>(component):
+    var Subscriptions : []cancelable = array{}
+
+    OnSimulate<override>()<suspends> : void =
+        sync:
+            PulseLoop()                     # both end when OnSimulate is cancelled
+            BlinkLoop()
+
+    OnEndSimulation<override>() : void =
+        for (Subscription : Subscriptions):
+            Subscription.Cancel()
+        set Subscriptions = array{}
+        (super:)OnEndSimulation()
+```
+
+### Shared behaviour across components: interfaces
+
+A component must inherit `component`, so behaviour shared by unrelated components
+(switch on/off, take a hit, reset each round) is an **interface** they also
+implement. One caller then drives all of them without knowing their classes:
+
+```verse
+toggleable := interface:
+    SetActive(Active : logic) : void
+
+spinner_component := class<final_super>(component, toggleable):
+    var IsActive : logic = true
+    SetActive<override>(Active : logic) : void =
+        set IsActive = Active
+
+# A lever switches every toggleable component under Root.
+ToggleAll(Root : entity, Active : logic) : void =
+    for (Found : Root.FindDescendantComponents(component), Toggle := toggleable[Found]):
+        Toggle.SetActive(Active)
+```
+
+Interfaces, `(iface:)` qualification and casts: verse `classes`.
+
 ### Entity API (verified members)
 
 - Hierarchy: `GetParent[]`, `GetEntities()`, `AddEntities(array{...})`,
@@ -293,5 +341,8 @@ queries: `FindOverlapHits` / `FindSweepHits` with
   events instead of re-querying wide hierarchies during gameplay.
 - Keep interactions inside the prefab's local hierarchy; avoid broadcasting
   `SendDown` from the simulation root.
-- One `TickEvents` subscription doing a little work beats several components
-  each ticking; cancel them all in `OnEndSimulation`.
+- One loop driving many entities beats one loop per entity; cancel every
+  subscription in `OnEndSimulation`.
+- Visual-only updates (bobbing, colour pulses, HUD-like readouts) run ~10 times a
+  second (`Sleep(0.1)`); per-frame `Sleep(0.0)` only for steering that must react
+  every frame. Timed motion is keyframed (`movement_transforms`).

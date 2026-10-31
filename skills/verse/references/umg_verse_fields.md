@@ -54,36 +54,37 @@ verse_fields_example := class(creative_device):
     var Widgets : [player]UW_FieldsTest = map{}
     var Style1Material : MI_Style1ProgressBar = MI_Style1ProgressBar{}
     var Style2Material : MI_Style2ProgressBar = MI_Style2ProgressBar{}
-    var VerseProgressValue : float = 0.0
+    var Progress : [player]float = map{}             # each player's bar fills on its own
 
-    OnBegin<override>()<suspends>:void =
+    OnBegin<override>()<suspends> : void =
         AddWidgetVolume.AgentEntersEvent.Subscribe(AddWidget)
         Style1Volume.AgentEntersEvent.Subscribe(EnterStyle1)
         Style2Volume.AgentEntersEvent.Subscribe(EnterStyle2)
 
     # One widget per player (a shared instance breaks with two players)
-    AddWidget(InAgent : agent):void =
+    AddWidget(InAgent : agent) : void =
         if (Player := player[InAgent], PlayerUI := GetPlayerUI[Player], not Widgets[Player]):
             Widget := UW_FieldsTest{}
             set Widget.StyleText = Style1Message
             if (set Widgets[Player] = Widget) {}
             PlayerUI.AddWidget(Widget, player_ui_slot{ InputMode := ui_input_mode.None })
 
-    EnterStyle1(InAgent : agent):void =
+    EnterStyle1(InAgent : agent) : void =
         if (Player := player[InAgent], Widget := Widgets[Player]):
             set Widget.ProgressBarMaterial = Style1Material
-            if (VerseProgressValue < 1.0):
-                set VerseProgressValue += 0.1
-            set Widget.ProgressValue = VerseProgressValue
+            set Widget.ProgressValue = StepProgress(Player)
             set Widget.StyleText = Style1Message
 
-    EnterStyle2(InAgent : agent):void =
+    EnterStyle2(InAgent : agent) : void =
         if (Player := player[InAgent], Widget := Widgets[Player]):
             set Widget.ProgressBarMaterial = Style2Material
-            if (VerseProgressValue < 1.0):
-                set VerseProgressValue += 0.1
-            set Widget.ProgressValue = VerseProgressValue
+            set Widget.ProgressValue = StepProgress(Player)
             set Widget.StyleText = Style2Message
+
+    StepProgress(Player : player)<transacts> : float =
+        NewValue := Min((Progress[Player] or 0.0) + 0.1, 1.0)
+        if (set Progress[Player] = NewValue) {}
+        NewValue
 ```
 
 Replace `UW_FieldsTest` / `MI_*` / field names with **exact** digest identifiers from your project.
