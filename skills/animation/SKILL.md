@@ -14,6 +14,19 @@ metadata:
 
 # UEFN skeletal animation
 
+## Hard rules (every UEFN skill)
+
+1. **Our architecture is the spine** — systems are our packs on `player_manager`; never a second registry, wallet or save table (verse `sys_architecture`).
+2. **Scene Graph first** for anything created, moved or animated at runtime; Creative devices for features Fortnite provides; `creative_prop` only as a fallback (scenegraph SKILL.md).
+3. **Never animate by teleporting** — keyframed movement, `MoveTo` glides, `SetOrigin`, chairs for carried players, animation assets for characters (scenegraph `movement_transforms`).
+4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
+5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
+6. **One house code style** (verse `code_style`).
+7. **Names come from the digest** (verse `digests`).
+8. **Done means played** — build, then one live run; two players for multiplayer (verse `runtime_pitfalls`).
+
+Character and creature motion is animation assets (Animated Mesh device, the play-animation controller, NPC AnimPresets) — never per-tick transform writes. Moving objects without a skeleton: scenegraph `movement_transforms`.
+
 **CRITICAL — editor mutations are SERIAL:** one heavy MCP call (`spawn_actor`,
 `set_actor_*`, `save_current_level`, bake/retarget tools, `npc_author_*`,
 `create_physics_asset_for_mesh`, `create_anim_preset`, `create_character_blueprint`,

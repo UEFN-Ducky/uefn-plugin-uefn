@@ -13,6 +13,17 @@ metadata:
 
 # UEFN MCP — Operator Skill
 
+## Hard rules (every UEFN skill)
+
+1. **Our architecture is the spine** — systems are our packs on `player_manager`; never a second registry, wallet or save table (verse `sys_architecture`).
+2. **Scene Graph first** for anything created, moved or animated at runtime; Creative devices for features Fortnite provides; `creative_prop` only as a fallback (scenegraph SKILL.md).
+3. **Never animate by teleporting** — keyframed movement, `MoveTo` glides, `SetOrigin`, chairs for carried players, animation assets for characters (scenegraph `movement_transforms`).
+4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
+5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
+6. **One house code style** (verse `code_style`).
+7. **Names come from the digest** (verse `digests`).
+8. **Done means played** — build, then one live run; two players for multiplayer (verse `runtime_pitfalls`).
+
 **UEFN popups (HARD):** a modal blocks Slate — Epic MCP and `execute_python` hang. `uefn_popups` captures each popup with numbered buttons → `uefn_popup_press(hwnd, n)`; Save prompts: `dismiss_uefn_modal`. Verse-error popups on project open are answered for you; the level is not saved until Verse builds clean → `uefn_popups`. Do not retry Python / `unreal__*`.
 
 **Fortnite client:** after a session launch, `fortnite_client_wait` → `fortnite_client_capture` → `fortnite_client_move`; never touch a loading client → `fortnite_client`.

@@ -14,6 +14,35 @@ metadata:
 
 # UEFN Scene Graph — entities, components, prefabs
 
+## Hard rules (every UEFN skill)
+
+1. **Our architecture is the spine** — systems are our packs on `player_manager`; never a second registry, wallet or save table (verse `sys_architecture`).
+2. **Scene Graph first** for anything created, moved or animated at runtime; Creative devices for features Fortnite provides; `creative_prop` only as a fallback (scenegraph SKILL.md).
+3. **Never animate by teleporting** — keyframed movement, `MoveTo` glides, `SetOrigin`, chairs for carried players, animation assets for characters (scenegraph `movement_transforms`).
+4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
+5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
+6. **One house code style** (verse `code_style`).
+7. **Names come from the digest** (verse `digests`).
+8. **Done means played** — build, then one live run; two players for multiplayer (verse `runtime_pitfalls`).
+
+## What to build it with
+
+| You need | Build it as | Example |
+|----------|-------------|---------|
+| Something the code creates, moves or animates (platform, door, lift, mover, projectile, pickup, effect anchor) | **Entity / Entity Prefab** + components (`mesh_component`, `keyframed_movement_component`, your Verse components) | moving platform = prefab + `keyframed_movement_component` driven by a small Verse component |
+| A Fortnite feature (grant items, spawn players, seat a player, zones, buttons, HUD messages) | **Creative device**, wired with `@editable` | spawn pad, `item_granter_device`, `chair_device`, `trigger_device` |
+| Custom weapons and items | Armory / item **Entity Prefabs** | `custom_weapons`, `custom_items` |
+| Characters and enemies | NPC character definition + `npc_behavior` | the `npc-ai` skill |
+| Any UI | Verse UI Kit UMG widgets | verse `verse_ui_kit` |
+| Static set dressing | A placed mesh or prefab instance, no Verse | — |
+| Runtime props (`creative_prop`, `SpawnProp`) | Only when no entity path exists (an existing prop-based template) | verse `sys_spawning` fallback section |
+
+Spawn at runtime by constructing the prefab class and parenting it
+(`Parent.AddEntities(array{EP_Crate{}})`). Many pieces that move together → one
+parent entity. Short-lived entities (effects, debris, projectiles) are pooled:
+hidden and reused, never destroyed and recreated in bursts (verse
+`runtime_pitfalls` §4).
+
 **Entity CRUD is nested Epic UEFN MCP.** Settings → MCPs → **UEFN MCP (Epic)**.
 Use `unreal__list_toolsets` → `unreal__describe_toolset` → `unreal__call_tool` into
 `ValkyrieToolset.EntityToolset` (`FindEntities`, `CreateEntity`, `AddComponent`,
