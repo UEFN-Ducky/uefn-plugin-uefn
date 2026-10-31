@@ -1,11 +1,11 @@
 ---
 source_plugin_id: uefn
 name: leveldesign
-description: "UEFN level design — spatial awareness, blockout, player flow, combat/spawns, full-game director, themes, lighting, cinematic composition, procedural generation"
+description: "UEFN level design — spatial awareness, blockout, player flow, combat/spawns, full-game director, themes, lighting, cinematic composition, procedural generation, urban design (cities, streets, blocks, plazas)"
 license: MIT
 metadata:
   label: UEFN Level Design
-  version: 27
+  version: 28
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -250,6 +250,13 @@ Load with `skill_read_subskill("leveldesign", "<id>")`:
 | `procedural_generation` | PCG / seeded mass placement |
 | `landscape_foliage` | Terrain + foliage scatter |
 | `lego_brick_editor` | LEGO islands: Brick Editor mode, Kragle / Separate, brick rules (42.40) |
+| `urban_design` | **Cities start here** — real→uu conversion, Lynch/Jacobs/Gehl, city anti-patterns, router |
+| `urban_masterplan` | Lay out a whole city/town: 12-step build order, game-scale parameters |
+| `urban_streets` | Street hierarchy, cross-sections, driving lanes, intersections, roundabouts |
+| `urban_blocks` | Block typologies, building heights, towers, courtyards, corners |
+| `urban_public_spaces` | Plazas, parks, promenades — sizes, Gehl criteria, Power of 10 |
+| `urban_districts` | Downtown→suburb transect T1–T6, frontages, district themes |
+| `urban_evaluation` | 20-item city layout scorecard |
 
 ## Verify
 
