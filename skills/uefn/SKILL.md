@@ -24,6 +24,8 @@ metadata:
 7. **Names come from the digest** (verse `digests`).
 8. **Done means played** — build, then one live run; two players for multiplayer (verse `runtime_pitfalls`).
 
+**Building a whole island or feature set:** follow `skill_read_subskill("uefn", "build_order")` — plan, session shell, our packs, mode logic, Scene Graph objects, build then wire, UI, saves, two-player verify, dress — with leveldesign `full_game_director` for the level space.
+
 **UEFN popups (HARD):** a modal blocks Slate — Epic MCP and `execute_python` hang. `uefn_popups` captures each popup with numbered buttons → `uefn_popup_press(hwnd, n)`; Save prompts: `dismiss_uefn_modal`. Verse-error popups on project open are answered for you; the level is not saved until Verse builds clean → `uefn_popups`. Do not retry Python / `unreal__*`.
 
 **Fortnite client:** after a session launch, `fortnite_client_wait` → `fortnite_client_capture` → `fortnite_client_move`; never touch a loading client → `fortnite_client`.

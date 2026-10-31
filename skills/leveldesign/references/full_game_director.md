@@ -64,8 +64,9 @@ Place score/capture/race devices on the path players already take. Seal the
 playable footprint. Devices without space design = invisible goals.
 
 ### 9. Systems (Verse / Creative)
-Start Verse with `skill_read_subskill("verse", "sys_architecture")`, then only
-what the mode needs:
+Follow uefn `build_order` (packs, mode logic, Scene Graph objects, wiring, UI,
+saves, verify). Start Verse with `skill_read_subskill("verse", "sys_architecture")`,
+then only what the mode needs:
 
 | Need | Verse ref |
 |------|-----------|
