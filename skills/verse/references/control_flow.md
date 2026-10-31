@@ -37,6 +37,15 @@ if (A := Agent?):                     # unwrap an option; body runs only if it h
 - `<>` is not-equal; `><` is not an operator. Strings compare only with `=` and `<>`.
 - A `logic` needs `?` to become a test (`if (Done?):`); comparisons fail or succeed
   on their own.
+- The body of `if (…):`, `else:`, `for (…):` and `loop:` always starts on the
+  **next** line. `if (X): Stmt` on one line is parse error S76, and
+  `for (…): Stmt` is read as a definition (3514 "Cannot use reserved identifier
+  `for`"). For a value use the expression form
+  `Rate := if (Tier := Tiers[Level]) then Tier.Rate else 0.0`. An empty body is
+  `if (set Map[Key] = Value) {}` on the same line — a `{}` alone on the next line
+  is a parse error too. (Verified with verse-lsp, 42.40.)
+- Reserved words cannot name your types or functions: a class called `generator`
+  fails ("Cannot use reserved identifier").
 - Chain a second test with `else if (…):`:
 
 ```verse

@@ -22,7 +22,7 @@ var AllPlayers <private> : [agent]game_player = map{}
 
 GetAllGamePlayers<public>()<transacts> : [agent]game_player = AllPlayers
 GetGamePlayer<public>(Agent : agent)<transacts> : ?game_player =
-    if (MyPlayer := AllPlayers[Agent]): option{MyPlayer} else: false
+    if (MyPlayer := AllPlayers[Agent]) then option{MyPlayer} else false
 ```
 
 ### Join lifecycle (three entry points, one handler)

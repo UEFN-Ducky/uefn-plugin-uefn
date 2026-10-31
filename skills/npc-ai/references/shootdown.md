@@ -79,10 +79,17 @@ Archer passes `?ShootDownRadius := ShootDownRadius` (default 100). Mage/grenadie
 ## Kill VFX pattern
 
 ```verse
-EnemyProjectilePlayKillVFX(Sim, Pos)<suspends>:
-  SpawnParticleSystem(KillFX or NS_ProjectileKill_asset, Pos)
-  Sleep(0.8)
-  Cancel handle   # looping systems need Cancel
+using { /Verse.org/Assets }                     # particle_system
+using { /UnrealEngine.com/Assets }              # SpawnParticleSystem
+
+@editable KillFX : ?particle_system = false
+
+# Falls back to the project's own kill burst (NS_ProjectileKill_asset) when KillFX is not set.
+EnemyProjectilePlayKillVFX(Fallback : particle_system, Pos : vector3)<suspends> : void =
+    FX := KillFX? or Fallback
+    Handle := SpawnParticleSystem(FX, Pos)          # returns a cancelable
+    Sleep(0.8)
+    Handle.Cancel()                                 # looping systems keep playing until cancelled
 ```
 
 ## Wiring checklist

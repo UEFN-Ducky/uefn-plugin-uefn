@@ -69,11 +69,14 @@ var PlayerStatsMap : weak_map(player, game_player_table) = map{}
 
 ```verse
 Arr.Length                                  # element count (int)
-set UpdatedCurrencies += array{NewEntry}    # append (build a new array)
-for (Item : Arr): …                         # iterate elements
-for (I := 0..Arr.Length - 1): …             # iterate indices
-if (First := Arr[0]): …                     # safe first element
-GetRandomInt(0, Arr.Length - 1)             # random index (with /Verse.org/Random)
+set UpdatedCurrencies += array{NewEntry}    # append one item (builds a new array)
+for (Item : Arr):                           # iterate elements
+    Use(Item)
+for (I := 0..Arr.Length - 1):               # iterate indices
+    UseAt(I)
+if (First := Arr[0]):                       # safe first element
+    Use(First)
+Pick := GetRandomInt(0, Arr.Length - 1)     # random index (with /Verse.org/Random)
 ```
 
 **Build arrays with a `for` expression**, never with `+=` inside a loop. Each `+=`

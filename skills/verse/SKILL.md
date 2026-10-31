@@ -5,7 +5,7 @@ description: "Writing Verse source — syntax, effects (no_rollback/transacts/de
 license: MIT
 metadata:
   label: UEFN Verse
-  version: 55
+  version: 56
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -38,7 +38,7 @@ message, never `_v2` copies of a device (`skill_read_subskill("uefn", "verse_dev
 - **Player manager flow.** `player_manager` bus → `Init` (persist row) → each manager's `OnPlayerJoined` (config, then HUD). Roles are Manager / Tracker / Controller / Service. → `sys_architecture`
 - **UI = Epic's Verse UI Kit first**, custom kit buttons only (never Loud/Quiet/Regular presets). → `verse_ui_kit`, then the layer you write (`umg_widgets` index → `umg_*`; tools `umg_mcp_tools`). The widget type is its Assets digest name — never invent `MyUMGWidget := class`. Code-built canvas only as a fallback: `sys_canvas_cookbook` → `sys_hud_template` → `sys_custom_buttons` (`SetFocus` before `AddWidget`) → `sys_ui_menus`. Gatherable copy: `localization` skill, `ui_ready`.
 - **Digests are read only.** Never write, patch or delete any `*.digest.verse`.
-- **Syntax.** `X := value` is constant; `var X : t = value` changes only through `set`. Types are lowercase (`int float logic string`); `[]t` array, `[k]v` map, `?t` option, `tuple(…)`, element `T(0)`; `array{}` not `array:`; no `ToString(logic)`. Comments are `#`, never `//`. A `{}` body stays on the same line as its `if (…)` (a lone `{}` on the next line is parse error 3100). → `syntax`
+- **Syntax.** `X := value` is constant; `var X : t = value` changes only through `set`. Types are lowercase (`int float logic string`); `[]t` array, `[k]v` map, `?t` option, `tuple(…)`, element `T(0)`; `array{}` not `array:`; no `ToString(logic)`. Comments are `#`, never `//`. A `{}` body stays on the same line as its `if (…)` (a lone `{}` on the next line is parse error 3100); an `if (…):` / `for (…):` body always goes on the next line — `if (X): Stmt` on one line is parse error S76 and `for (…): Stmt` is 3514; for a value write `if (X) then A else B`. → `syntax`
 - **Recent releases** (chat channels, Unarmed, marketplace, LLM NPCs, ability templates, UMG event fields, 43.00 events) → `whats_new`.
 
 ## What are you building? Load these

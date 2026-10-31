@@ -250,8 +250,7 @@ if:
     OldTable := PlayerStatsMap[Player]
 then:
     # build NewNested …
-    if (set PlayerStatsMap[Player] = UpdateYourField(OldTable, NewNested)):
-        {}  # saved
+    if (set PlayerStatsMap[Player] = UpdateYourField(OldTable, NewNested)) {}  # saved
 ```
 
 Every failable step stays in the `if:` / `if (` head. Partial table rebuilds must

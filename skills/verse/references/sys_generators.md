@@ -33,14 +33,14 @@ generator_tier := class<concrete>():
     @editable RatePerSecond : float = 1.0
     @editable UpgradeCost : int = 100
 
-generator := class<unique>():
+idle_generator := class<unique>():          # not `generator`: that is a reserved word in Verse
     @editable Prop : creative_prop = creative_prop{}
     @editable Tiers : []generator_tier = array{}
     var Level <private> : int = 0
     var Accrued <private> : float = 0.0        # earned but not yet collected
 
     CurrentRate<public>()<transacts> : float =
-        if (Tier := Tiers[Level]): Tier.RatePerSecond else: 0.0
+        if (Tier := Tiers[Level]) then Tier.RatePerSecond else 0.0
 ```
 
 ### The generation loop

@@ -88,15 +88,13 @@ Remove: subtract; drop the entry at zero (or clamp). Always guard `set` in `if`.
 ### Quantity checks (on the manager)
 
 ```verse
-GetQuantity(ItemId : string)<transacts> : int =
-    # walk Entries; return matching Quantity or 0
+# Entries is this player's saved player_inventory.Entries.
+GetQuantity(Entries : []inventory_entry, ItemId : string)<transacts> : int =
+    Matches := for (Entry : Entries, Entry.ItemId = ItemId) do Entry.Quantity
+    Matches[0] or 0
 
-HasItem(ItemId : string, Amount : int)<transacts> : logic =
-    CurrentAmount := GetQuantity(ItemId)
-    if (CurrentAmount >= Amount):
-        return true
-    else:
-        return false
+HasItem(Entries : []inventory_entry, ItemId : string, Amount : int)<transacts> : logic =
+    if (GetQuantity(Entries, ItemId) >= Amount) then true else false
 ```
 
 Call `HasItem` before `RemoveItem`. Never trust the caller.

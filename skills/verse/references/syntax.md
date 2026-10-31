@@ -80,7 +80,7 @@ point := struct:
     X : float
     Y : float
 
-team := enum { Red, Blue }
+team_color := enum{Red, Blue}        # not `team`: that clashes with /Verse.org/Simulation (3532)
 
 healer := interface:
     Heal(Agent : agent):void

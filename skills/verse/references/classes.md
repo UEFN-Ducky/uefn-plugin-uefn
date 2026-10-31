@@ -124,8 +124,12 @@ it's a device (`creative_device`).
 
 ```verse
 game_phase := enum{ Warmup, Active, Ended }
-team := enum{ Red, Blue }
+team_color := enum{ Red, Blue }
 ```
+
+Never reuse an engine type name for your own type: `team := enum{…}` clashes with
+`/Verse.org/Simulation`'s `team` in every device file (3532, ambiguous — verified
+with verse-lsp, 42.40). Treat `player`, `agent` and `entity` the same way.
 
 Refer to a value as `game_phase.Active`; compare with `=` / `<>`; match with `case`
 (a `case` that lists every value needs no `_`; one over `int` / `string` does —

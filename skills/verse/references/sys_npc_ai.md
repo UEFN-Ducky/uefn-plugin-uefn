@@ -123,11 +123,15 @@ race:
 Approach a ring around the player with a random side offset:
 
 ```verse
-# PreferDist = desired stand-off; SideMin/SideMax = lateral scatter
-SpreadApproachPoint(SelfPos, TargetPos, PreferDist, SideMin, SideMax):vector3 =
+# PreferDist = desired stand-off; SideMin/SideMax = lateral scatter on a random side.
+# vector3 here is /UnrealEngine.com/Temporary/SpatialMath (fort_character positions).
+SpreadApproachPoint(SelfPos : vector3, TargetPos : vector3, PreferDist : float, SideMin : float, SideMax : float) : vector3 =
     Away := SelfPos - TargetPos
-    # unit XY Away → RingDir; random side along lateral (-Away.Y, Away.X)
-    # return TargetPos + RingDir * RingDist + Lat * Side
+    Len := Max(Sqrt(Away.X * Away.X + Away.Y * Away.Y), 1.0)
+    RingDir := vector3{X := Away.X / Len, Y := Away.Y / Len, Z := 0.0}
+    Lateral := vector3{X := -RingDir.Y, Y := RingDir.X, Z := 0.0}
+    Side := GetRandomFloat(SideMin, SideMax) * (if (GetRandomInt(0, 1) = 0) then -1.0 else 1.0)
+    TargetPos + RingDir * PreferDist + Lateral * Side
 ```
 
 ### Sidestep hop

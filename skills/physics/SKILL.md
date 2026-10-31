@@ -4,7 +4,7 @@ description: "UEFN Physics Beta — enable project physics, FortPhysics props, c
 license: MIT
 metadata:
   label: UEFN Physics
-  version: 9
+  version: 10
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true

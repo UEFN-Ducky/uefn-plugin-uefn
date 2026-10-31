@@ -61,9 +61,10 @@ player_anim_device := class(creative_device):
     @editable
     Trigger : trigger_device = trigger_device{}
 
-    # Point this at your retargeted / baked AnimSequence in Details.
+    # Point this at your retargeted / baked AnimSequence in Details. An @editable asset
+    # field is an option: `= external {}` is only legal inside digests (error 3558).
     @editable
-    Clip : animation_sequence = external {}
+    Clip : ?animation_sequence = false
 
     OnBegin<override>()<suspends>:void =
         Trigger.TriggeredEvent.Subscribe(OnTriggered)
@@ -74,12 +75,13 @@ player_anim_device := class(creative_device):
 
     PlayOnAgent(Agent : agent)<suspends>:void =
         if:
+            Sequence := Clip?
             FortCharacter := Agent.GetFortCharacter[]
             AnimController := FortCharacter.GetPlayAnimationController[]
         then:
             # Hold the INSTANCE — do not re-fetch the controller to Stop.
             Instance := AnimController.Play(
-                Clip,
+                Sequence,
                 ?BlendInTime := 0.25,
                 ?BlendOutTime := 0.25,
                 ?PlayRate := 1.0

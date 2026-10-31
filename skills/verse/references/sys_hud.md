@@ -94,7 +94,7 @@ rebuild). To refresh **everyone**, iterate the map:
 
 ```verse
 UpdateAll() : void =
-    for (Agent -> _ : PlayerCanvases):
+    for (Agent -> Canvas : PlayerCanvases):     # `_` is not a binding name (3514)
         RefreshFor(Agent)
 ```
 

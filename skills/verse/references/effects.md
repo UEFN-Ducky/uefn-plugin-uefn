@@ -139,7 +139,10 @@ the first failure aborts and **rolls back** everything above it, so the mutation
 at the bottom never half-apply:
 
 ```verse
-MeleeAttack(Attacker : player, Target : player)<decides><transacts> : float =
+# fighter and melee_weapon are your own classes (player has no Stamina or weapon fields):
+#   fighter: var Health, var Stamina, EquippedWeapon : ?melee_weapon, IsAlive()<transacts><decides>
+#   melee_weapon: Reach, Cost, Damage
+MeleeAttack(Attacker : fighter, Target : fighter)<decides><transacts> : float =
     Target.IsAlive[]                            # fails: target not alive
     Weapon := Attacker.EquippedWeapon?          # fails: no weapon equipped
     InRange[Attacker, Target, Weapon.Reach]     # fails: out of reach

@@ -28,14 +28,18 @@ match_controller := class(creative_device):
         set RoundStarted = true
         if (Level := ActiveLevel?):
             Level.StartBarrierDevice.Disable()
-            RoundTimers.RoundTimer.ResetForAll(); RoundTimers.RoundTimer.Start()
+            RoundTimers.RoundTimer.ResetForAll()
+            RoundTimers.RoundTimer.Start()
             spawn{ RoundTimerLoop() }          # HUD countdown loop
             StartActivePhase(InstigatorAgent)   # → enter first sub-phase
 
     StartHoldPhase<public>(InstigatorAgent : ?agent) : void =
-        if (EndingStarted = true): return       # guard: don't chain past the end
-        RoundTimers.HoldPhaseTimer.ResetForAll(); RoundTimers.HoldPhaseTimer.Start()
-        for (Event : PhaseChangedEvent): Event()    # notify subscribers
+        if (EndingStarted?):                    # guard: don't chain past the end
+            return
+        RoundTimers.HoldPhaseTimer.ResetForAll()
+        RoundTimers.HoldPhaseTimer.Start()
+        for (Event : PhaseChangedEvent):        # notify subscribers
+            Event()
         spawn{ HoldPhaseLoop() }
         # StartActivePhase will be called again when this phase's timer ends
 ```

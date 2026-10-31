@@ -118,10 +118,10 @@ mover_component := class<final_super>(component):
 
     Advance(DeltaTime:float):void =
         T := Entity.GetLocalTransform()
-        Entity.SetLocalTransform(transform:
+        Entity.SetLocalTransform(transform{
             Translation := T.Translation + vector3{Forward := Speed * DeltaTime}
             Rotation := T.Rotation
-            Scale := T.Scale)
+            Scale := T.Scale})
 ```
 
 - Use a **measured** delta (`GetSimulationElapsedTime` difference), never a fixed

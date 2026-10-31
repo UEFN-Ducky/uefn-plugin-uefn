@@ -101,8 +101,10 @@ game_manager := class(creative_device):
         Sleep(3.0)
         ResetPos := vector3{X := 0.0, Y := 0.0, Z := 400.0}
         if (FootballA.TeleportTo[ResetPos, IdentityRotation()]) {}
-        FootballA.SetLinearVelocity(vector3{})
-        FootballA.SetAngularVelocity(vector3{})
+        # Physics velocities take the /Verse.org/SpatialMath vector3; this file imports the
+        # UnrealEngine one for TeleportTo, so qualify (a bare vector3{} is error 3509).
+        FootballA.SetLinearVelocity((/Verse.org/SpatialMath:)vector3{})
+        FootballA.SetAngularVelocity((/Verse.org/SpatialMath:)vector3{})
 ```
 
 Confirm event names with digests. Tweak Hide/Reset vectors to the field center.

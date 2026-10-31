@@ -137,9 +137,12 @@ rank_reward_manager := class():
     var ThirdPlaceReward : visual_effect_powerup_device = visual_effect_powerup_device{}
 
     AssignRankRewards(SortedAgents : []agent) : void =
-        if (First := SortedAgents[0]):  FirstPlaceReward.Pickup(First)
-        if (Second := SortedAgents[1]): SecondPlaceReward.Pickup(Second)
-        if (Third := SortedAgents[2]):  ThirdPlaceReward.Pickup(Third)
+        if (First := SortedAgents[0]):
+            FirstPlaceReward.Pickup(First)
+        if (Second := SortedAgents[1]):
+            SecondPlaceReward.Pickup(Second)
+        if (Third := SortedAgents[2]):
+            ThirdPlaceReward.Pickup(Third)
 ```
 
 Track current assignments in `[agent]int` so you can clear last round's rewards
