@@ -149,7 +149,10 @@ succeed while the gun is still unparented. Parent/equip is
 `GetParentInventory[]` then `Equip()`, else `PickUp[Inventory]` then
 `Equip()` — `skill_read_subskill("scenegraph", "custom_weapons")`. Owned
 collectible + persist + shop: `skill_read_subskill("verse", "sys_owned_weapons")`.
-`item_granter_device` cannot grant a custom Armory prefab.
+`item_granter_device`, Item Spawners and the Save Point device do not handle
+custom Armory prefabs — grant from Verse. Constructing `EP_*{}` from another
+Verse folder needs the prefab folder declared `<public>` (Script error 3593
+otherwise — `sys_owned_weapons`).
 
 ### Recipe B2 — punch / FPS melee (v42.20 Unarmed)
 

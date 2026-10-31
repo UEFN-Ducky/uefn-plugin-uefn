@@ -68,13 +68,22 @@ and `<converges>` calls may initialise a field.
 ### 3593 — "Invalid access of internal module / scoped class from control scope" (16 hits)
 
 Cause: importing a **nested** Assets-digest module (`using { Materials.HexPlatforms }`)
-or constructing a `scoped{…}` class (`EP_Weapon_Pistol{}`) from another module.
-Only top-level Assets modules are importable; scoped classes are usable only in
-their own scope.
+or constructing a prefab (`EP_Weapon_Pistol{}`) that sits in a nested asset
+folder, from another module. Assets.digest generates asset folder modules with
+no access specifier (internal); the `scoped{…}` prefab class itself is scoped to
+the whole island and is fine.
 
-Fix: move the asset up to a top-level Content folder (or a folder the digest
-exposes as `<public>`), rebuild, `search_verse_digest` the new path, then import
-that. For your own modules, add `<public>` to the module declaration.
+Fix: declare each folder on the path `<public>` in a file of the folder that
+contains it (normally `module_declarations.verse`), rebuild, then import:
+
+```verse
+# Content/Verse/module_declarations.verse — prefabs in Content/Verse/ArmoryWeapons
+ArmoryWeapons<public> := module:
+```
+
+Same for your own nested code folders. Full rule: `modules` → "Make a folder
+`<public>`". Moving the asset to a top-level folder also works but breaks every
+existing reference to it.
 
 ### 3588 / 3532 — "Ambiguous identifier; could be (…:)Distance, (/Verse.org/SpatialMath:)Distance" (9 hits)
 

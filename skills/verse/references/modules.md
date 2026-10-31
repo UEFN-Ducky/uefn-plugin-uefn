@@ -1,5 +1,5 @@
 ---
-description: "Project structure — module declarations, using {} imports (engine paths vs project modules), how folders map to modules, and cross-file references"
+description: "Project structure — module declarations, using {} imports (engine paths vs project modules), how folders map to modules, making nested and asset folders <public> (Script error 3593), and cross-file references"
 metadata:
   order: 11
   label: "Modules, using & file layout"
@@ -19,7 +19,7 @@ module/type names below are generic placeholders — name yours to fit your proj
 
 | Allowed at Verse root | Everything else |
 |----------------------|-----------------|
-| `module_declarations.verse` (optional; only for modules without a folder) | One **system folder** per concern |
+| `module_declarations.verse` (optional; module blocks + `<public>` folder declarations) | One **system folder** per concern |
 | Tiny shared `helpers.verse` (optional) | Devices, managers, HUD builders, shops, … |
 
 Canonical template folders (use these names when they fit):
@@ -90,18 +90,17 @@ Rules of thumb:
 | `/Verse.org/Random` | `GetRandomInt`, random selection |
 | `/Verse.org/Colors` (+ `/NamedColors`) | `color`, named colors |
 
-### Folders ARE modules — do not declare them twice
+### Folders ARE modules
 
 Every folder under `Content/Verse` is **implicitly** a module named after the
 folder, and a `.verse` file's code belongs to the module of the folder it sits in
 (`Verse/PlayerCore/*.verse` → `using { PlayerCore }`;
 `Verse/GameDevices/Gameplay/*.verse` → `using { GameDevices.Gameplay }`). This is
 how every shipped template pack works: no `:= module` line anywhere, just folders.
+Top-level `Verse/*` folders reach each other with no declaration.
 
-**Do not** also write `PlayerCore <public> := module:` in `module_declarations.verse`
-for a folder that exists — that is a duplicate definition. Reserve explicit
-`Name := module:` blocks for **sub-modules inside one file** (grouping helpers) or
-for a module that has no folder:
+Explicit `Name := module:` blocks are for **sub-modules inside one file**
+(grouping helpers), a module that has no folder, or making a folder public:
 
 ```verse
 # inside a single file, optional grouping
@@ -112,9 +111,39 @@ Helpers<public> := module:
 - Only `<public>` members cross folder/module boundaries — mark them explicitly.
 - Reference a nested folder by dotted path in `using`:
   `using { GameDevices.Gameplay.UI }`.
-- Assets-digest modules (materials, meshes, prefabs) follow the same rule but only
-  the **top-level** Content folder is importable; nested asset folders are
-  `internal` (E3593) — move the asset up or import the top-level module.
+
+### Make a folder `<public>` when another folder cannot reach it (Script error 3593)
+
+Declare the folder `<public>` in a `.verse` file of the folder **that contains
+it** — normally `module_declarations.verse` — nesting the path down from that
+file's folder. It merges with the real folder; it is **not** a duplicate
+definition (an island declaring 37 existing folders this way builds clean).
+
+```verse
+# Content/Verse/module_declarations.verse
+ArmoryWeapons<public> := module:          # Content/Verse/ArmoryWeapons (prefab assets)
+GameDevices<public> := module:
+    Gameplay<public> := module:
+        UI<public> := module:             # Content/Verse/GameDevices/Gameplay/UI
+```
+
+```verse
+# Content/modules.verse — for folders beside Verse/ (Content/SceneGraph/CustomWeapons)
+SceneGraph<public> := module:
+    CustomWeapons<public> := module:
+```
+
+- Never put the declaration inside the folder it names — a file in
+  `Verse/PlayerCore/` declaring `PlayerCore<public> := module:` creates
+  `PlayerCore.PlayerCore`.
+- **Asset folders need it.** Assets.digest generates every asset folder module
+  with no access specifier (`Materials := module:`), so a nested folder of
+  materials, meshes or prefabs (`EP_*`) gives 3593 from your code until each
+  folder on its path is declared `<public>`. The asset classes themselves are
+  `<scoped>` to the whole island and need nothing. Custom weapons:
+  `sys_owned_weapons`.
+- Build Verse after adding the declaration, then `search_verse_digest` the
+  asset to copy its exact path.
 
 ### Cross-file references
 

@@ -5,7 +5,7 @@ description: "Writing Verse source — syntax, effects (no_rollback/transacts/de
 license: MIT
 metadata:
   label: UEFN Verse
-  version: 51
+  version: 52
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -166,7 +166,7 @@ Load the closest 1–3 for the task:
   Load when: A screen must be built in Verse code — canvas, overlay, stack_box, text_block, texture_block, alignment or slots
 - `references/sys_canvas_cookbook.md` — Verse canvas cookbook (code-built fallback to the Verse UI Kit) — shop, inventory, HUD, modal, grid compositions that show visually, custom buttons only, visibility checklist, drive from any Services manager
   Load when: Creating any Verse canvas UI — shop, inventory, HUD, modal menu, tabbed panel, item grid, progress bar, or dynamic cell board that must show on screen
-- `references/modules.md` — Project structure — module declarations, using {} imports (engine paths vs project modules), how folders map to modules, and cross-file references
+- `references/modules.md` — Project structure — module declarations, using {} imports (engine paths vs project modules), how folders map to modules, making nested and asset folders <public> (Script error 3593), and cross-file references
   Load when: Organizing code across files — module declarations, using imports, or referencing a type/manager defined in another folder
 - `references/sys_architecture.md` — The backbone for building ANY player-driven game system — manager device + game_player + manager bundle + weak_map, and how the pieces plug together
   Load when: Designing or extending any game system (score, economy, progression, stats…) — how player_manager, game_player, Services and persistence fit together
@@ -209,8 +209,8 @@ Load the closest 1–3 for the task:
   Load when: Tracking playtime, first/last login, session duration, offline elapsed time, or real-world timestamps across sessions
 - `references/sys_inventory.md` — Per-player inventory — persistable item entry arrays, immutable add/remove, quantity checks, re-granting physical items on load, and per-entry persist vs reset flags (soft bags + Creative granters; Armory prefab → scenegraph `custom_weapons`; owned collectible + canvas shop → `sys_owned_weapons`; custom items → scenegraph `custom_items`; template abilities → scenegraph `template_abilities`)
   Load when: Building a per-player item inventory, owned-collection, stackable items, re-granting items on join, or persist vs session-reset item flags
-- `references/sys_owned_weapons.md` — Owned custom firearms — persist, collectible_object_device pickup, WaitForInventory, AddItemDistribute then GetParentInventory/PickUp/Equip, canvas shop, rejoin; Item Granter cannot grant EP_*
-  Load when: Custom player weapons that save, pick up via collectible_object_device, canvas-shop, upgrade, restore on rejoin, or pick a collectible and shoot
+- `references/sys_owned_weapons.md` — Owned custom firearms — persist ownership, one WeaponId → prefab registry, public prefab folder (E3593), WaitForInventory, fresh grant then GetParentInventory/PickUp/Equip, load on join, collectible_object_device pickup, canvas shop; Item Granter / Spawner / Save Point cannot handle EP_*
+  Load when: Custom player weapons that save, load on join, pick up via collectible_object_device, canvas-shop, upgrade, restore on rejoin, or pick a collectible and shoot; EP_* from another folder (Script error 3593)
 - `references/sys_hud_template.md` — Any-manager display template — *_canvas_builder, ShowHUD/RemoveHud, shop rows, inventory slots, progress bars; driven by any Services manager
   Load when: Creating per-player on-screen UI for any manager — wallet, XP, shop rows, inventory slots, tabs, progress bars — canvas_builder and ShowHUD
 - `references/sys_input_devices.md` — Input devices — input_trigger_device Register/Unregister, Pressed/Released, held-key repeat, UI buttons vs Creative triggers

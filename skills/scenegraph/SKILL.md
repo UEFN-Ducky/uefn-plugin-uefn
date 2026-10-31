@@ -5,7 +5,7 @@ description: "UEFN Scene Graph — use when the task is entities, components, or
 license: MIT
 metadata:
   label: "UEFN Scene Graph"
-  version: 24
+  version: 25
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -169,9 +169,12 @@ free-text hunts, `list_verse_modules` for the module map.
   way — never a custom punch montage. Recipes: `itemization`. **Custom player firearms** are Entity
   Prefabs from `/Fortnite.com/Armory` templates (`assault_rifle_template`,
   pistol / shotgun / SMG) with `fort_trace_weapon_component` — mesh swap,
-  tuning, and Verse grant/equip/clear/mutate: `custom_weapons`. Owned persist +
-  `collectible_object_device` pickup + canvas shop + rejoin: verse
-  `sys_owned_weapons`.
+  tuning (`ShotAmmoCost` 0 = no ammo), skins as extra prefabs, and Verse
+  grant/equip/clear/mutate by prefab type: `custom_weapons`. Owned persist +
+  load on join + `collectible_object_device` pickup + canvas shop: verse
+  `sys_owned_weapons`. `EP_*` from another folder needs the prefab folder
+  declared `<public>` (Script error 3593); Item Granter / Spawner / Save Point
+  do not handle custom prefabs.
   **Custom non-weapon items** are blank Entity Prefabs with an itemization
   shell (`item_component` + pickup/description/icon/mesh) plus **your Verse
   components** for any equipped/dropped behavior (categories/stack/rarity,
@@ -240,7 +243,7 @@ Load with `skill_read_subskill("scenegraph", "<id>")`:
 - `prefab_only` — prefab-asset-first hard rules, MCP level-vs-tab limit, banned repackage, orbit recipe
 - `movement_transforms` — why it isn't moving: local vs global, origins/attach, full KFM API, LUF axes, known transform bugs
 - `itemization` — items and inventories, granting stock weapons from `/Fortnite.com/Weapons`, pickups, equipping
-- `custom_weapons` — custom Armory Entity Prefabs (AR/pistol/shotgun/SMG), mesh/pivot/collision, `fort_trace_weapon_component`, Verse grant: poll until `GetFirstInventory[Agent]` succeeds (a `Sleep(0.1)` loop you write — not an API) + AddItemDistribute then GetParentInventory/PickUp/Equip (not AddResult.Ok). Owned collectible + canvas shop + persist → verse `sys_owned_weapons`
+- `custom_weapons` — custom Armory Entity Prefabs (AR/pistol/shotgun/SMG), mesh/pivot/collision, `fort_trace_weapon_component`, Verse grant: poll until `GetFirstInventory[Agent]` succeeds (a `Sleep(0.1)` loop you write — not an API) + AddItemDistribute then GetParentInventory/PickUp/Equip (not AddResult.Ok); stat ranges, infinite ammo, rarity, skins, upgrades from base values, find held guns by prefab type. Owned collectible + canvas shop + persist + load on join → verse `sys_owned_weapons`
 - `custom_items` — fully custom non-weapon Entity Prefabs: itemization shell + Verse components for any behavior, categories/stack/rarity, KFM, equipped logic, Verse grant (no Creative granter yet)
 - `cameras` — Scene Graph camera components (perspective/orthographic/physical), `camera_director_component.AddCamera[...]`, the `camera_modifier` stack (`AddModifier(...)` has NO `<decides>`), `fort_orbit` / `fort_fixed_angle` / `fort_fixed_point` modifiers with full field tables, enter/exit transitions + blends, why `camera_state` and `mesh_component` are `epic_internal`. All Experimental.
 - `custom_player_controller` — fully custom locomotion on an entity: 42.10 `Move`/`Jump` on `TraversalMapping`, `OnSimulate` + `Sleep(0.0)` delta loop (tick subscribe is `epic_internal`), editable speed/accel/friction/gravity/jump, orbit camera install, stock character in stasis; compiled templates via `verse_template_apply("custom_movement")`
