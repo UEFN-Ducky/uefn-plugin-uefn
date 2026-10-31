@@ -1,6 +1,7 @@
 # SETUP: Place ONE player_manager in the level. Wire AllPlayerSpawners (one pad per MaxPlayers).
 # Connection slots (?option): Economy / Progression / Playtime register themselves from their packs.
 # Consumers: if (Wallet := PlayerManager.GetCurrencyProvider()?): …
+# Per-player slot (lane, plot, seat, HUD row): if (Slot := PlayerManager.GetPlayerSlot[Agent]): …
 using { /Verse.org/Simulation }
 using { /Fortnite.com/Devices }
 using { /Fortnite.com/Game }
@@ -35,6 +36,7 @@ player_manager <public> := class(creative_device):
     var PlayerConnectedToGame <private> : []player_connected_to_game = array{}
     var PlayerRemovedFromGame <private> : []player_removed_from_game = array{}
     var EliminationEvents <private> : []elimination_event = array{}
+    var PlayerSlots <private> : [agent]int = map{}
 
     # Optional cross-pack slots — filled by feature pack devices on OnBegin
     var Currency <private> : ?currency_provider = false
@@ -76,6 +78,7 @@ player_manager <public> := class(creative_device):
         else:
             NewGamePlayer : game_player = game_player{MyAgent := NewAgent}
             if (set AllPlayers[NewAgent] = NewGamePlayer):
+                AssignSlot(NewAgent)
                 NewGamePlayer.Init(NewAgent)
                 for (ConnectEvent : PlayerConnectedToGame):
                     ConnectEvent(NewGamePlayer)
@@ -91,6 +94,7 @@ player_manager <public> := class(creative_device):
             for (Key -> Value : AllPlayers, Key <> OutAgent):
                 if (set TempAllPlayers[Key] = Value) {}
             set AllPlayers = TempAllPlayers
+            ReleaseSlot(OutAgent)
 
     OnEliminated<private>(Result : elimination_result) : void =
         Eliminator := Result.EliminatingCharacter
@@ -124,6 +128,25 @@ player_manager <public> := class(creative_device):
             return option{MyPlayer}
         else:
             return false
+
+    # Lowest free slot (0, 1, 2, …) given on join and freed on leave, so systems index
+    # their per-player device arrays instead of each finding "a free one". Fails for unknown agents.
+    GetPlayerSlot<public>(Agent : agent)<transacts><decides> : int = PlayerSlots[Agent]
+
+    AssignSlot<private>(Agent : agent) : void =
+        if (not PlayerSlots[Agent]):
+            FreeSlots := for (Candidate := 0..PlayerSlots.Length, not IsSlotTaken[Candidate]) do Candidate
+            if (Slot := FreeSlots[0], set PlayerSlots[Agent] = Slot) {}
+
+    IsSlotTaken<private>(Slot : int)<transacts><decides> : void =
+        Holders := for (Holder -> Taken : PlayerSlots, Taken = Slot) do Holder
+        Holders.Length > 0
+
+    ReleaseSlot<private>(Agent : agent) : void =
+        var Remaining : [agent]int = map{}
+        for (Holder -> Slot : PlayerSlots, Holder <> Agent):
+            if (set Remaining[Holder] = Slot) {}
+        set PlayerSlots = Remaining
 
     GetRandomPlayerSpawner<public>()<transacts> : ?player_spawner_device =
         if (AllPlayerSpawners.Length > 0):

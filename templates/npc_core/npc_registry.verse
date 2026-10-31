@@ -69,21 +69,10 @@ MarkPreyDowned<public>(Agent : agent, UntilTime : float) : void =
     Session := GetSession()
     Agents := GetDownedAgents()
     Untils := GetDownedUntilTimes()
-    var NextAgents : []agent = array{}
-    var NextUntils : []float = array{}
-    var Replaced : logic = false
-    for (Idx := 0..Agents.Length - 1):
-        if (A := Agents[Idx], U := Untils[Idx]):
-            if (A = Agent):
-                set NextAgents += array{Agent}
-                set NextUntils += array{UntilTime}
-                set Replaced = true
-            else:
-                set NextAgents += array{A}
-                set NextUntils += array{U}
-    if (Replaced = false):
-        set NextAgents += array{Agent}
-        set NextUntils += array{UntilTime}
+    # Everyone else's entry, then this agent's (added or replaced).
+    Keep := for (Index -> Other : Agents, Other <> Agent, Until := Untils[Index]) do Index
+    NextAgents := (for (Index : Keep, Other := Agents[Index]) do Other) + array{Agent}
+    NextUntils := (for (Index : Keep, Until := Untils[Index]) do Until) + array{UntilTime}
     if (set DownedAgents[Session] = NextAgents) {}
     if (set DownedUntilTimes[Session] = NextUntils) {}
 
@@ -91,12 +80,9 @@ ClearPreyDowned<public>(Agent : agent) : void =
     Session := GetSession()
     Agents := GetDownedAgents()
     Untils := GetDownedUntilTimes()
-    var NextAgents : []agent = array{}
-    var NextUntils : []float = array{}
-    for (Idx := 0..Agents.Length - 1):
-        if (A := Agents[Idx], U := Untils[Idx], A <> Agent):
-            set NextAgents += array{A}
-            set NextUntils += array{U}
+    Keep := for (Index -> Other : Agents, Other <> Agent, Until := Untils[Index]) do Index
+    NextAgents := for (Index : Keep, Other := Agents[Index]) do Other
+    NextUntils := for (Index : Keep, Until := Untils[Index]) do Until
     if (set DownedAgents[Session] = NextAgents) {}
     if (set DownedUntilTimes[Session] = NextUntils) {}
 
@@ -112,36 +98,24 @@ IsPreyDownedAt<public>(Agent : agent, Now : float)<transacts> : logic =
 
 RegisterPreyAgent<public>(Agent : agent) : void =
     Session := GetSession()
-    Current := GetPreyAgents()
-    var Next : []agent = array{Agent}
-    for (Existing : Current, Existing <> Agent):
-        set Next += array{Existing}
-    if (set ActivePreyAgents[Session] = Next) {}
+    Others := for (Existing : GetPreyAgents(), Existing <> Agent) do Existing
+    if (set ActivePreyAgents[Session] = array{Agent} + Others) {}
 
 UnregisterPreyAgent<public>(Agent : agent) : void =
     Session := GetSession()
-    Current := GetPreyAgents()
-    var Next : []agent = array{}
-    for (Existing : Current, Existing <> Agent):
-        set Next += array{Existing}
-    if (set ActivePreyAgents[Session] = Next) {}
+    Remaining := for (Existing : GetPreyAgents(), Existing <> Agent) do Existing
+    if (set ActivePreyAgents[Session] = Remaining) {}
     ClearPreyDowned(Agent)
 
 RegisterHunterAgent<public>(Agent : agent) : void =
     Session := GetSession()
-    Current := GetHunterAgents()
-    var Next : []agent = array{Agent}
-    for (Existing : Current, Existing <> Agent):
-        set Next += array{Existing}
-    if (set ActiveHunterAgents[Session] = Next) {}
+    Others := for (Existing : GetHunterAgents(), Existing <> Agent) do Existing
+    if (set ActiveHunterAgents[Session] = array{Agent} + Others) {}
 
 UnregisterHunterAgent<public>(Agent : agent) : void =
     Session := GetSession()
-    Current := GetHunterAgents()
-    var Next : []agent = array{}
-    for (Existing : Current, Existing <> Agent):
-        set Next += array{Existing}
-    if (set ActiveHunterAgents[Session] = Next) {}
+    Remaining := for (Existing : GetHunterAgents(), Existing <> Agent) do Existing
+    if (set ActiveHunterAgents[Session] = Remaining) {}
 
 FindNearestPlayer<public>(Behavior : npc_behavior, FortChar : fort_character, DetectionRange : float)<transacts> : ?fort_character =
     var Best : ?fort_character = false

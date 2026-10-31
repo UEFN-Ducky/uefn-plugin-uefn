@@ -78,12 +78,14 @@ those arrays (see `sys_rounds_timers`):
 var TeamA : []agent = array{}
 var TeamB : []agent = array{}
 
+# First half to team A, the rest to team B. Index * 2 avoids int / int (a failable rational).
 AssignRoles(Players : []agent) : void =
-    for (Index -> P : Players):
-        if (Index < Players.Length / 2):
-            set TeamA += array{P};  ConfigureAsTeamA(P)
-        else:
-            set TeamB += array{P};  ConfigureAsTeamB(P)
+    set TeamA = for (Index -> Player : Players, Index * 2 < Players.Length) do Player
+    set TeamB = for (Index -> Player : Players, Index * 2 >= Players.Length) do Player
+    for (Player : TeamA):
+        ConfigureAsTeamA(Player)
+    for (Player : TeamB):
+        ConfigureAsTeamB(Player)
 ```
 
 Give each side a `struct<concrete>` bundle of its devices (`team_a_devices`,

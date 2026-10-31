@@ -58,6 +58,13 @@ item_config := class<concrete>():
 Same guard and rebuild pattern as currency:
 
 ```verse
+# The entry with Amount added when it is ItemId; any other entry unchanged.
+AddToEntry(Entry : inventory_entry, ItemId : string, Amount : int)<transacts> : inventory_entry =
+    if (Entry.ItemId = ItemId):
+        inventory_entry{ItemId := ItemId, Quantity := Entry.Quantity + Amount}
+    else:
+        Entry
+
 AddItem(Agent : ?agent, ItemId : string, Amount : int) : void =
     if:
         RealAgent := Agent?
@@ -65,22 +72,15 @@ AddItem(Agent : ?agent, ItemId : string, Amount : int) : void =
         Player.IsActive[]
         OldTable := PlayerStatsMap[Player]
     then:
-        var Updated : []inventory_entry = array{}
-        var Found : logic = false
-        for (Entry : OldTable.PlayerInventory.Entries):
-            if (Entry.ItemId = ItemId):
-                set Found = true
-                set Updated += array{inventory_entry{
-                    ItemId := ItemId
-                    Quantity := Entry.Quantity + Amount
-                }}
-            else:
-                set Updated += array{Entry}
-        if (Found = false):
-            set Updated += array{inventory_entry{ ItemId := ItemId, Quantity := Amount }}
-        NewInv := player_inventory{ Entries := Updated }
+        Old := OldTable.PlayerInventory.Entries
+        Known := for (Entry : Old, Entry.ItemId = ItemId) do Entry
+        Bumped := for (Entry : Old) do AddToEntry(Entry, ItemId, Amount)
+        Updated := if (Known.Length > 0) then Bumped else Old + array{inventory_entry{ItemId := ItemId, Quantity := Amount}}
+        NewInv := player_inventory{Entries := Updated}
         if (set PlayerStatsMap[Player] = UpdateInventory(OldTable, NewInv)) {}
 ```
+
+Arrays are built with for-expressions, never `+=` inside a loop (`datatypes`).
 
 `UpdateInventory` must copy **every** other nested field on the shared table.
 Remove: subtract; drop the entry at zero (or clamp). Always guard `set` in `if`.

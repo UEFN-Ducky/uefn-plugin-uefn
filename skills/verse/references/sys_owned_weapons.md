@@ -196,10 +196,8 @@ WaitForInventory<public>(Agent : agent)<suspends> : logic =
 ClearOwnedGun<public>(Agent : agent, WeaponId : string) : void =
     Class := ArmoryClassOf(WeaponId)
     if (Inventory := GetFirstInventory[Agent]):
-        var ToRemove : []entity = array{}
-        for (Item : Inventory.FindItems()):
-            if (IsArmoryClassEntity(Item, Class) = true):
-                set ToRemove += array{Item}
+        # Collect first, then remove: never change an inventory while iterating it.
+        ToRemove := for (Item : Inventory.FindItems(), IsArmoryClassEntity(Item, Class) = true) do Item
         for (Item : ToRemove):
             if (IC := Item.GetComponent[item_component], Parent := IC.GetParentInventory[]):
                 Parent.RemoveItem(Item)

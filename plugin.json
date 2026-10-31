@@ -1363,7 +1363,7 @@
         "id": "player_core",
         "name": "Player Core",
         "icon": "\ud83d\udc64",
-        "description": "player_manager + game_player + save_service. ?option slots for Economy / Progression / Playtime.",
+        "description": "player_manager + game_player + save_service. ?option slots for Economy / Progression / Playtime; per-player slot index (GetPlayerSlot).",
         "folder": "PlayerCore",
         "connects": [
           "registers:currency_provider",
