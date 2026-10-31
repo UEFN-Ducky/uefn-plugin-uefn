@@ -1,27 +1,27 @@
 ---
-description: "Async vs synchronous Verse — what <suspends> means, structured concurrency (sync / race / rush / branch vs spawn), Sleep/Await, event subscriptions, and the rules for calling async code"
+description: "Async vs synchronous Verse — what <suspends> means, task lifetimes (spawn / branch / sync / race / rush), stop events, defer cleanup, task(t), Sleep/Await, loop rules, event subscriptions, and the rules for calling async code"
 metadata:
   order: 5
-  label: "Async & structured concurrency — suspends, sync, race, rush, branch, spawn"
+  label: "Async & structured concurrency — suspends, lifetimes, stop events, defer"
   default_enabled: false
-  load_condition: "Anything time-based or event-driven — loops with Sleep, spawn, branch, race, sync, rush, Await, waiting on events, or 'is this function async?'"
+  load_condition: "Anything time-based or event-driven — loops with Sleep, spawn, branch, race, sync, rush, defer, Await, stopping a loop when a player leaves, waiting on events, or 'is this function async?'"
 ---
 
 ## Async vs synchronous — the `<suspends>` model
 
 **The one rule that decides everything: a function is async iff it carries the
 `<suspends>` effect.** Async code can pause (across frames/seconds) and resume;
-sync code runs to completion in a single instant.
+sync ("immediate") code runs to completion in a single instant.
 
 ### What is async (`<suspends>`)
 
 A `<suspends>` function may `Sleep`, `Await` events, and call other `<suspends>`
-functions. It is how time passes.
+functions. Calling one from another **waits** for it to finish.
 
 ```verse
 OnBegin<override>()<suspends> : void =        # the entry point IS async
     Trigger.TriggeredEvent.Subscribe(OnActivated)
-    branch{ GameLoop() }                      # background loop tied to OnBegin's scope
+    spawn{ GameLoop() }                       # lives as long as the device
 
 GameLoop()<suspends> : void =
     loop:
@@ -31,51 +31,67 @@ GameLoop()<suspends> : void =
 
 | Call | Does |
 |------|------|
-| `Sleep(Seconds : float)<suspends>` | Pause this coroutine for N seconds. `Sleep(0.0)` yields one frame. |
-| `SomeEvent.Await()` | Block until the event fires once. `GetPlayspace().PlayerRemovedEvent().Await()` |
-| `spawn{ F() }` | Start `F` as an **independent** task; lifetime is **not** tied to the caller. |
-| `branch{ F() }` / `branch:` | Start `F` in the background; **cancelled when the enclosing scope exits**. |
-| `sync:` | Run every block concurrently; completes when **all** finish; evaluates to a tuple of their results. |
-| `race:` | Run every block concurrently; completes when the **first** finishes; **cancels** the rest. |
-| `rush:` | Run every block concurrently; completes when the **first** finishes; the rest **keep running** in the background. |
+| `Sleep(Seconds : float)<suspends>` | Pause this task for N seconds. `Sleep(0.0)` yields one frame. |
+| `SomeEvent.Await()` | Wait until the event fires once; returns its payload. `Agent := Button.InteractedWithEvent.Await()` |
+| `F()` inside `<suspends>` code | Runs F and waits for it. |
 
 ### What is NOT async
 
-Plain functions and those marked `<transacts>` / `<computes>` are synchronous —
+Plain functions and those marked `<transacts>` / `<computes>` are immediate —
 they **cannot** `Sleep` or `Await`, and they return in the same instant.
 
 ```verse
-TakeDamage<public>(Damage : float)<transacts> : logic = …   # sync, rollback-safe
-GetCount<public>()<transacts> : int = Count                 # sync getter
-BuyWithCurrency(Agent : agent) : void = …                   # sync event handler
+TakeDamage<public>(Damage : float)<transacts> : logic = …   # immediate, rollback-safe
+GetCount<public>()<transacts> : int = Count                 # immediate getter
+BuyWithCurrency(Agent : agent) : void = …                   # immediate event handler
 ```
 
-Event **handlers** you pass to `.Subscribe` are ordinary (sync) functions. If a
-handler needs to wait, it starts an async task (below).
+Event **handlers** you pass to `.Subscribe` are immediate functions. If a handler
+needs to wait, it starts a task with `spawn`.
 
 ### The calling rules (this is where compiles fail)
 
-1. A `<suspends>` call is only legal **inside another `<suspends>` context** — or
-   inside a `spawn{}` / `branch{}` / `sync:` / `race:` / `rush:` block.
-2. A `<suspends>` call can never sit in a failure context (`if (…)` head, `[]`).
-3. To kick off async work from a **sync** function (like a subscribe handler), wrap
-   it in `spawn`:
+1. A `<suspends>` call is only legal inside another `<suspends>` function or inside
+   a `spawn{}` block. Otherwise: "has a suspends effect, which is not allowed in an
+   immediate context".
+2. **An immediate function can only use `spawn`.** `branch`, `sync`, `race` and
+   `rush` all need `<suspends>`.
+3. A `<suspends>` call can never sit in a failure context (`if (…)` head, `[]`).
 
 ```verse
-OnPlayerAdded(NewAgent : agent) : void =        # sync handler…
+OnPlayerAdded(NewAgent : agent) : void =        # immediate handler…
     spawn{ StartMouseTracking(NewAgent) }       # …launches async work
 ```
 
-4. `OnBegin<override>()<suspends>` is your async root — start persistent loops
-   from there.
+### Lifetimes — pick the tool by how long the work must live
 
-### Structured concurrency — the four blocks
+| Tool | Runs | Ends when | Allowed in | Use for |
+|------|------|-----------|------------|---------|
+| `F()` | one call | F finishes; the caller waits | `<suspends>` | steps in order |
+| `spawn{ F() }` | one call | F finishes, whatever the caller does | immediate or `<suspends>` | starting work from a handler; device-lifetime loops; per-player loops with a stop event |
+| `branch:` | several lines | the **enclosing function returns** — all branched work is killed | `<suspends>`, **not inside a `loop` / `for` body** | helpers that must die with a function that keeps running |
+| `sync:` | several arms | all arms finish; evaluates to a tuple of results | `<suspends>` | waiting for several things |
+| `race:` | several arms | the first arm finishes; the others are cancelled | `<suspends>` | "do X until Y happens" |
+| `rush:` | several arms | the first arm finishes; the others keep running **only until the enclosing function returns** | `<suspends>` | rarely useful — see below |
 
-Structured concurrency guarantees that every concurrent operation started inside a
-block is **managed and cleaned up before the block exits**. Prefer it over
-fire-and-forget `spawn` whenever the work belongs to a scope.
+`block:` groups several lines into one arm of `sync` / `race` / `rush`.
 
-**`sync:` — wait for all**
+**Default:** `spawn` plus a stop event (below) for anything that must keep going;
+`race` for "until". Use `branch` only when the function that owns it keeps running
+after it, for example:
+
+```verse
+RunRound()<suspends> : void =
+    branch:
+        HudCountdownLoop()           # killed automatically when RunRound returns
+    RoundEndedEvent.Await()          # keeps RunRound alive until the round ends
+```
+
+A `branch` at the end of `OnBegin` (or any function that then returns) dies at
+once — the loop never runs. Branch inside a loop body is rejected by the compiler
+("Branch is not currently supported in loops").
+
+### sync, race, rush
 
 ```verse
 StartBossFight()<suspends> : void =
@@ -84,14 +100,7 @@ StartBossFight()<suspends> : void =
         RevealBossAnimation()      # ~4 s
         PlayIntroMusic()           # 4 s
     EnableBossAI()                 # runs only after all three finished
-    Print("Fight!")
-```
 
-`sync` evaluates to a tuple of each block's result if you need them.
-
-**`race:` — first one wins, the rest are cancelled**
-
-```verse
 BoardGame()<suspends> : void =
     race:
         AwaitPlayerLeftGameEvent()   # if this finishes first…
@@ -99,45 +108,95 @@ BoardGame()<suspends> : void =
     CleanUpGame()
 ```
 
-The canonical use is "do X forever, but stop the instant Y happens".
-
-**`rush:` — first one wins, the rest keep going**
+**`rush` is not "finish in the background".** Its losing arms are cancelled the
+moment the function containing the `rush` returns. To let the slower work really
+finish, start it with `spawn` and race over the tasks — a race never cancels a
+spawned task:
 
 ```verse
 SaveProgress(P : player)<suspends> : void =
-    rush:
-        SaveToLocal(P)
-        SaveToCloud(P)               # still completes in the background
-    ShowSavedNotification()          # shown as soon as the faster save finished
+    LocalSave := spawn{ SaveToLocal(P) }
+    CloudSave := spawn{ SaveToCloud(P) }
+    race:
+        LocalSave.Await()
+        CloudSave.Await()
+    ShowSavedNotification()          # after the faster save; the other keeps going
 ```
 
-**`branch:` — background task owned by the scope**
+### Tasks
+
+`spawn` returns a `task(t)`, where `t` is the spawned function's return type. The
+type lives in `/Verse.org/Concurrency`. In 42.40 a task has only `Await()` — there
+is **no `Cancel()`**.
 
 ```verse
-RunRound()<suspends> : void =
-    branch:
-        HudCountdownLoop()           # cancelled automatically when RunRound returns
-    RoundEndedEvent.Await()
+using { /Verse.org/Concurrency }
+
+TimerTask : task(int) = spawn{ RunTimer(30) }   # inside a <suspends> function
+Seconds := TimerTask.Await()                    # waits, then returns RunTimer's result
 ```
 
-### `spawn` vs `branch` — pick by lifetime
+### Stopping work — the stop-event pattern
 
-| | `spawn{}` | `branch{}` |
-|--|-----------|------------|
-| Lifetime | Independent of the caller; keeps running after the function returns | Bound to the enclosing scope; cancelled when it exits |
-| Callable from | sync **or** async code | `<suspends>` code only |
-| Use for | Handlers that must start async work; device-lifetime loops from `OnBegin` | Loops and watchers that belong to one phase, round, menu, or player session |
+A race cancels its own arms, **not** a task you spawned and then awaited inside an
+arm: that task keeps running. To make long work stoppable, race against a stop
+event **inside** the task:
 
-Inside a `<suspends>` function, default to `branch`. Reach for `spawn` only when the
-task must outlive the current scope or when you are in a sync handler. A `spawn`
-returns a `task(t)` you can `Await`; it has **no** `Cancel()` — use `race` or
-`branch` when you need cancellation.
+```verse
+# One per player. Stop() ends the loop so the widget and its data can be freed.
+hud_updater := class:
+    StopEvent : event() = event(){}
+
+    Start() : void =
+        spawn{ UpdatePeriodically() }
+
+    Stop() : void =
+        StopEvent.Signal()
+
+    UpdatePeriodically()<suspends> : void =
+        race:
+            StopEvent.Await()
+            loop:
+                RefreshGold()
+                Sleep(1.0)
+```
+
+Signal the stop event when the player **leaves** and when they are **eliminated**
+mid-flow (`runtime_pitfalls` §5). A per-player loop left running after its player
+is gone keeps every object it references alive — a leak that grows each session.
+
+### Cleanup — `defer`
+
+`defer:` runs its block when the enclosing scope exits — on a normal return **and**
+when a `race` cancels it. It cannot call `<suspends>` functions (it can `spawn`).
+
+```verse
+using { /UnrealEngine.com/Temporary/SpatialMath }
+
+SpawnTempProp(Asset : creative_prop_asset, Duration : float)<suspends> : void =
+    SpawnResult := SpawnProp(Asset, transform{})   # tuple(?creative_prop, spawn_prop_result)
+    if (Prop := SpawnResult(0)?):
+        defer:
+            Prop.Dispose()                       # runs on return and on cancel
+        Sleep(Duration)
+```
+
+Without the `defer`, a prop spawned inside a race arm that loses is never disposed.
+
+### Loops
+
+- Every `loop` must wait (`Sleep`, an `Await`) or reach a `break`. A loop with
+  neither is rejected by the compiler; a loop whose only `break` can never run
+  (`if (false?): break`) **compiles but crashes Verse at runtime** by spinning in one
+  frame.
+- Code after an endless `loop` in the same function never runs. Put long-lived
+  loops in their own `<suspends>` function and `spawn` them.
 
 ### Subscribing to events (the async trigger surface)
 
 Which events have `.Subscribe` (listenable) and which only `.Await` (your own `event(t)`, UMG event fields — until 43.00): `events_subscriptions`.
 
-`.Subscribe(Handler)` registers a sync handler; the event calls it later. Two
+`.Subscribe(Handler)` registers an immediate handler; the event calls it later. Two
 shapes appear, depending on the API — an event **field** vs an event **accessor
 method** `()`:
 
@@ -151,8 +210,10 @@ FortChar.EliminatedEvent().Subscribe(OnEliminated)
 Which form (field vs `()` method) and which payload type an event uses comes from
 the **digest** — look it up. The handler's parameter must match the payload exactly
 (`SpawnedEvent` gives `agent`; `PlayerAddedEvent()` gives `player`;
-`input_trigger_device.ReleasedEvent` gives `tuple(agent, float)`). `.Subscribe`
-returns a `cancelable`; keep it if you plan to `Cancel()` later.
+`trigger_device.TriggeredEvent` gives `?agent`;
+`input_trigger_device.ReleasedEvent` gives `tuple(agent, float)`). Payload table:
+`devices`. `.Subscribe` returns a `cancelable`; keep it if you plan to `Cancel()`
+later.
 
 ### Passing extra data into a handler
 
@@ -160,16 +221,22 @@ returns a `cancelable`; keep it if you plan to `Cancel()` later.
 small wrapper class: a `<unique>` class that stores `ExtraData` plus your
 `OutputFunc`, and exposes an `InputFunc(Agent : agent)` (the subscribe shape) that
 calls `OutputFunc(Agent, ExtraData)`. Subscribe with the wrapper's `InputFunc`. The
-`subscribe_helpers` template pack ships these.
+`subscribe_helpers` template pack ships these; general function values and
+wrappers: `functions`.
 
 ### Anti-patterns
 
 | Wrong | Right |
 |-------|-------|
-| `Sleep` / `Await` in a non-`<suspends>` function | Add `<suspends>`, or move it into `spawn{}` / `branch{}` |
-| Calling a `<suspends>` fn directly from a sync handler | `spawn{ AsyncFn() }` |
-| `loop:` with no `Sleep`/`Await` | Yield every iteration (`Sleep(0.0)` at minimum) |
-| Expecting a value back from `spawn` | `sync`/`race`, or `Await` the task / an event |
-| Storing a `spawn` task to cancel it later | `race` against a stop event, or `branch` inside the owning scope |
-| `spawn` for a per-round/per-menu loop | `branch` so it dies with the scope |
+| `Sleep` / `Await` in a non-`<suspends>` function | Add `<suspends>`, or move it into `spawn{}` |
+| Calling a `<suspends>` fn directly from an immediate handler | `spawn{ AsyncFn() }` |
+| `branch{ Loop() }` as the last thing in `OnBegin` | `spawn{ Loop() }` — the branch dies when `OnBegin` returns |
+| `branch` inside a `loop` / `for` body | `spawn`, or restructure with `race` |
+| `rush` to "finish in the background" | `spawn` each job, race over `Task.Await()` |
+| `loop:` with no `Sleep`/`Await`/reachable `break` | Yield every iteration (`Sleep(0.0)` at minimum) |
+| Code after an endless loop in the same function | Spawn the loop from its own function |
+| Expecting a value back from `spawn` without awaiting | `Task.Await()`, `sync`, or an event |
+| Racing against `SpawnedTask.Await()` to stop it | Stop event raced **inside** the task |
+| Per-player loop with no stop on leave / elimination | Stop event signalled from both |
+| Cleanup at the end of a function that can be cancelled | `defer:` |
 | Guessing `.SomeEvent` vs `.SomeEvent()` or its payload type | Check the event's shape in the digest |

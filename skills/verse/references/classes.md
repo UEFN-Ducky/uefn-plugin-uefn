@@ -40,7 +40,7 @@ Specifiers and what each buys you:
 | Specifier | Meaning / when to use |
 |-----------|-----------------------|
 | `class(creative_device)` | **A placed device.** Subclass of `creative_device`; gets `OnBegin`, shows in UEFN with `@editable` fields. `player_manager := class(creative_device):` |
-| `class(tag)` | A **tag** for `GetCreativeObjectsWithTag` / prop queries. Empty body: `collectable_coins := class(tag){}` |
+| `class(tag)` | A **tag** for `FindCreativeObjectsWithTag(collectable_coins)` (pass the tag **type**; `GetCreativeObjectsWithTag` and the tag-instance overload are deprecated in 42.40). Write it `collectable_coins := class(tag){}` |
 | `class()` / `class:` | Plain class — a helper/manager you `new` yourself. `save_service := class():` |
 | `<concrete>` | **Every field has a default**, so it can be made with `{}` and used as an `@editable` struct or array element. `tower_data := class<concrete>():` |
 | `<unique>` | **Reference identity** — instances are distinct and comparable/allocated; needed for stateful helper objects. `game_player := class<unique>():` |
