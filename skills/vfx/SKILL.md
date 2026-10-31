@@ -5,7 +5,7 @@ description: "Niagara VFX in UEFN — assemble systems from stock modules via MC
 license: MIT
 metadata:
   label: "UEFN Niagara"
-  version: 12
+  version: 13
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true

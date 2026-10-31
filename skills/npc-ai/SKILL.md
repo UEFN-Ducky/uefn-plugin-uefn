@@ -5,7 +5,7 @@ description: "UEFN NPC AI exact recipes — character definitions, equipment/wea
 license: MIT
 metadata:
   label: "UEFN NPC AI & Enemies"
-  version: 14
+  version: 15
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
