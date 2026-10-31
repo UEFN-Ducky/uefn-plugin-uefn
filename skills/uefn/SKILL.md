@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 51
+  version: 52
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -41,6 +41,14 @@ otherwise). Scene Graph entities/components → Epic `ValkyrieToolset.EntityTool
 Verse build: `workspace_list_verse_errors` → `workspace_compile_verse` → wire; Epic
 `ValkyrieToolset.VerseToolset` BuildAll when `epic_mcp_online`. Save: one `save_current_level`
 at the end of a placement batch.
+
+**Placed-device traps (HARD):**
+- **Placed values win over code defaults.** Changing an `@editable` default in Verse does not change a device already in the level — `GetDeviceProperties` / `get_verse_editables` the placed one and `SetDeviceProperty` / `set_verse_editable` it too.
+- **Read start-up options on every device you place or reuse** — "add to players on start", "hide player character", "enabled at game start", priority. A camera or HUD added to every player at start stays on in the hub and hides players.
+- **Some things are only device settings**, never Verse: the crosshair/reticle, minimap and other HUD parts live on the **HUD Controller** (`GetDeviceProperties` → set it there). Template packs ship their own HUD — turn it off when the island has its own.
+- **A device type that won't take an `@editable` wire** → give it a Verse tag (`VerseTagMarkup` component with your `tag` class) and find it at runtime with `FindCreativeObjectsWithTag`.
+- **Unknown device features:** `GetDeviceProperties` the full list once, change one setting, verify, then the next — never guess property names across rounds.
+- **Non-experimental only?** Check each API/device is out of Experimental **before** designing around it — an experimental feature blocks publishing.
 
 Work loop: **find → inspect → write → verify → `save_current_level`**.
 Code/behavior changes live in `Verse/**/*.verse` on disk (workspace tools — works with the listener **offline**). Creative-device place/edit and PIC need Epic MCP; VerseDevice `@editable` wires still use Ducky `inspect_verse_device` / `wire_verse_device_ref`. Never poll status tools waiting for the listener.
@@ -112,4 +120,4 @@ This guide is already in your context — do **not** call `uefn_skill` to re-fet
 
 ## Verify
 
-After wiring or placement: `get_verse_editables` / `GetDeviceProperties` / `take_high_res_screenshot`. Do not claim done without that read-back.
+After wiring or placement: `get_verse_editables` / `GetDeviceProperties` / `take_high_res_screenshot`. Do not claim done without that read-back. Gameplay behaviour needs one short live session too (`uefn-logs` mark → play → capture). Another agent on the same island: check its files before big edits — one owner per file, or the build breaks and work is overwritten. When a session character moves without your input, the person is playing: stop driving it.

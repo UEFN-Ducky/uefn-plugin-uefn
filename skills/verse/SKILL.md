@@ -5,7 +5,7 @@ description: "Writing Verse source — syntax, effects (no_rollback/transacts/de
 license: MIT
 metadata:
   label: UEFN Verse
-  version: 52
+  version: 53
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -30,6 +30,8 @@ SERIAL: one mutating/editor call per assistant message. and `creative_devices`.
 **Never invent API names.** Copy names and signatures from a loaded skill or template as-is; for any name no loaded skill shows, `search_verse_digest` once — if it is in no digest it is almost certainly invented (`Log10`, `MoveToLocation`, `team_selector`, `timer_device.Reset` do not exist). Exception: core intrinsics `Abs`, `ConcatenateMaps`, `Max`, `Min` are not listed in the digests yet compile — the build's "Unknown identifier" is the final word. Epic doc samples also omit `using` lines; add them. Budget ~5 lookups per task, then write.
 
 **Effects decide whether your code compiles (HARD):** a function with **no effect specifier is `no_rollback`** and cannot be called inside `if (…)`, `if:`, `for` filters, `[]`, or a `<decides>` body. Give every getter/helper `<transacts>`; pair `<decides>` with `<transacts>`; field initialisers are literals only; `int / int` is failable and `rational`; never name a binding `Distance`. These four rules were 72 % of all real compile errors. Details: `effects`; fixes by error code: `compile_errors`.
+
+**Compiles clean ≠ plays right (HARD):** Verse runs on the server, so motion it writes every tick is choppy on clients — glide with `keyframed_movement_component` / device `MoveTo(Pos, Rot, Seconds)` on a ~10 Hz visual clock aimed one step ahead; carry a player in a `chair_device` moved by `MoveTo`, never `TeleportTo` each tick (seated players can't be teleported — `Eject` first). Split big builds (`Sleep(0.0)`, one piece per tick) or the runtime computation limit kills the device; share one material per colour and pool spawned entities. Debounce handlers subscribed to several sources, gate menus against gameplay keys, clean up on `EliminatedEvent`, give each player their own slot and never reset shared state when one starts. Details + done checklist: `runtime_pitfalls`.
 
 **Concurrency:** inside `<suspends>` code use `branch` (cancelled with the scope), `race` (first wins, rest cancelled), `sync` (all), `rush` (first wins, rest continue); `spawn` only from sync handlers or for device-lifetime loops. Details: `async`.
 
@@ -125,6 +127,10 @@ my_device := class(creative_device):
 | Guess a device / asset / function name | Copy it from a loaded skill, else `search_verse_digest` once |
 | Helper with no effect called inside `if (…)` | `<transacts>` on the helper, or bind to a local first |
 | Wire `@editable` refs right after writing Verse | `workspace_compile_verse` first, then wire |
+| `TeleportTo` / `SetGlobalTransform` every tick for visuals or a carried player | Keyframed glide / `MoveTo` on a slower clock; carried player in a moved `chair_device` (`runtime_pitfalls`) |
+| `MakeMaterial()` per mesh, spawn/dispose effects in bursts | One cached material per colour; a hide/re-show pool |
+| Build the whole level in one `OnBegin` pass | `Sleep(0.0)` every N items or one piece per tick |
+| Call a gameplay change done after a clean build | One short live run with tagged `Print`s — the build proves syntax, not behaviour |
 | Treat a clean `workspace_list_verse_errors` as "it compiles" | It is syntax-only; the build finds effect/module errors |
 | `spawn` a per-round loop inside `<suspends>` code | `branch` (dies with the scope) or `race` against the end event |
 | `// comment` | `#` comment |
@@ -144,6 +150,8 @@ Load the closest 1–3 for the task:
   Load when: Writing non-trivial Verse — control flow, classes/structs, options/failure, or concurrency
 - `references/compile_errors.md` — Compiler error catalogue: Script error code → real cause → compiling fix (3512, 3582, 3593, 3588, 3104, 3506, 3509, 3524, 3511, 3514, 3100, 9002) plus tool-side "STALE REFLECTION"
   Load when: workspace_compile_verse or the UEFN build reported a Script error, or workspace_list_verse_errors names a file
+- `references/runtime_pitfalls.md` — Compiles clean, plays wrong: server-only motion, chair vs teleport, computation limit, shared materials and pools, debounce, menu key gates, elimination cleanup, per-player state, done checklist
+  Load when: Anything that ticks, moves players/props/entities, spawns many entities, handles input/menus, or must work for several players — and before calling gameplay done
 - `references/classes.md` — How to declare classes, structs, enums, interfaces — every specifier, members, methods, subclassing, parametric types
   Load when: Creating or subclassing a class/struct/enum/interface, or unsure which class specifier (<concrete>/<unique>/<final>/<persistable>) to use
 - `references/control_flow.md` — Control flow — if / else, the if:/then:/else: block form, all for-loop shapes, loop/break, case, and how failure drives branching
@@ -256,4 +264,4 @@ Load the closest 1–3 for the task:
 
 ## Verify
 
-`workspace_list_verse_errors` then `workspace_compile_verse`. Wiring waits until the build succeeds.
+`workspace_list_verse_errors` then `workspace_compile_verse`. Wiring waits until the build succeeds. Gameplay, camera, movement and UI changes also need one short live run (tagged `Print`s via `uefn-logs` + one frame) before they are done.

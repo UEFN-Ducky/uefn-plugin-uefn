@@ -5,7 +5,7 @@ description: Read the real UEFN Output Log (Verse Print / LogVerse lines from pl
 license: MIT
 metadata:
   label: UEFN Logs
-  version: 1
+  version: 2
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -39,3 +39,10 @@ No mark → reads the last ~2 MB of the log.
   wire into `pipeline.agent` so a ducky diagnoses the run.
 
 Tag your Verse prints (`[ARRIVAL] ...`, `[PLAYERCORE] ...`) so one regex finds the whole flow.
+
+## Empty capture? It usually isn't the game
+- The parameter is `mark` (the name you gave `uefn_logs_mark`) — not `since_mark`; a wrong name silently reads the default window.
+- Keep `pattern` simple: one tag or `A|B`. Nested groups / lookarounds that don't match return nothing, not an error.
+- An editor or session restart rotates the log — mark **again** after every restart, before Play.
+- No tagged line at all → the code path never ran (wrong device, handler not subscribed, a placed value disabled it), not "nothing to log".
+- Big captures get cut off: lower `max_lines` and narrow the pattern rather than reading everything.

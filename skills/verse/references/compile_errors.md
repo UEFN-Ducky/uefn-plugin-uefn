@@ -93,7 +93,11 @@ Cause: you named a field, local or parameter the same as a module function
 Fix: rename the binding (`Dist`, `DistToTarget`). Never use these names for your
 own bindings: `Distance DistanceSquared Dot Cross Normalize Lerp Sqrt Sin Cos Tan
 Floor Ceil Round Int Min Max Clamp Print Sleep Exp Log Pow`. Never reuse a
-module-level name inside a function in the same module.
+module-level name inside a function in the same module. Also clashes: a local
+named like a field or method of the class it sits in, a local named like a
+folder/module (`Run`, `Shop`, `Hub`…), and short generic names another file in
+the same module already defines (`Slice`, `Made`, `Item`, `Data`). Use specific
+names (`SliceAt`, `NewMat`, `Controller`).
 
 ### 3104 — "Dangling `=` assignment with no expressions or empty braced block on its right hand side" (5 hits)
 
@@ -143,6 +147,9 @@ need `/Verse.org/SceneGraph`; `GetPlayspace()` needs `/Fortnite.com/Playspaces`;
   write `if (Flag?) then "true" else "false"`.
 - "expects []int but this initializer is []tuple(…)" → you used the `array:` block
   form, which builds a tuple per line. Use `array{1, 2, 3}`.
+- "No overload of `=` matches" on two device references (`chair_device`, most
+  `*_device`) → devices are not comparable; track them by index in an array
+  (`[agent]int`), not by `=` on the device.
 - A handler typed `(Player : player)` subscribed to a `listenable(agent)` → match the
   payload exactly (`Arg : agent`, or `Arg : tuple(agent, float)` for
   `ReleasedEvent`).
