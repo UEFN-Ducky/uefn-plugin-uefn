@@ -1,5 +1,5 @@
 ---
-description: "Runtime traps that compile clean but break play — server-only Verse and per-tick network cost, moving players (chair/MoveTo, never per-tick teleport), the computation limit, shared materials, pooling, cached maths, handler debounce, key reuse between gameplay and menus, elimination mid-flow, per-player vs shared state, and the done checklist"
+description: "Runtime traps that compile clean but break play — the performance budget (what runs on events, ~10 Hz, per frame), server-only Verse and per-tick network cost, moving players (chair/MoveTo, never per-tick teleport), the computation limit, shared materials, pooling, cached maths, handler debounce, key reuse between gameplay and menus, elimination mid-flow, per-player vs shared state, and the done checklist"
 metadata:
   order: 4
   label: "Runtime pitfalls — compiles clean, plays wrong"
@@ -11,6 +11,24 @@ metadata:
 
 None of these show up as a Script error. Each one cost real sessions several
 rounds of "it lags" / "it's stuck" / "it doesn't show" after a clean build.
+
+### Performance budget — where each kind of work belongs
+
+| Work | Where | How often |
+|------|-------|-----------|
+| Reacting to players, devices, damage | event handlers (`Subscribe`, `Await`) | when it happens |
+| Score, currency, XP, saves | the handler of the event that changed them | on change |
+| HUD | `set Widget.Field` / `SetText` | on change; a countdown only when the shown number changes |
+| Timed motion, doors, lifts, flight | keyframed movement / one `MoveTo` glide | one call per motion |
+| Visual-only polish (pulse, bob, spin readouts) | one loop for all objects | ~10 Hz (`Sleep(0.1)`) |
+| Steering, chasing, physics-like state | one loop, pure state | per frame (`Sleep(0.0)`); visuals ~10 Hz |
+| Periodic checks (zone scoring, waves, regen) | one loop per system | 1 Hz or slower |
+| Building arrays | a for-expression, once | never `+=` in a loop — each `+=` copies the array |
+| Big builds (level, grid, list) | split across ticks | a few dozen items per `Sleep(0.0)` |
+| Short-lived objects | pools (`sys_spawning`) | never spawn/dispose in bursts |
+
+Every loop has an owner and a stop (round end, player leave or elimination,
+component end) — `async`. When something lags, find the row it breaks.
 
 ### 1. Verse runs on the server — motion it drives is replicated
 
@@ -84,7 +102,9 @@ runtime, often only when the level is big.
 ### 6. Several players at once
 
 - Give each player their own slot (lane, plot, seat, camera, HUD) from the
-  start: an `[agent]int` slot map, allocated centre-out, freed on leave/finish.
+  start: `PlayerManager.GetPlayerSlot[Agent]` (lowest free, freed on leave —
+  `design_patterns`). A minigame with its own seats keeps its own `[agent]int`
+  (centre-out when the layout needs it), freed on leave or finish.
 - **Never reset shared state when one player starts.** Reset shared data only
   when no player is using it (`ActiveCount() = 0`).
 - Devices are not comparable: track which device a player has by **index**, not
@@ -101,7 +121,8 @@ runtime, often only when the level is big.
 
 ### Done checklist (before saying a gameplay change works)
 
-1. What runs every tick, and what crosses the network every tick?
+1. What runs every tick, and what crosses the network every tick? Does every
+   loop match its row in the performance budget, and stop with its owner?
 2. Are new entities and materials pooled / shared?
 3. Placed-device values and start-up options checked (`uefn` skill)?
 4. Any key doing two jobs without a gate?

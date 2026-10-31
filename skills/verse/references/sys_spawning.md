@@ -1,175 +1,192 @@
 ---
-description: "Spawning & movement — spawning enemies/props, movement loops with MoveTo/nav points, NPC elimination tracking, teleport-until-success, and array-based pools"
+description: "Spawning at runtime, Scene Graph first — what to spawn with (Entity Prefab vs NPC spawner vs player spawner vs prop), spawning and despawning prefab instances with GetSimulationEntity/AddEntities/RemoveFromParent, pools of prefab instances (hide with mesh_component Disable, reuse), motion for spawned things, wave managers built with for-expressions, NPC spawner events and elimination payloads, reliable player teleport, and creative_prop SpawnProp/MoveTo as the fallback"
 metadata:
   order: 26
-  label: "Game systems — spawning, movement & AI"
+  label: "Game systems — spawning, pools & waves"
   default_enabled: false
-  load_condition: "Spawning enemies/props/waves, moving objects along paths, tracking NPC eliminations, or teleporting players reliably"
+  load_condition: "Spawning anything at runtime (projectiles, pickups, debris, enemies, platforms, waves), pooling spawned objects, moving spawned things, tracking NPC eliminations, or teleporting players reliably"
 ---
 
-## Spawning, movement & AI
+## Spawning at runtime — Scene Graph first
 
 > **Snippets here are fragments.** The `using` block in this file's first code
 > block applies to all of them — copy those imports (or start from the matching
 > `verse_template_apply` pack) when pasting into a real `.verse` file.
 
-Names below are generic — adapt them to your entities. All device/prop APIs
-(`creative_prop`, `MoveTo`, spawner events) come from the digest.
+### What to spawn with
 
-### An entity class that owns its own behavior
+| Spawning | Use |
+|----------|-----|
+| Projectiles, pickups, debris, platforms, streamed pieces, enemies built as objects | **Entity Prefab** instances (`EP_*` / `P_*` from Assets.digest) — this page |
+| Fortnite NPCs, guards, creatures, wildlife | `npc_spawner_device` & co — "NPC spawners" below, `sys_npc_ai` |
+| Players | `player_spawner_device` (`sys_damage_health`) |
+| A prop with no prefab and no entity path | `creative_prop` — "Fallback" at the end |
 
-Give each spawned thing a class holding its prop, live state, and an async loop it
-drives itself. Kick the loop off with `spawn` from a sync setter:
+Always-on scenery is placed once in the editor (`instantiate_prefab`), not spawned
+every match. Anything spawned more than a few times a minute comes from a **pool**.
+
+### Spawn and despawn a prefab instance
+
+The prefab's class exists after the next Verse build (scenegraph
+`verse_authoring`). Parent it under the simulation entity, then place it:
 
 ```verse
-spawned_enemy_prop := class<concrete>():
-    @editable PropObject <public> : creative_prop = creative_prop{}
-    var Health <public> : float = 100.0
-    var IsAlive <public> : logic = true
-    var IsMoving <private> : logic = false
-    var CurrentNavPoint <private> : ?nav_point_data = false
+using { /Fortnite.com/Devices }
+using { /Verse.org/SceneGraph }
+using { /Verse.org/SpatialMath }
+using { /Verse.org/Simulation }
 
-    StartMovement<public>(StartPoint : nav_point_data) : void =
-        set CurrentNavPoint = option{StartPoint}
-        set IsMoving = true
-        spawn{ MovementLoop() }                # sync entry → async loop
+SpawnCrate(Position : vector3) : void =
+    if (Sim := GetSimulationEntity[]):          # creative_device extension, <transacts><decides>
+        Crate := EP_Crate{}
+        Sim.AddEntities(array{Crate})
+        T := Crate.GetGlobalTransform()
+        Crate.SetGlobalTransform(transform{Translation := Position, Rotation := T.Rotation, Scale := T.Scale})
 ```
 
-### Movement loop along nav points
+`Crate.RemoveFromParent()` takes it out of the scene (its components run
+`OnEndSimulation`); `AddEntities` can add it back later. Removing and re-adding
+in bursts is what a pool avoids.
 
-Move with `MoveTo`, `Sleep` for the travel time, advance to the next point, and
-`break` at the end or on death:
+### Pool of prefab instances
+
+Create the pool once, hide spare instances, hand one out per use, hide it again
+when done:
 
 ```verse
-MovementLoop<private>()<suspends> : void =
-    loop:
-        if (not IsAlive? or not IsMoving?): break
-        if (NavPoint := CurrentNavPoint?):
-            TargetPos := NavPoint.NavPoint.GetTransform().Translation
-            PropObject.MoveTo(TargetPos, IdentityRotation(), MoveSpeed)
-            Sleep(MoveSpeed)                    # wait out the move
-            if (Next := NavPoint.NextNavPoint?):
-                set CurrentNavPoint = option{Next}
+crate_dropper_device := class(creative_device):
+    @editable PoolSize : int = 20
+    @editable LifeSeconds : float = 5.0
+
+    var Free : []entity = array{}
+
+    OnBegin<override>()<suspends> : void =
+        if (Sim := GetSimulationEntity[]):
+            Crates := for (Index := 1..PoolSize) do EP_Crate{}
+            Sim.AddEntities(Crates)
+            for (Crate : Crates):
+                SetShown(Crate, false)
+            set Free = Crates
+
+    DropAt(Position : vector3)<suspends> : void =
+        if (Crate := Free[0], Rest := Free.RemoveElement[0]):
+            set Free = Rest
+            T := Crate.GetGlobalTransform()
+            Crate.SetGlobalTransform(transform{Translation := Position, Rotation := T.Rotation, Scale := T.Scale})
+            SetShown(Crate, true)
+            Sleep(LifeSeconds)
+            SetShown(Crate, false)
+            set Free += array{Crate}            # one append per release, not in a loop
+
+    # Enable / Disable have no effect specifier: straight-line code only.
+    SetShown(Crate : entity, Shown : logic) : void =
+        for (Mesh : Crate.FindDescendantComponents(mesh_component)):
+            if (Shown?):
+                Mesh.Enable()
             else:
-                DestroyProp(); break            # reached the end
-        else:
-            break
+                Mesh.Disable()
 ```
 
-`MoveTo(Position, Rotation, OverTime)<suspends>` on `creative_prop` is the async
-positioning call (there is no `MoveToLocation`) — confirm the overload in the digest. For continuous spin, `spawn` a per-prop loop
-that nudges the rotation each tick.
+- Pool empty → skip the spawn (or grow the pool by a few) rather than block.
+- Several players: one pool per system, sized for the worst case, not per player.
+- A pool of devices or widgets uses the generic `pool(t)` in `design_patterns`.
 
-### Damage & death
+### Moving what you spawned
 
-Keep damage synchronous and `<transacts>`; return whether the entity died so the
-caller can award score:
+- A thrown, dropped or flying object: one `keyframed_movement_component` delta
+  over its flight time (scenegraph `movement_transforms`).
+- A platform or door loop: keyframed `loop` / `pingpong` playback.
+- Chasing or steering: one manager loop for all instances, pure state per frame,
+  visuals pushed ~10 times a second (`runtime_pitfalls`).
+- Never `SetGlobalTransform` each tick to animate.
+
+### Wave manager
+
+The manager owns the live list and the wave loop; it stops with the round:
 
 ```verse
-TakeDamage<public>(Damage : float)<transacts> : logic =
-    if (not IsAlive?): return false
-    set Health = Max(0.0, Health - Damage)
-    if (Health <= 0.0):
-        set IsAlive = false; DestroyProp()
-        return true                            # died
-    return false
+var ActiveEnemies : []enemy = array{}
+
+RunWaves()<suspends> : void =
+    race:
+        RoundEndedEvent.Await()
+        loop:
+            SpawnWave()
+            Sleep(WaveInterval)
+
+# Drop eliminated enemies with a for-expression, never += in a loop.
+PruneEnemies() : void =
+    set ActiveEnemies = for (Enemy : ActiveEnemies, Enemy.IsAlive?) do Enemy
 ```
 
-### Spawner / wave manager
+Closest target: one pass with `Distance` and a running best, run when targets
+change or a few times a second — not every frame for every enemy.
 
-A manager holds the live entities in an array and runs a spawning loop. Add on
-spawn, and rebuild the array to drop dead ones (same filter-rebuild idiom as maps):
+### NPC spawners
+
+Engine NPCs come from `npc_spawner_device` (and guard / creature / wildlife
+spawners). Their `EliminatedEvent` sends `device_ai_interaction_result`:
 
 ```verse
-var ActiveEnemies : []spawned_enemy_prop = array{}
+Spawner.SpawnedEvent.Subscribe(OnNpcSpawned)            # agent
+Spawner.EliminatedEvent.Subscribe(OnNpcEliminated)
 
-SpawningLoop<private>()<suspends> : void =
-    loop:
-        if (not GameActive?): break
-        SpawnOneWave()
-        Sleep(WaveInterval)
-
-# prune dead entities
-var Living : []spawned_enemy_prop = array{}
-for (E : ActiveEnemies, E.IsAlive?):
-    set Living += array{E}
-set ActiveEnemies = Living
+OnNpcEliminated(Result : device_ai_interaction_result) : void =
+    if (Eliminator := Result.Source?):                   # empty for falls, storms
+        AwardKill(Eliminator)
+    set AliveNpcs -= 1
+    if (AliveNpcs <= 0):
+        spawn{ StartNextWave() }
 ```
 
-Find the closest target by scanning the array with `Distance` and a running best
-(track a `var ClosestDistance` / `var ?entity` and update as you loop).
+Behaviour, equipment and Scene Graph NPCs: `sys_npc_ai` and the `npc-ai` skill.
 
-### NPC spawning & elimination
+### Placing a player once (teleport with retry)
 
-For engine NPCs, subscribe to the spawner's events from the digest:
-
-```verse
-Spawner.SpawnedEvent.Subscribe(OnNPCSpawned)      # npc_spawner_device
-# in the handler, subscribe the spawned character:
-NpcFort.EliminatedEvent().Subscribe(OnNPCEliminated)
-```
-
-Track counts and trigger the next wave / reward when the count hits zero.
-
-### Reliable player teleport (retry-until-success)
-
-Teleport can fail if the destination is briefly blocked. Retry in an async loop
-with a timeout, confirming arrival by distance:
+One-off placement (round start, return to hub) uses `TeleportTo[]`. It can fail
+while the destination is blocked or the player is still loading — retry briefly
+and confirm arrival:
 
 ```verse
-TeleportPlayersUntilSuccessLoop<public>(Position : vector3)<suspends> : void =
-    var TimeOut : int = 600
-    loop:
-        Sleep(0.1)
-        set TimeOut -= 1
-        if (TimeOut <= 0): break
+TeleportWithRetry(Agent : agent, Position : vector3)<suspends> : void =
+    for (Attempt := 1..30):
         if:
-            Char := MyAgent.GetFortCharacter[]
-            Char.TeleportTo[Position, IdentityRotation()]
-            Distance(Char.GetTransform().Translation, Position) <= 100.0
+            FortCharacter := Agent.GetFortCharacter[]
+            FortCharacter.TeleportTo[Position, IdentityRotation()]
+            Distance(FortCharacter.GetTransform().Translation, Position) <= 100.0
         then:
-            break                              # confirmed arrival
+            return
+        Sleep(0.1)
 ```
 
-`TeleportTo[...]` is failable (`[]`) — call it inside the `if:` head. Kick it off
-with `spawn{ TeleportPlayersUntilSuccessLoop(Pos) }` from a sync method.
+A teleport is for placing a player, never for moving one over time — carry a
+player in a moved `chair_device` (`runtime_pitfalls`).
 
-### Runtime prop spawn (PropSpawnManager) — not only pre-placed props
+### Fallback: `creative_prop`
 
-For delivery props created at runtime (confirm `SpawnProp` /
-`Dispose` names in the digest):
+Only when there is no prefab and no entity path. `SpawnProp` returns
+`tuple(?creative_prop, spawn_prop_result)` and is not failable;
+`MoveTo(Position, Rotation, Seconds)<suspends>` glides it:
 
 ```verse
-# Hold input_trigger → ContinuousSpawnLoop (sys_input_devices)
 SpawnAndDeliver(Agent : agent)<suspends> : void =
-    if (not HasFreeStorage(Agent)?):
-        return
-    ReserveStorageSlot(Agent)
-    if (Prop := SpawnProp(PropAsset, StartTransform)(0)?):   # returns tuple(?creative_prop, spawn_prop_result); not failable
-        MoveAlongPath(Prop)                               # MoveTo / nav points
-        if (GP := PlayerManager.GetGamePlayer(Agent)?):
-            GP.Services.EconomyManager.AddCurrency("Coins", Payout)
-        Prop.Dispose()                                    # or equivalent cleanup
+    if (Prop := SpawnProp(PropAsset, StartTransform)(0)?):
+        defer:
+            Prop.Dispose()                      # runs even if the task is cancelled
+        Prop.MoveTo(EndPosition, IdentityRotation(), TravelSeconds)
+        if (GamePlayer := PlayerManager.GetGamePlayer(Agent)?):
+            GamePlayer.Services.EconomyManager.AddCurrency("Coins", Payout)
 ```
 
-| Step | Detail |
-|------|--------|
-| Gate | Building/storage capacity before spawn (`sys_buildings`) |
-| Input | Pressed starts loop; Released stops (`sys_input_devices`) |
-| Path | Nav points / smooth path samples + `MoveTo` |
-| End | Grant currency, VFX optional, dispose prop |
-| Unlock | Building unlock enables matching end-nav set |
-
-Keep **pre-placed** `@editable creative_prop` movement in the sections above;
-keep **NPC** waves via `npc_spawner_device`. Label your device clearly:
-`prop_spawn_manager` vs NPC spawner.
+- Pool props the same way as entities (hide, move away, reuse) when they spawn
+  often; `Dispose` every prop you spawn or it leaks.
+- A pre-placed `@editable creative_prop` moved along nav points: `MoveTo` to each
+  point in turn (the call waits for the glide), `break` at the end or on death.
 
 ### Gotchas
 
-- Every spawn loop needs a stop condition and a `Sleep`/`Await` — see `async`.
-- Mutating `creative_prop` transforms directly vs `MoveTo` (animated): pick per
-  need; `MoveTo` is async and yields.
-- Prune dead entities from your arrays/maps or they pile up across waves.
-- Runtime props: always dispose or you leak actors.
-- Confirm `MoveTo`, `TeleportTo`, `SpawnProp`, spawner events, and NPC APIs in
-  the digest — don't guess the names.
+- Every spawn loop waits and stops with its owner (round, player, device) —
+  `async`.
+- Prune dead entries from arrays and maps each wave with a for-expression.
+- Confirm prefab class names in Assets.digest and spawner events in the digest
+  (`devices` "What each event sends") — never guess.
