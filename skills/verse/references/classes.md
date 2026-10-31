@@ -195,6 +195,8 @@ TryEat(Food : fruit) : void =
 ```
 
 - An interface works as a field, variable or array type (`Lunch : edible = sandwich{}`).
+- An interface can hold fields, `var`s included, with defaults
+  (`var Count : int = 0`); implementing classes `set` them like their own.
 - When two interfaces declare the same name, qualify it:
   `(initializable:)Init<override>() : void =`, call `(resettable:)Init()`, read
   `(resettable:)Counter`. Qualifying even without a clash makes the source obvious.
@@ -220,12 +222,12 @@ scoreboard(key_type : subtype(comparable), score_type : type) := class:
 Scores : scoreboard(player, int) = scoreboard(player, int){}
 ```
 
-**Parse order.** If a file that uses a generic class is parsed before the file that
-declares it, the build fails with "can't access the function from a preceding type",
-which does not name the cause. Put generic classes in a Content-level folder that
-sorts first (`Content/Archetypes/`, above `Content/Verse/`), and inside one file put
-helper functions **below** the generic classes they use. Pools and function wrappers
-built this way: `design_patterns`, `functions`.
+**Order inside the file.** A function placed **above** a generic class in the same
+file fails with 3502 "Can't access a function from a preceding type", which does
+not name the cause. List every generic class first and put helper functions below
+them (verified with verse-lsp, 42.40). Using a generic class from another folder
+works in any folder order. Keep them together in one folder (`Archetypes/`). Pools
+and function wrappers built this way: `design_patterns`, `functions`.
 
 Generic functions (`where t : type`) are in `functions`.
 

@@ -17,9 +17,9 @@ page is copied in, it is re-written in this style first.
 
 - One system per folder (`Verse/Economy/`, `Verse/Shop/`); the file name is the
   main class name (`economy_manager.verse` holds `economy_manager`).
-- Generic (parametric) classes live in a Content-level folder that sorts first
-  (`Content/Archetypes/`), with any helper functions **below** the classes in the
-  same file (parse order — `classes`).
+- Generic (parametric) classes live together in one folder (`Archetypes/`), with
+  any helper functions **below** the classes in the same file (a function above a
+  generic class is error 3502 — `classes`).
 - Order inside a file: `using` lines → module-level types and constants → classes.
 - Order inside a device or manager: `@editable` fields → constants → `var` state →
   `OnBegin` → public API → event handlers → private helpers.

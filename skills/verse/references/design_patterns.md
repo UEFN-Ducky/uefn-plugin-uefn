@@ -56,7 +56,7 @@ hide on expiry, re-show and move on reuse, remove only on teardown
 (`runtime_pitfalls` §4, scenegraph `movement_transforms`).
 
 **Any object** (devices, widgets, prefab instances): a generic pool marks each entry
-taken or free. Generic classes go in a Content-level folder that sorts first.
+taken or free. Generic classes go first in their file, helpers below them.
 
 ```verse
 # Content/Archetypes/pool.verse
@@ -70,7 +70,7 @@ pool<public>(t : type) := class:
 
     # First free entry, marked taken. Fails when none is free.
     Fetch<public>()<transacts><decides> : pooled_obj(t) =
-        Free := for (Entry : Objects, Entry.Available?) do Entry
+        Free := for (Candidate : Objects, Candidate.Available?) do Candidate   # not `Entry`: a name is never reused (3532)
         Entry := Free[0]
         set Entry.Available = false
         Entry
@@ -96,7 +96,7 @@ shared behaviour. Qualify clashing names with `(iface:)`. → `classes`
 
 A data structure used with several types (scoreboard, pool, ring buffer) is a
 generic class: `scoreboard(key_type : subtype(comparable), score_type : type) :=
-class`. Keep it in the first-parsed folder (`classes`, parse-order error).
+class`. Classes above functions in its file (`classes`, error 3502).
 
 ### Callbacks and wrappers
 

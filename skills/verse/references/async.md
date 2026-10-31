@@ -31,7 +31,7 @@ GameLoop()<suspends> : void =
 
 | Call | Does |
 |------|------|
-| `Sleep(Seconds : float)<suspends>` | Pause this task for N seconds. `Sleep(0.0)` yields one frame. |
+| `Sleep(Seconds : float)<suspends>` | Pause this task for N seconds. `Sleep(0.0)` yields one frame; `Sleep(Inf)` never returns (a `race` arm that only ends when another wins). |
 | `SomeEvent.Await()` | Wait until the event fires once; returns its payload. `Agent := Button.InteractedWithEvent.Await()` |
 | `F()` inside `<suspends>` code | Runs F and waits for it. |
 

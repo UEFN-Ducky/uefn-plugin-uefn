@@ -161,19 +161,20 @@ AllPlayers := MyPlayerManager.GetAllGamePlayers()
 - A module-level `var` must be a `weak_map`: `var PlayerStatsMap<public> :
   weak_map(player, player_stats) = map{}` (persistent) or `weak_map(session, t)`
   (one value for this match, not saved). A plain `var Count : int` outside a class
-  does not compile. Session state belongs on a manager device instead — reach for
+  is 3502 "Module-scoped `var` must have `weak_map` type". Session state belongs on a manager device instead — reach for
   `weak_map(session, …)` only when there is no device to hold it.
 - Imported module-level `var`s are shared global state. Keep them `<public>` only
   when other systems truly need them; persistent ones count toward the four-map
   cap (`persistence`).
 
-### Parse order — generic classes first
+### Generic classes — classes above functions
 
-Verse reads folders in name order. A generic (parametric) class used from a file
-parsed **before** it gives "can't access the function from a preceding type".
-Put generic classes in a Content-level folder that sorts first
-(`Content/Archetypes/`, declared `<public>` like any folder beside `Verse/`), and
-in that file put helper functions **below** the classes (`classes`).
+A function placed above a generic (parametric) class **in the same file** fails
+with 3502 "Can't access a function from a preceding type". List the generic
+classes first, helpers below them (`classes`). Folder order does not matter: a
+folder that sorts before `Archetypes/` uses its generic classes without error
+(verified with verse-lsp, 42.40). Keeping them in one shared folder is for
+organisation.
 
 ### Moving files
 

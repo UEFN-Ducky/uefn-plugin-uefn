@@ -162,6 +162,11 @@ TeleportWithRetry(Agent : agent, Position : vector3)<suspends> : void =
 A teleport is for placing a player, never for moving one over time — carry a
 player in a moved `chair_device` (`runtime_pitfalls`).
 
+`fort_character` and `creative_prop` take the `/UnrealEngine.com/Temporary/SpatialMath`
+`vector3` / `rotation`; Scene Graph entities take `/Verse.org/SpatialMath`. A file
+that imports both qualifies the shared names, or the call is ambiguous (3518):
+`(/UnrealEngine.com/Temporary/SpatialMath:)IdentityRotation()`.
+
 ### Fallback: `creative_prop`
 
 Only when there is no prefab and no entity path. `SpawnProp` returns

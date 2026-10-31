@@ -153,10 +153,11 @@ need `/Verse.org/SceneGraph`; `GetPlayspace()` needs `/Fortnite.com/Playspaces`;
 - A handler typed `(Player : player)` subscribed to a `listenable(agent)` → match the
   payload exactly (`Arg : agent`, or `Arg : tuple(agent, float)` for
   `ReleasedEvent`).
-- "expects a value of type agent->void, but this argument is of type tuple->void" →
+- "expects a value of type agent->void, but this argument is an incompatible value of type tuple()->void" →
   the handler has **no** parameter; add the one the event sends
   (`OnPressed(Agent : agent) : void`). `trigger_device` sends `?agent` (`devices`).
-- "no match for int / float" (also `+`, `-`) → only `*` mixes `int` and `float`;
+- "No overload of the function `operator'/'` matches the provided arguments (:int,:type{8.000000})"
+  (also `+`, `-`) → only `*` mixes `int` and `float`;
   convert first: `(Count * 1.0) / 8.0`. A float literal needs its decimal point
   (`0.0`, not `0`).
 
@@ -236,13 +237,15 @@ unbalanced `{` `}` or `(` `)`, or a stray `:` at the end of a one-line `if`.
 An Assets-digest module that is not in this project. The asset folder must exist
 under `Content/` and the project must have been built once so the digest lists it.
 
-### Messages to recognise (code varies)
+### Messages to recognise (verified with verse-lsp, 42.40)
 
 | Message | Cause | Fix |
 |---------|-------|-----|
-| "… has a suspends effect, which is not allowed in an immediate context" | `Sleep` / `Await` / a `<suspends>` call in a function without `<suspends>` | add `<suspends>`, or `spawn{ … }` it (`async`) |
-| "can't access the function from a preceding type" | a generic class is parsed after the file (or the line) that uses it | move generic classes to a Content-level folder that sorts first; helpers below the classes (`classes`) |
-| "Branch is not currently supported in loops" | `branch` inside a `loop` / `for` body | `spawn`, or a `race` (`async`) |
+| 3512 "This invocation calls a function (`…Sleep`) that has the 'suspends' effect, which is not allowed by its context" | `Sleep` / `Await` / a `<suspends>` call in a function without `<suspends>` | add `<suspends>`, or `spawn{ … }` it (`async`) |
+| 3502 "Can't access a function from a preceding type" | a function sits **above** a generic class in the same file | move the generic classes to the top of the file, helpers below (`classes`) |
+| 3502 "Module-scoped `var` must have `weak_map` type" | `var X : int` outside any class | put the state on a manager device, or `weak_map(session, …)` (`modules`) |
+| 3552 "'branch' is not currently supported in loops" | `branch` inside a `loop` / `for` body | `spawn`, or a `race` (`async`) |
+| 3512 "Case might fail because it doesn't handle all possible values and doesn't have a default clause" | `case` over `int` / `string` without `_` | add `_ => …` (`control_flow`) |
 | a loop "needs a sub-expression that is async or break" | `loop:` with no `Sleep` / `Await` / `break` | wait each pass, or break (`control_flow`) |
 
 ### Tool-side errors that look like compile errors

@@ -103,9 +103,11 @@ for (Row := 0..GridHeight - 1):
 
 - `A..B` is an **inclusive** range: `0..10` runs 11 times, `0..Count - 1` runs
   `Count` times, and `10..0` runs **zero** times (start must be ≤ end).
-- `for (Index -> Item : Arr)` gives each element with its 0-based index. It works on
-  arrays and maps, not on generators (`FindCreativeObjectsWithTag`,
-  `FindDescendantEntities`) — count with a `var` there.
+- `for (Index -> Item : Arr)` gives each element with its 0-based index on arrays
+  (and key -> value on maps). On a generator (`FindCreativeObjectsWithTag`,
+  `FindDescendantEntities`) it still compiles, but the left name is the element,
+  not an `int` — make an array first (`Found := for (X : Gen) do X`) when you need
+  indexes.
 - The filter clause (form 3) is any failable expression; items that fail it are
   skipped, not aborted.
 - `for` used as an expression builds an array (the last line of each pass is the
@@ -140,9 +142,10 @@ case (Phase):
     _ => DoNothing()          # _ is the default branch (the only place `_` is legal — never as a binding name)
 ```
 
-- A `case` over an enum that lists **every** value needs no `_`.
+- A `case` over an enum that lists **every** value needs no `_` (one there anyway
+  is warning 2302, unreachable).
 - A `case` over `int`, `string` or an open enum (42.40 ability enums) must end with
-  `_ => …`.
+  `_ => …`; without it the case can fail (3512).
 - An arm can hold several lines: put them indented under `Value =>`.
 
 Use `case` for enums and fixed value sets; use `if`/`else` chains for ranges and
