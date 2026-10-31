@@ -167,14 +167,17 @@ AllPlayers := MyPlayerManager.GetAllGamePlayers()
   when other systems truly need them; persistent ones count toward the four-map
   cap (`persistence`).
 
-### Generic classes — classes above functions
+### Parse order — generic classes first
 
-A function placed above a generic (parametric) class **in the same file** fails
-with 3502 "Can't access a function from a preceding type". List the generic
-classes first, helpers below them (`classes`). Folder order does not matter: a
-folder that sorts before `Archetypes/` uses its generic classes without error
-(verified with verse-lsp, 42.40). Keeping them in one shared folder is for
-organisation.
+Verse reads folders and files in name order. A class field typed with a generic
+(parametric) class, or a function signature naming one, that is read **before**
+the generic class fails with 3502 "Can't access a function from a preceding type"
+— reported at the generic class. Put generic classes in a Content-level folder
+that sorts first (`Content/Archetypes/`, declared `<public>` like any folder
+beside `Verse/`), helpers below the classes in the same file (`classes`). A
+function that only uses one inside its body is not affected. (Verified with
+verse-lsp, 42.40: a user folder named `AUser` broke a generic class in `ZGen`; the
+same files with the folders swapped built clean.)
 
 ### Moving files
 

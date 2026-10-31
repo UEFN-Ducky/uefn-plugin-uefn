@@ -1,5 +1,5 @@
 ---
-description: "Functions in Verse — anatomy, parameters and returns, your own <transacts><decides> checks, Await payloads, extension functions, ToString overloads, generic functions with where, function types (arrow vs type{} with effects), function values and callback arrays, comparator sorting, and function wrappers"
+description: "Functions in Verse — anatomy, parameters and returns, your own <transacts><decides> checks, Await payloads, extension functions, ToString overloads, generic functions with where, function types (arrow vs type{} with effects), function values and callback arrays, comparator sorting, and function wrappers (left, right, both-sides and no-argument versions with helpers)"
 metadata:
   order: 7
   label: "Functions — checks, extensions, generics, function values"
@@ -151,10 +151,18 @@ must match the one the sort declares.
 When one class must call many functions that take different fixed arguments
 (a settings toggle that drives both a per-player save and a global VFX switch),
 wrap each so they share one `Call(Value)` shape. The wrapper stores the fixed
-arguments:
+arguments; `P` is the shared argument the caller passes each time:
+
+| Wrapped function | Wrapper | Helper |
+|------------------|---------|--------|
+| `F(P)` | `func_wrapper` | `WrapFunc(F)` |
+| `F(LHS, P)` — fixed arguments first | `func_wrapper_lhs` | `WrapFuncLHS(F, LHS)` |
+| `F(P, RHS)` — fixed arguments last | `func_wrapper_rhs` | `WrapFuncRHS(F, RHS)` |
+| `F(LHS, P, RHS)` — fixed on both sides | `func_wrapper_lhs_rhs` | `WrapFuncLHSRHS(F, LHS, RHS)` |
+| `F(LHS)` — never needs `P` | `func_wrapper_no_p` | `WrapFuncNoP(p, F, LHS)` |
 
 ```verse
-# Content/Archetypes/func_wrappers.verse — generic classes, helpers below them
+# Content/Archetypes/func_wrappers.verse — generic classes first, helpers below them
 func_wrapper_base<public>(p : type, ret : type) := class<abstract>:
     Call<public>(P : p) : ret
 
@@ -167,20 +175,83 @@ func_wrapper_lhs<public>(lhs : type, p : type, ret : type) := class(func_wrapper
     LHS<public> : lhs
     Call<override>(P : p) : ret = Func(LHS, P)
 
-WrapFunc<public>(Func : type{_(:p) : ret} where p : type, ret : type) : func_wrapper(p, ret) =
+func_wrapper_rhs<public>(p : type, rhs : type, ret : type) := class(func_wrapper_base(p, ret)):
+    Func<public> : type{_(:p, :rhs) : ret}
+    RHS<public> : rhs
+    Call<override>(P : p) : ret = Func(P, RHS)
+
+func_wrapper_lhs_rhs<public>(lhs : type, p : type, rhs : type, ret : type) := class(func_wrapper_base(p, ret)):
+    Func<public> : type{_(:lhs, :p, :rhs) : ret}
+    LHS<public> : lhs
+    RHS<public> : rhs
+    Call<override>(P : p) : ret = Func(LHS, P, RHS)
+
+# The wrapped function never needs P; Call still takes one so every wrapper has the same shape.
+func_wrapper_no_p<public>(lhs : type, p : type, ret : type) := class(func_wrapper_base(p, ret)):
+    Func<public> : type{_(:lhs) : ret}
+    LHS<public> : lhs
+    Call<override>(P : p) : ret = Func(LHS)
+
+WrapFunc<public>(Func : type{_(:p) : ret} where p : type, ret : type)<transacts> : func_wrapper(p, ret) =
     func_wrapper(p, ret){Func := Func}
 
-WrapFuncLHS<public>(Func : type{_(:lhs, :p) : ret}, LHS : lhs where lhs : type, p : type, ret : type) : func_wrapper_lhs(lhs, p, ret) =
+WrapFuncLHS<public>(Func : type{_(:lhs, :p) : ret}, LHS : lhs where lhs : type, p : type, ret : type)<transacts> : func_wrapper_lhs(lhs, p, ret) =
     func_wrapper_lhs(lhs, p, ret){Func := Func, LHS := LHS}
+
+WrapFuncRHS<public>(Func : type{_(:p, :rhs) : ret}, RHS : rhs where p : type, rhs : type, ret : type)<transacts> : func_wrapper_rhs(p, rhs, ret) =
+    func_wrapper_rhs(p, rhs, ret){Func := Func, RHS := RHS}
+
+WrapFuncLHSRHS<public>(Func : type{_(:lhs, :p, :rhs) : ret}, LHS : lhs, RHS : rhs where lhs : type, p : type, rhs : type, ret : type)<transacts> : func_wrapper_lhs_rhs(lhs, p, rhs, ret) =
+    func_wrapper_lhs_rhs(lhs, p, rhs, ret){Func := Func, LHS := LHS, RHS := RHS}
+
+# P cannot be inferred from Func here, so the caller names it.
+WrapFuncNoP<public>(p : type, Func : type{_(:lhs) : ret}, LHS : lhs where lhs : type, ret : type)<transacts> : func_wrapper_no_p(lhs, p, ret) =
+    func_wrapper_no_p(lhs, p, ret){Func := Func, LHS := LHS}
 ```
 
-- Several fixed arguments travel as one tuple, so the wrapped function takes a
-  tuple parameter: `SetLogic(OwnerAndKey : tuple(agent, string), Value : logic) : void`.
-- `WrapFuncLHS(SetLogic, (Owner, "music"))` and `WrapFunc(SetVfx)` are both a
-  `func_wrapper_base(logic, void)` one widget class can call.
-- Right-hand, both-sides and "ignore p" variants follow the same pattern.
+Using them — a toggle that only knows "read a `logic`" and "write a `logic`":
+
+```verse
+using { Archetypes }
+
+settings_toggle := class:
+    Get : func_wrapper_base(tuple(), logic)
+    Set : func_wrapper_base(logic, void)
+    Update : ?func_wrapper_base(logic, void) = false
+
+    Toggle() : void =
+        Current := Get.Call(())              # Call has no effect: bind it before an if
+        Set.Call(if (Current?) then false else true)
+        if (Updated := Update?):
+            Updated.Call(Get.Call(()))
+
+# Per-player saved setting: the owner and key are fixed, the value changes.
+LoadSetting(OwnerAndKey : tuple(agent, string)) : logic = …
+SaveSetting(OwnerAndKey : tuple(agent, string), Value : logic) : void = …
+UpdateRadio(Owner : agent, Value : logic) : void = …
+# Global switch: already the right shape.
+ReadVfx() : logic = …
+SwitchVfx(Value : logic) : void = …
+
+BuildToggles(Owner : agent) : []settings_toggle =
+    Music := settings_toggle:
+        Get := WrapFuncNoP(tuple(), LoadSetting, (Owner, "music"))
+        Set := WrapFuncLHS(SaveSetting, (Owner, "music"))
+        Update := option{WrapFuncLHS(UpdateRadio, Owner)}
+    Vfx := settings_toggle{Get := WrapFunc(ReadVfx), Set := WrapFunc(SwitchVfx)}
+    array{Music, Vfx}
+```
+
+- Several fixed arguments travel as **one tuple**, so the wrapped function takes a
+  tuple parameter (`OwnerAndKey : tuple(agent, string)`) and the caller passes
+  `(Owner, "music")`.
+- "No argument" is the type `tuple()` and the value `()`: `Get.Call(())`.
+- Fixed arguments are set once; anything that changes per call belongs in `P`.
+- The helpers are `<transacts>` so they also work inside `option{}` and `if`.
 - Worth it when one class drives many unrelated setters; for two or three, a small
   `if` is simpler.
+- Verified with verse-lsp against the 42.40 digests (all five wrappers, the
+  helpers and the toggle above).
 
 ### Message helpers
 

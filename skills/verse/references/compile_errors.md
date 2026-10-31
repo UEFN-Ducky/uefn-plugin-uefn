@@ -242,7 +242,7 @@ under `Content/` and the project must have been built once so the digest lists i
 | Message | Cause | Fix |
 |---------|-------|-----|
 | 3512 "This invocation calls a function (`…Sleep`) that has the 'suspends' effect, which is not allowed by its context" | `Sleep` / `Await` / a `<suspends>` call in a function without `<suspends>` | add `<suspends>`, or `spawn{ … }` it (`async`) |
-| 3502 "Can't access a function from a preceding type" | a function sits **above** a generic class in the same file | move the generic classes to the top of the file, helpers below (`classes`) |
+| 3502 "Can't access a function from a preceding type" (shown **at the generic class**) | a class field or function signature naming a generic class is read before it: an earlier folder, an earlier file, or above it in the file | move generic classes to a Content-level folder that sorts first (`Content/Archetypes/`), helpers below the classes (`classes`) |
 | 3502 "Module-scoped `var` must have `weak_map` type" | `var X : int` outside any class | put the state on a manager device, or `weak_map(session, …)` (`modules`) |
 | 3552 "'branch' is not currently supported in loops" | `branch` inside a `loop` / `for` body | `spawn`, or a `race` (`async`) |
 | 3512 "Case might fail because it doesn't handle all possible values and doesn't have a default clause" | `case` over `int` / `string` without `_` | add `_ => …` (`control_flow`) |

@@ -56,7 +56,8 @@ hide on expiry, re-show and move on reuse, remove only on teardown
 (`runtime_pitfalls` §4, scenegraph `movement_transforms`).
 
 **Any object** (devices, widgets, prefab instances): a generic pool marks each entry
-taken or free. Generic classes go first in their file, helpers below them.
+taken or free. Generic classes go in a Content-level folder that sorts first,
+helpers below them (`classes`, 3502).
 
 ```verse
 # Content/Archetypes/pool.verse
@@ -96,7 +97,7 @@ shared behaviour. Qualify clashing names with `(iface:)`. → `classes`
 
 A data structure used with several types (scoreboard, pool, ring buffer) is a
 generic class: `scoreboard(key_type : subtype(comparable), score_type : type) :=
-class`. Classes above functions in its file (`classes`, error 3502).
+class`. Keep it in the folder that sorts first, helpers below (`classes`, 3502).
 
 ### Callbacks and wrappers
 

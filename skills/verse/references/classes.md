@@ -222,12 +222,16 @@ scoreboard(key_type : subtype(comparable), score_type : type) := class:
 Scores : scoreboard(player, int) = scoreboard(player, int){}
 ```
 
-**Order inside the file.** A function placed **above** a generic class in the same
-file fails with 3502 "Can't access a function from a preceding type", which does
-not name the cause. List every generic class first and put helper functions below
-them (verified with verse-lsp, 42.40). Using a generic class from another folder
-works in any folder order. Keep them together in one folder (`Archetypes/`). Pools
-and function wrappers built this way: `design_patterns`, `functions`.
+**Parse order.** Anything that **names** a generic class — a class field of its
+type, or a function whose signature returns or takes it — must be parsed after
+the class: below it in the same file, or in a file or folder that sorts later.
+Otherwise the build fails with 3502 "Can't access a function from a preceding
+type", reported **at the generic class**, not where the cause is. Put generic
+classes in a Content-level folder that sorts first (`Content/Archetypes/`, before
+`Content/Verse/`) with helper functions below the classes in the same file. Code
+that only uses one inside a function body is not affected; plain classes are not
+affected. (Verified with verse-lsp, 42.40.) Pools and function wrappers built this
+way: `design_patterns`, `functions`.
 
 Generic functions (`where t : type`) are in `functions`.
 
