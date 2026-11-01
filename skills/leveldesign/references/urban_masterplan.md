@@ -42,6 +42,9 @@ Source: masterplan-design skill, *Urban Design Skills* (MIT, A. Bhardwaj), turne
 
 Then dress (`theme_recipes`, `landscape_foliage`), light (`lighting`), devices, QA (`blockout_playtest`).
 
+**Generated / random settlement (any theme or layout style):** the same 12 steps as a seeded
+generator → `urban_procedural_city`. Verse that reads the layout at runtime → `verse` `sys_world_data`.
+
 ## Parameter matrix (game scale)
 
 | Context | Storeys | Coverage | Open space | Block side (cells) | Street ROW (uu, driving) |

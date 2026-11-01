@@ -252,6 +252,7 @@ Load with `skill_read_subskill("leveldesign", "<id>")`:
 | `lego_brick_editor` | LEGO islands: Brick Editor mode, Kragle / Separate, brick rules (42.40) |
 | `urban_design` | **Cities start here** — real→uu conversion, Lynch/Jacobs/Gehl, city anti-patterns, router |
 | `urban_masterplan` | Lay out a whole city/town: 12-step build order, game-scale parameters |
+| `urban_procedural_city` | Generate any settlement from a seed (city, village, colony, station, ruins; grid / organic / radial / vertical): network → blocks → lots → structures → plan file, batch placement, per-match variety |
 | `urban_streets` | Street hierarchy, cross-sections, driving lanes, intersections, roundabouts |
 | `urban_blocks` | Block typologies, building heights, towers, courtyards, corners |
 | `urban_public_spaces` | Plazas, parks, promenades — sizes, Gehl criteria, Power of 10 |

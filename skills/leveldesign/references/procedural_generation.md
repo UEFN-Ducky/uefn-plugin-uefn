@@ -20,26 +20,34 @@ Prefer this route for foliage/scatter the project already has a graph for.
 
 Two sub-routes:
 
-**B1 — Precise (few props):** compute positions, then one `spawn_actor` per actor
-with `check_area_clear` / `snap_actor_to_ground` / folders.
+**B1 — Precise (a few props):** compute positions, then `spawn_actor` per actor
+with `check_area_clear` / `snap_actor_to_ground` / folders. Five or more actors →
+B2's batch script instead.
 
-**B2 — Large greybox (preferred for cities/forests):** after surveying a clear
-footprint, `blockout_layout` / `area_create` / `pcg_generate` / `foliage_scatter`
-with Content Drawer `_C` `sources=` from `foliage_list_sources` (skip mesh / BakeData / HLOD hits).
-Leftover cubes: serial `spawn_actor(..., label=..., folder=...)` — one per
-assistant message. Never an `execute_python` spawn loop (freezes UEFN).
+**B2 — Large (cities, forests, thousands of props):** compute every position offline
+into a plan file (seeded), then place it with **one Epic `execute_tool_script` per
+batch of ~500–800 actors** (thousands of actors in a handful of batches). The script
+tools read files only under `%LOCALAPPDATA%/UnrealEditorFortnite/Saved/`, so stage the
+plan there. Greybox alternatives: `blockout_layout` / `area_create` / `pcg_generate` /
+`foliage_scatter` with Content Drawer `_C` `sources=` from `foliage_list_sources`
+(skip mesh / BakeData / HLOD hits). Never an `execute_python` spawn loop (freezes UEFN).
+Cities, towns, villages, colonies, bases, ruins (any theme): `urban_procedural_city`.
 
 Non-negotiables:
 
 - **Deterministic seed.** Derive every position from an explicit seed the user
   can re-run (say the seed in your summary). Same seed → same level.
+- **Validate the plan before placing** (overlaps, walkable gaps, budget). A bad
+  plan means a new seed, not hand fixes in the level.
 - **Clear the site first.** `check_area_clear` on the full footprint before bulk
-  place. For precise mode, clear each spot; for greybox, clear once then place
-  from computed coords via layout tools / serial `spawn_actor`.
+  place.
 - **Tag the generation**: every spawned actor gets a folder like
-  `Generated/<name>` or `BlockoutCity/...` + labels. Regenerate foliage =
-  `foliage_clear_generated` then re-scatter Creative sources. Never regenerate
-  on top of a previous run. Never `delete_actors` (refused).
+  `Generated/<name>_<seed>/...` + labels. Regenerate = census that folder, check
+  nothing else references its actors (`get_verse_editables`, Verse tags), delete
+  them with Epic `unreal__*` actor tools, then place the new seed. Foliage:
+  `foliage_clear_generated` then re-scatter. Never regenerate on top of a
+  previous run.
+- **Count check:** actors placed per kind = plan count.
 - **Never revive `spawn_actor_batch` / `batch_commands`.**
 
 ### Pattern cookbook (positions you compute)
@@ -48,7 +56,7 @@ Non-negotiables:
   spacing keeps rows readable). Streets/orchards/crates.
 - **Scatter with min-distance** — random points, reject any closer than
   `min_dist` to an accepted point (track accepted list), then
-  place survivors (`spawn_actor(..., label=..., folder=...)` — one per turn).
+  place survivors (B2 batch script; `spawn_actor` only for a handful).
 - **Radial** — N points on a circle (angle = i·2π/N): arena cover, stone
   circles, spawn rings.
 - **Path/corridor** — walk a polyline; place segments every `step`.

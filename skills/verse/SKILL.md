@@ -53,6 +53,7 @@ message, never `_v2` copies of a device (`skill_read_subskill("uefn", "verse_dev
 | Anything that loops, waits, races or must stop | `async`, `events_subscriptions` |
 | Moving, animating or attaching anything | scenegraph `movement_transforms` |
 | Spawning things at runtime, waves, pools | `sys_spawning`, `design_patterns` |
+| Ground height, paths, obstacles, GPS / NPC routes without raycasts; seeded random | `sys_world_data` |
 | NPCs and enemies | `sys_npc_ai` (+ the `npc-ai` skill) |
 | Damage, healing, elimination | `sys_damage_health` |
 | Teams, party, chat | `sys_teams`, `sys_party`, `sys_chat_channels`, `sys_text_chat` |
