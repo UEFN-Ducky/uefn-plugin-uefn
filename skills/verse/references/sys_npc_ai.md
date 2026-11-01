@@ -56,6 +56,7 @@ Every enemy type is a `class(npc_behavior)` with `@editable` tuning and an
 using { /Verse.org/Assets }
 using { /Fortnite.com/Characters }
 using { /Fortnite.com/AI }
+using { /Fortnite.com/Animation/PlayAnimation }   # GetPlayAnimationController (without it: 3506)
 using { /UnrealEngine.com/Temporary/SpatialMath }
 using { /Verse.org/Random }
 using { /Verse.org/SceneGraph }
@@ -195,11 +196,11 @@ Chase and fight while facing the player. Cap each hop with `Sleep` so the loop
 can re-target:
 
 ```verse
-TargetEnt := TargetChar.GetEntity[]   # bind in the if that found the target
-race:
-    Actions.NavigateTo(MakeNavigationTarget(Approach), ?MovementType := movement_type.Running, ?ReachRadius := 150.0)
-    Actions.Focus(TargetEnt, ?LockFocus := true)
-    Sleep(0.55)
+if (TargetEnt := TargetChar.GetEntity[]):   # GetEntity[] can fail: bind it in an if (bare: 3512)
+    race:
+        Actions.NavigateTo(MakeNavigationTarget(Approach), ?MovementType := movement_type.Running, ?ReachRadius := 150.0)
+        Actions.Focus(TargetEnt, ?LockFocus := true)
+        Sleep(0.55)
 ```
 
 ### Spread ring (packs fan out instead of stacking)

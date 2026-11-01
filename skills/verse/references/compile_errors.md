@@ -181,7 +181,7 @@ need `/Verse.org/SceneGraph`; `GetPlayspace()` needs `/Fortnite.com/Playspaces`;
   compiles (`events_subscriptions`).
   If the message adds "Did you forget to specify using { …/SomeFolder }", another
   folder defines a `Subscribe` extension on events — 43.00 rejects that one (below).
-- **43.00:** "Multiple overloads of the function match the provided arguments (:int->void).
+- **43.00 (3518):** "Multiple overloads of the function match the provided arguments (:int->void).
   Could be any of: function (/Verse.org/Verse/event:)Subscribe(:int->void) in package Verse
   / function (/YourIsland/Folder:)operator'.Subscribe'(:event(t),:t->void)" — your own
   `(Event:event(t) where t:type).Subscribe(…)` extension (Epic's interim tutorial helper)
