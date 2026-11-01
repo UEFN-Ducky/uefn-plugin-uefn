@@ -13,7 +13,9 @@ Every profiling tool reads a **live session**: Launch Session first (MCP:
 `ValkyrieFortniteToolset.SessionToolset.StartSession`). No session, no data.
 
 To have an agent run them, see `profiling_mcp` (the troubleshooting loop).
-For known causes and their fixes, see `profiling_fixes`.
+For known causes and their fixes, see `profiling_fixes`. Reading Verse Insights
+step by step (Timers modes, isolating a function, the spawn-burst fix,
+comparing traces): `verse_insights`.
 
 ## Which tool answers what
 
@@ -75,8 +77,10 @@ What a capture holds (`GetRecordedChannels`):
   check `CanCapture` first, since a fresh server may not have reported yet.
 - Verse Insights needs the **Use Verse VM** launch option: turn it on in Launch
   Options **before** you launch the session (VerseVM session toggle, 42.40).
+- Editor path: **Tools → Profile → Timing Insights**, target **Server**, Save to
+  File on before Start. How to read it and fix what it finds: `verse_insights`.
 - Hot Verse function → see verse `runtime_pitfalls` (work every tick, polling
-  loops, a `for` over every player or prop each frame).
+  loops, a `for` over every player or prop each frame, a spawn burst in one frame).
 
 ## Memory Snapshot
 

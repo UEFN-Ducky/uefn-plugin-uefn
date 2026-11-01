@@ -88,7 +88,7 @@ and the digest disagree, the digest wins; rows marked *not in the notes* came fr
 | Live edit: entity prefab assets, snap tools, Blocking / Post Process volumes (Water Body Exclusion still needs push) | uefn `troubleshooting`; scenegraph `editor_tools` |
 | `ValkyrieMap=` command line overrides the startup map | uefn `troubleshooting` |
 | Compact connectivity HUD | uefn `fortnite_client` |
-| Profiling: Verse Insights in Timing Insights (Server target, Use Verse VM), Memory Snapshot filters, mobile profiling, Quick Find | uefn `profiling` |
+| Profiling: Verse Insights in Timing Insights (Server target, Use Verse VM), Memory Snapshot filters, mobile profiling, Quick Find | uefn `profiling`, `verse_insights` |
 | Editor QoL: copy/paste vectors and transforms as Verse literals (LUF ↔ engine), custom grid transform, actor picker picks entities, performance-validation Content Browser filters, Lumen in the Prefab Editor | scenegraph `editor_tools` |
 | Lore: VS Code diff for `.uefnproject` / `.verse` / `.uplugin`, no 24 h reminder, `Lore.vsix`, Branch Explorer fixes | uefn `troubleshooting` |
 

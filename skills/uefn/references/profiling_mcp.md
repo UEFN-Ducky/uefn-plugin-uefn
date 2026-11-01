@@ -64,9 +64,12 @@ again. Each entry has `instanceId`, `displayName` and `bIsServer`. The client is
    About 20 s is enough. `GetCaptureStatus {instanceId}` shows `elapsedSeconds`.
 4. `StopCapture {instanceId}` → `.utrace` path. `InsightsTargetToolset.ListCaptures {}`
    lists this session's captures; `ListSavedCaptures {}` lists older ones.
-5. Read it: no MCP tool analyzes a trace. Open the file in Timing Insights with
-   the person, or read its csv scopes and frame events with a trace reader in the
-   sandbox. What a trace holds: `GetRecordedChannels {kind: "Client"|"Server"}`.
+5. Read it: the `unreal__*` toolsets don't analyze a trace. If a separate
+   **`unreal-insights`** MCP server is connected (seen next to `unreal-mcp` in
+   Epic's 43.00 Verse Insights demo), list its tools and read the trace with them.
+   Otherwise open the file in Timing Insights with the person (`verse_insights`
+   for server / Verse traces), or read its csv scopes and frame events with a
+   trace reader in the sandbox. What a trace holds: `GetRecordedChannels {kind: "Client"|"Server"}`.
 
 **Memory Snapshot.**
 1. Stand near the suspect area (streaming hides far textures).

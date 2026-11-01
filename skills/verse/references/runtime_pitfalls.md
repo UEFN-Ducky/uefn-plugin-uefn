@@ -24,7 +24,7 @@ rounds of "it lags" / "it's stuck" / "it doesn't show" after a clean build.
 | Steering, chasing, physics-like state | one loop, pure state | per frame (`Sleep(0.0)`); visuals ~10 Hz |
 | Periodic checks (zone scoring, waves, regen) | one loop per system | 1 Hz or slower |
 | Building arrays | a for-expression, once | never `+=` in a loop — each `+=` copies the array |
-| Big builds (level, grid, list) | split across ticks | a few dozen items per `Sleep(0.0)` |
+| Big builds (level, grid, list), mass entity spawns | split across ticks | a few dozen items per `Sleep(0.0)`; one `AddEntities` per batch. Find them with uefn `verse_insights` |
 | Short-lived objects | pools (`sys_spawning`) | never spawn/dispose in bursts |
 
 Every loop has an owner and a stop (round end, player leave or elimination,
