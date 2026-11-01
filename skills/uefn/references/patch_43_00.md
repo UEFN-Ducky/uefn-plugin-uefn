@@ -39,6 +39,7 @@ and the digest disagree, the digest wins; rows marked *not in the notes* came fr
 | Scene Graph handles (*not in the notes*) | `entity_handle`, `component_handle(t)`, `mesh_part_handle`; Source/TargetMeshHandle on hit and overlap results | scenegraph `components`, `movement_transforms` |
 | Same-frame overlap / sweep | results valid the same frame — drop the `Sleep(0.0)` workaround | scenegraph `movement_transforms` |
 | No proxy actors | the editor works with entities directly; advice that finds entities through proxy actors is stale | scenegraph `editor_tools` |
+| **Scene Graph performance** | cheaper bulk spawning, cheaper moves, the server skips unmoved entities, less reinstancing on compile / push, faster mass deletes, less client memory for many Verse objects / material properties, better memory tracking. Some gains need a **new cook** | scenegraph `SKILL` (43.00 performance), uefn `profiling` |
 | `weak_map` limit 4 → 6 | per island persistent `weak_map`s | verse `persistence` |
 | Asset modules default to project-wide | Verse modules with reflected assets are project-accessible by default | verse `modules` |
 | NPC actions (*not in the notes*) | `npc_actions_component` (`NavigateTo`, `Focus`, `Idle`, …), `guard_actions_component` (`Tether`) replace deprecated NPC calls | npc-ai pack; verse `devices` § NPC |

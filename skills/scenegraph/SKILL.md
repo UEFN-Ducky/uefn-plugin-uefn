@@ -43,6 +43,21 @@ metadata:
 | Editor uses entities directly (no proxy actors); prefab live edit | find entities with `FindEntities` | `editor_tools`, `prefab_only` |
 | Built-in damage hits entities | health pipeline | verse `sys_health_pipeline` |
 | Max `weak_map` per module 4 → 6 | — | verse `persistence` |
+| **Performance:** spawning many entities is cheaper (fewer hitches), moving costs less per frame, the server skips entities that haven't moved, Verse compile / Push Changes reinstance less, mass deletes are faster, many Verse objects or material properties use less client memory, Scene Graph memory is tracked better | **re-cook (launch/push again) to see it**; still pool and reuse, still move with KFM, not per-tick teleports; measure with the Memory Snapshot *Scene Graph* filter | below, uefn `profiling` |
+
+### 43.00 performance: what it changes for you
+
+- **Spawning in bulk** (waves, PCG-style scatter from Verse, pickups) hitches less, but a pool
+  (spawn once, hide / show, `RemoveFromParent` only at the end) is still cheaper than spawn/destroy loops.
+- **Movement:** a moved entity costs less per frame, and the server no longer processes
+  entities that **didn't move**, so many static or rarely moving entities are now cheap. Keep
+  movers on `keyframed_movement_component` instead of per-frame `SetGlobalTransform`.
+- **Memory:** islands with many Verse objects or Verse-driven material properties use less
+  client memory **once uploaded from 43.00**. Check with Memory Snapshot's *Filter by Scene Graph
+  Objects* (entities vs components; it doesn't show parent links).
+- **Editor:** Verse compiles and Push Changes spend less time reinstancing, mass entity deletes are faster,
+  and big prefabs don't reinitialize while you drag them (they do on release).
+- **Some gains need a new cook:** launch or push again before you profile a 43.00 change.
 
 ## What to build it with
 
