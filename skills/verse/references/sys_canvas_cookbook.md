@@ -18,7 +18,9 @@ settings, dialogs, lists, grids, HUDs and toasts are kit screens in UMG. Use thi
 cookbook only when the screen must be built in Verse code — a data-sized cell
 board, a template pack's `*_canvas_builder`, or a project with no kit and no
 UMG. The kit's rules still apply: custom buttons only (`sys_custom_buttons`),
-focus on open, Back closes, localizable text, safe zone.
+focus on open, Back closes, localizable text, safe zone. So do the design
+rules in `ui_design`: write the direction first, put one shared set of `color`
+constants and spacing steps in the builder, and run its checklist.
 
 Use this when building on-screen Verse UI in code — shops,
 inventory, wallets, XP, collect popups, tabs, minigame boards. Pair with

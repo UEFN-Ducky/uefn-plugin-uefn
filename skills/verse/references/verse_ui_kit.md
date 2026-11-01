@@ -197,6 +197,7 @@ Verified in UEFN 42.30 (Oct 16 2026) with the Ducky tools, on stand-in kit butto
 - [ ] Every clickable is a kit button (or one built on a Custom Button) — no Loud/Quiet/Regular buttons.
 - [ ] No values set on nested instances; styling lives in slots.
 - [ ] Manual steps listed for the user, plus anything you couldn't verify.
+- [ ] The `ui_design` checklist passes too (direction, spacing on the 4 scale, one accent, no slop signs).
 
 **Manual test for the user** (agents can't press buttons): open the screen with a gamepad connected; focus lands on the first control; the D-pad reaches every control; A activates; B/Back closes. Repeat with the mouse and with the arrow keys.
 
