@@ -108,6 +108,47 @@ Cine.Play()
 Sleep(Cine.GetSequenceLength())   # then hand control back / start the round
 ```
 
+Other device calls (digest): `Play(Agent)` / `Stop(Agent)` / `Pause(Agent)` (the agent overload is
+**required** unless the device's visibility is *Everyone*), `PlayReverse`, `GoToEndAndStop`,
+`SetPlaybackTime` / `SetPlaybackFrame`, `SetPlayRate(float)` / `GetPlayRate`, and
+`StoppedEvent:listenable(tuple())`. Too slow? Raise the play rate (e.g. 1.2) instead of re-keying.
+
+### Per-player intro on a trigger volume
+
+The shape that ships: a volume a few metres in front of the spawn pad (not on it), a
+Verse device that plays once per player and freezes them for the shot. Hide the Verse
+device in game.
+
+```verse
+var SeenIntro : [agent]logic = map{}
+
+PlayIntro(Agent:agent)<suspends>:void =
+    if (Character := Agent.GetFortCharacter[]):
+        Character.PutInStasis(stasis_args{AllowTurning := false, AllowFalling := false})
+    IntroSequence.Play(Agent)
+    race:                                   # StoppedEvent can be missed; cap the wait
+        IntroSequence.StoppedEvent.Await()
+        Sleep(IntroSequence.GetSequenceLength() + 1.0)
+    if (Character := Agent.GetFortCharacter[]):
+        Character.ReleaseFromStasis()
+```
+
+### Starting from the player's view (Can Blend)
+
+A cut from the gameplay camera into the cine camera is the **Camera Cut track's Can
+Blend** flag plus an ease-in on the cut section, not a Fade track. Agents that can't
+find a tool for it fall back to a fade-from-black: wrong when the user wants a blend.
+Set it with the Sequencer toolset if `describe_toolset` lists it; otherwise
+`describe_class` the camera cut track and set the `can_blend` editor property. Fade to
+black only at the end, before control returns.
+
+### Check the camera path for clipping
+
+After keying, scrub the camera at every key and midway between keys (screenshot or a
+trace from the camera position): orbits clip trees and walls when the orbit radius
+contains geometry (a 7.5 m orbit around a shop counter passes through the shop wall).
+Shrink the radius or add a key, then check again.
+
 ## Cutscene audio: MetaSound through Epic MCP (43.00)
 
 Import → MetaSound → device, all by MCP:
@@ -139,6 +180,9 @@ Import → MetaSound → device, all by MCP:
 | Nothing plays in game | Device not wired / Auto Start off with no trigger |
 | Double playback | Two triggers overlapping |
 | Stuck camera | Pause-at-end; restore player control explicitly |
+| Shot fades in from black instead of blending from the player | Camera Cut track **Can Blend** not set; a Fade track was used instead |
+| Camera passes through a wall / tree | Orbit radius contains geometry; check every key, shrink the radius |
+| `Play()` does nothing for one player | Device not set to *Everyone*: use `Play(Agent)` |
 | Keys missing | Outside section range; re-add keys via tool |
 | Actor doesn't move | Wrong binding / wrong actor_path label |
 | Capabilities false | Fall back to Verse prop anim or FBX anim path |

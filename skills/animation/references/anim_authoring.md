@@ -31,8 +31,17 @@ it: `skill_read_subskill("animation", "runtime_playback")`. Player body clips:
 
 ## Route 1 — Control Rig in a Level Sequence, then bake
 
-Authoring the rig itself is editor UI (no MCP tool drives Control Rig controls);
-the bake at the end is scripted.
+Authoring the rig is editor UI on 42.x. **43.00:** Epic MCP's
+`SequencerControlRigTools` keys controls (`key_controls`, `set_transform`,
+`load_anim_into_rig`, `bake_to_control_rig`) and `SequencerImportExportTools.export_anim_sequence`
+bakes the result, so an agent can author the whole clip (uefn `epic_toolsets`;
+`sequencer_cinematics` § Sequencer through Epic MCP).
+
+**Idle replacement for a bought NPC** (the clip it came with pops at the loop):
+8 s, slight breathing, small arm drift, weight shift leg to leg, head looks left and
+right; first and last poses identical. After the bake, check the root: total drift
+under ~0.01 cm or the NPC slides. Then point the character's idle / Animation to Play
+at the new AnimSequence and watch one full loop in the asset preview.
 
 1. Content Drawer → right-click → **Cinematics → Level Sequence**. Open it,
    **Add Actor** → the target skeletal mesh (`create_level_sequence` +

@@ -35,6 +35,10 @@ opened in the editor session — before that Verse gets E3506 "Unknown member". 
 and close the editor once per session for you (`verse_ready` in the result). Fields made another way:
 `open_asset_in_uefn` on the widget, then build Verse.
 
+**43.00:** a Verse file that `set`s a field made in the same pass fails the first build (3506) because
+the digest still lacks the field; that build regenerates it, so build Verse a **second** time before
+debugging the code.
+
 ### Drive from a creative_device
 
 ```verse
