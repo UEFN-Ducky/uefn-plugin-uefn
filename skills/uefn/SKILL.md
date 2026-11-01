@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 53
+  version: 54
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -32,7 +32,7 @@ metadata:
 
 **Launch blockers:** "Failed to connect to beacon" at Downloading while other islands launch = generated Verse data too big (≤ ~250 KB, flat `[]int`) → `launch_beacon_failure`. Validator "Vertex count of LOD0 ... too high (30,000)" on a Nanite mesh = the fallback is counted → `nanite_fallback_vertex_count`.
 
-**UEFN 42.40 (Oct 15 2026, current):** what changed and where it is covered → `skill_read_subskill("uefn", "patch_42_40")` (42.30 → `patch_42_30`). Discover artwork is required to publish from Oct 22 2026 → `creator_portal`. Every Epic toolset/tool name → `epic_toolsets`. Moderation flags during cook → `content_prechecks`. Benchmarks, offer errors, memory in MB, Rocket Racing, Fab → `creator_portal`.
+**UEFN 42.40 (Oct 15 2026, current):** what changed and where it is covered → `skill_read_subskill("uefn", "patch_42_40")` (42.30 → `patch_42_30`). Discover artwork is required to publish from Oct 22 2026 → `creator_portal`. Every Epic toolset/tool name → `epic_toolsets`. Epic MCP call failed, returned OK but changed nothing, wrong island on :8000, or a bulk edit → `epic_mcp_ops` (Epic's own safety/recovery rules). Full Unreal Engine 5 (not UEFN) → `skill_read_subskill("unreal-engine")`. Moderation flags during cook → `content_prechecks`. Benchmarks, offer errors, memory in MB, Rocket Racing, Fab → `creator_portal`.
 
 **Place like Content Drawer (HARD):** search `/Game/Creative/**` → keep only
 `BlueprintGeneratedClass` / `*_C`. **5+ pieces** → Programmatic `execute_tool_script`

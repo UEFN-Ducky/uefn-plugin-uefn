@@ -21,6 +21,10 @@ below.
 5+ editor ops → `ProgrammaticToolset` `execute_tool_script` (sandboxed tool calls),
 not `EditorLevelLibrary.spawn_actor_from_object` in the Ducky listener.
 
+**Check every result (HARD):** Epic tools can report failure in the payload with no
+exception — anything not an explicit success is a stop. Save before and after bulk
+edits. Safety, recovery, wrong-editor-on-:8000 → `epic_mcp_ops`.
+
 ## Where it shows in the app
 
 Settings → **MCPs** → nested row **UEFN MCP (Epic)**  

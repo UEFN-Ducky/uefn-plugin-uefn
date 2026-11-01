@@ -15,4 +15,4 @@ def test_every_part_registers_and_manifest_is_clean():
     tools = json.loads((_ROOT / "plugin.json").read_text(encoding="utf-8"))["contributes"]["agent.tools"]["tools"]
     assert len(tools) == len(set(tools))
     skills = sorted(p.name for p in (_ROOT / "skills").iterdir() if p.is_dir())
-    assert len(skills) == 17 and all((_ROOT / "skills" / s / "SKILL.md").is_file() for s in skills)
+    assert len(skills) == 18 and all((_ROOT / "skills" / s / "SKILL.md").is_file() for s in skills)
