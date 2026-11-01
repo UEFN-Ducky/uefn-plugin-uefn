@@ -121,7 +121,7 @@ Masterplan phase order; each phase ends playable and saved.
 4. **Gameplay actors** — spawns, objectives, control props; give each kind a Verse tag so code
    finds them by tag.
 5. **Materials** — one master + one instance per surface group, assigned by slot-name prefix
-   (imported slots get a `_NNN` suffix) in one batched `StaticMeshTools.set_material`. Never
+   (imported slots get a `_NNN` suffix) in one batched `EditorToolset.StaticMeshToolset.SetMaterial`. Never
    default a texture parameter to `/Engine/...` (the validator rejects it and blocks publishing).
 
 **Regenerate:** census `Generated/<Name>_<seed>/`, confirm nothing outside it references those

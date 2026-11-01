@@ -62,7 +62,8 @@ Verse AI loops: `skill_read_subskill("verse", "sys_npc_ai")`.
 `npc_behavior` subclass `OnBegin` loop typically uses (43.00 digest-verified):
 
 - `Actions := GetEntity[].GetComponent[npc_actions_component]` (`using { /Verse.org/SceneGraph }`)
-- `Actions.Focus(Target.GetEntity[], ?LockFocus := true)` — look / turn toward the player
+- `Actions.Focus(TargetEntity, ?LockFocus := true)` — look / turn toward the player
+  (bind `TargetEntity := Target.GetEntity[]` in the `if`; it is `<decides>`)
   (raced; a position is `FromVector3(Pos)`)
 - `Actions.NavigateTo(MakeNavigationTarget(Agent), ?MovementType := movement_type.Running)` — chase / strafe
 - 43.00 **deprecated** `GetFocusInterface` / `MaintainFocus`, `GetNavigatable`, `GetFortLeashable` and

@@ -28,7 +28,9 @@ Set to `false` to restore pack spread + sidestep.
 
 ```verse
 using { /Fortnite.com/AI }
+using { /Fortnite.com/Animation/PlayAnimation }   # GetPlayAnimationController
 using { /Fortnite.com/Characters }
+using { /Fortnite.com/Playspaces }   # GetPlayspaceForEntity
 using { /UnrealEngine.com/Temporary/SpatialMath }
 using { /Verse.org/Assets }
 using { /Verse.org/Random }
@@ -226,4 +228,4 @@ returns `result(navigation_action_success_type, navigation_action_error_type)`; 
 (the old `MaintainFocus`), `false` ends once facing; `Idle(?Duration)` replaces `Wait`;
 `set Actions.MovementSpeedMultiplier = 1.5` replaces `SetMovementSpeedMultiplier`. Guards leash with
 `guard_actions_component.Tether` / `Untether`. Convert old-SpatialMath positions with `FromVector3(P)`;
-focus a moving character with `Target.GetEntity[]`. Full table: verse `sys_npc_ai`.
+focus a moving character with `Target.GetEntity[]` (`<decides>`: bind it in the `if`). Full table: verse `sys_npc_ai`.

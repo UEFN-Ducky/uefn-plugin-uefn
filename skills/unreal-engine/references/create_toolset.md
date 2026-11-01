@@ -22,7 +22,7 @@ Adapted from Epic `skills/create-toolset` (MIT). A toolset is a collection of st
 
 1. **Exists already?** Editor running → `list_toolsets`, then `describe_toolset` on anything relevant. No MCP → search for folders named `Toolsets` and read the C++ headers / Python files. Already exposed → tell the user, point to the tool, stop.
 2. **More general than it sounds?** "Read Blueprint asset metadata" is really asset metadata → `EditorToolset.AssetToolset`, not `BlueprintTools`. Generic beats narrow.
-3. **Domain toolset exists?** Add to it (a mesh query → `StaticMeshTools`) rather than a new one.
+3. **Domain toolset exists?** Add to it (a mesh query → `EditorToolset.StaticMeshToolset`) rather than a new one.
 4. **Own plugin?** Closely related to an existing plugin → add there; a distinct domain may warrant its own plugin. Ask if it isn't obvious.
 5. **Language (the user's call — help them decide).** Python is generally preferred (faster iteration, easier change).
    - **Python:** search (don't read wholesale) `<project_root>/Intermediate/PythonStub/unreal.py`. Missing → the user enables **Developer Mode** in Edit → Project Settings → Plugins → Python and restarts (recommend it proactively for any toolset work). All needed APIs present → Python. Something small missing → flag it; a minor engine tweak may still make Python better overall.

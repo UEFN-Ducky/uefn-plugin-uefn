@@ -51,7 +51,7 @@ SERIAL: one mutating/editor call per assistant message.. Gameplay SFX/horns = Cr
 **Place like Content Drawer (HARD):** search `/Game/Creative/**` → keep only
 `BlueprintGeneratedClass` / `*_C`. **5+ Fortnite pieces** → ProgrammaticToolset
 `execute_tool_script` → `EditorToolset.LevelToolset.AddToSceneFromClass`
-with `actorType.refPath` = full `Package.Asset_C`, then `set_actor_folder`.
+with `actorType.refPath` = full `Package.Asset_C`, then `LevelToolset.SetActorFolder` in the same script.
 **Never** `AddToSceneFromAsset` for `/Game/Creative` — that spawns
 `FortStaticMeshActor` and cook-fails `AssetValidator_AssetReferenceRestrictions`.
 Devices → `ValkyrieFortniteToolset.DeviceToolset.PlaceDevice` (location + yaw, no Scale).

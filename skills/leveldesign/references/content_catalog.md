@@ -26,7 +26,7 @@ The hit's `path` is `{package}.{asset}` — append `_C` for the Content Drawer c
 
 **5+ pieces (HARD):** ProgrammaticToolset `execute_tool_script` →
 `EditorToolset.LevelToolset.AddToSceneFromClass` with `actorType.refPath` = that `Package.Asset_C`,
-then `set_actor_folder`. Example house kit:
+then `LevelToolset.SetActorFolder` in the same script. Example house kit:
 `/Game/Creative/Sets/ArtDeco_Bank/BuildingPieces/AD_Bank_Floor.AD_Bank_Floor_C`.
 
 **Never** `AddToSceneFromAsset` on `/Game/Creative` (mesh or not) — that creates

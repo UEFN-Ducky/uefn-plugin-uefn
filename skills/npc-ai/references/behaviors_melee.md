@@ -31,6 +31,7 @@ EnableSidestep defaults **false** on all; FocusYawOffsetDeg = 0.0.
 
 ```verse
 using { /Fortnite.com/AI }
+using { /Fortnite.com/Animation/PlayAnimation }   # GetPlayAnimationController
 using { /Fortnite.com/Devices }
 using { /UnrealEngine.com/Assets }
 using { /UnrealEngine.com/Temporary/SpatialMath }
