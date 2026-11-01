@@ -32,6 +32,7 @@ using { /Fortnite.com/Characters }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 using { /Verse.org/Assets }
 using { /Verse.org/Random }
+using { /Verse.org/SceneGraph }   # GetComponent[npc_actions_component]
 using { /Verse.org/Simulation }
 
 EnemyStraightChaseTest<public>:logic = true
@@ -170,8 +171,7 @@ roguelike_enemy_behavior<public> := class(npc_behavior):
         if:
             Agent := GetAgent[]
             NpcChar := Agent.GetFortCharacter[]
-            Nav := NpcChar.GetNavigatable[]
-            Focus := NpcChar.GetFocusInterface[]
+            Actions := GetEntity[].GetComponent[npc_actions_component]   # 43.00: replaces GetNavigatable / GetFocusInterface
             Anim := NpcChar.GetPlayAnimationController[]
         then:
             loop:
@@ -185,7 +185,7 @@ roguelike_enemy_behavior<public> := class(npc_behavior):
                     LookAt := EnemyLookPoint(SelfPos, TargetPos, FocusYawOffsetDeg)
                     if (Dist <= HitRange):
                         race:
-                            Focus.MaintainFocus(LookAt)
+                            Actions.Focus(FromVector3(LookAt), ?LockFocus := true)
                             block:
                                 if (Clip := AttackAnim?):
                                     Anim.PlayAndAwait(Clip)
@@ -196,14 +196,14 @@ roguelike_enemy_behavior<public> := class(npc_behavior):
                         if (ShouldStrafe = true):
                             Strafe := EnemyStrafePoint(SelfPos, TargetPos, 160.0, 420.0)
                             race:
-                                Nav.NavigateTo(MakeNavigationTarget(Strafe), ?MovementType := movement_types.Running, ?ReachRadius := 150.0)
-                                Focus.MaintainFocus(LookAt)
+                                Actions.NavigateTo(MakeNavigationTarget(Strafe), ?MovementType := movement_type.Running, ?ReachRadius := 150.0)
+                                Actions.Focus(FromVector3(LookAt), ?LockFocus := true)
                                 Sleep(0.55)
                         else:
                             Approach := EnemySpreadApproachPoint(SelfPos, TargetPos, SpreadDist, 180.0, 520.0)
                             race:
-                                Nav.NavigateTo(MakeNavigationTarget(Approach), ?MovementType := movement_types.Running, ?ReachRadius := 150.0)
-                                Focus.MaintainFocus(LookAt)
+                                Actions.NavigateTo(MakeNavigationTarget(Approach), ?MovementType := movement_type.Running, ?ReachRadius := 150.0)
+                                Actions.Focus(FromVector3(LookAt), ?LockFocus := true)
                                 Sleep(0.55)
                     else:
                         Sleep(0.5)
@@ -213,7 +213,17 @@ roguelike_enemy_behavior<public> := class(npc_behavior):
 
 ## Skeleton every archetype shares
 
-1. Guard `GetAgent` / `GetFortCharacter` / `GetNavigatable` / `GetFocusInterface` / `GetPlayAnimationController`
+1. Guard `GetAgent` / `GetFortCharacter` / `GetEntity[].GetComponent[npc_actions_component]` / `GetPlayAnimationController`
 2. Loop: Sleep → dead break → nearest player
-3. In range → `race { MaintainFocus ; PlayAndAwait + hit helper + cooldown }`
-4. Out of range → NavigateTo(spread or strafe) raced with MaintainFocus + retarget Sleep
+3. In range → `race { Actions.Focus(…, ?LockFocus := true) ; PlayAndAwait + hit helper + cooldown }`
+4. Out of range → `Actions.NavigateTo`(spread or strafe) raced with `Actions.Focus` + retarget Sleep
+
+**43.00 API change:** `GetNavigatable` / `navigatable`, `GetFocusInterface` / `MaintainFocus`,
+`GetFortLeashable`, the `movement_types` module and the `navigation_result` enum are **deprecated**.
+Use `npc_actions_component`: `NavigateTo(Target, ?MovementType := movement_type.Running, ?ReachRadius, ?AllowPartialPath)`
+returns `result(navigation_action_success_type, navigation_action_error_type)`; `Focus(Entity or
+/Verse.org/SpatialMath vector3, ?LockFocus)` — `LockFocus := true` holds until the race cancels it
+(the old `MaintainFocus`), `false` ends once facing; `Idle(?Duration)` replaces `Wait`;
+`set Actions.MovementSpeedMultiplier = 1.5` replaces `SetMovementSpeedMultiplier`. Guards leash with
+`guard_actions_component.Tether` / `Untether`. Convert old-SpatialMath positions with `FromVector3(P)`;
+focus a moving character with `Target.GetEntity[]`. Full table: verse `sys_npc_ai`.

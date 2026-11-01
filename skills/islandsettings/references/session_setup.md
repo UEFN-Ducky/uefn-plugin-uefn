@@ -55,14 +55,14 @@ DefaultClassIdentifier: {"class_type": "NoClass", "class_slot": 1}
 
 ## Placing pads for N players
 
-**One Player Spawn Pad per MaxPlayers slot.** Epic `ValkyrieToolset.DeviceToolset` first:
+**One Player Spawn Pad per MaxPlayers slot.** Epic `ValkyrieFortniteToolset.DeviceToolset` first:
 
 ```
-unreal__describe_toolset(toolset_name="ValkyrieToolset.DeviceToolset")   # exact argument names — never invent them
-unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="ListDeviceAssets", arguments={})  # pick the Player Spawn Pad asset
+unreal__describe_toolset(toolset_name="ValkyrieFortniteToolset.DeviceToolset")   # exact argument names — never invent them
+unreal__call_tool(toolset_name="ValkyrieFortniteToolset.DeviceToolset", tool_name="ListDeviceAssets", arguments={})  # pick the Player Spawn Pad asset
 # place N pads (or N-P more), ~200–400 uu apart (XYZ) — ONE PlaceDevice per call;
 # wait for each result before the next (never parallel / same-turn multi)
-unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="PlaceDevice", arguments={…})
+unreal__call_tool(toolset_name="ValkyrieFortniteToolset.DeviceToolset", tool_name="PlaceDevice", arguments={…})
 set_actor_label(..., label="Player K Spawn Pad")   # K = 1…N
 save_current_level()   # once, after all pads
 ```

@@ -94,6 +94,26 @@ Hard rules and orbit pitfalls: `skill_read_subskill("scenegraph", "prefab_only")
   API — prefer editing the prefab asset; level tweaks diverge other instances.
 - EntityToolset `FindEntities` filters `TRASH_*`, `REINST_*`, and EntityProxyActor shadow
   copies so each placed prefab appears once (canonical LevelEntity path).
+- **43.00: no more entity proxy actors in the editor.** UEFN works on Scene Graph entities
+  directly (faster); some entity right-click menu entries moved, same features. Don't look
+  for an `EntityProxyActor` in the Outliner or `get_all_level_actors` to find an entity —
+  use EntityToolset `FindEntities`. Prefabs show collapsed in the Outliner by default.
+- 43.00 editor: the actor picker can pick Scene Graph entities (also for grid align);
+  very large prefabs no longer reinitialize while you drag them in or drag Details
+  sliders / the gizmo (full reinit on release); Lumen in the Prefab Editor (Show menu);
+  pasting subobjects between prefabs no longer leaves a cross-package reference that
+  failed cooking; Epic MCP has a **Prefab toolset** (`uefn` `epic_toolsets`).
+- **43.00 copy/paste of vectors, rotations and transforms** in Details works the same in
+  every display mode. Verse types copy as **Verse literals** (e.g.
+  `vector3{Forward := 100.0, Left := 0.0, Up := 50.0}`); paste accepts a Verse literal **or**
+  engine values (`X=…,Y=…,Z=…`) and converts LUF ↔ engine axes for you (Left = −Y). Use it
+  to move a placed entity's transform into Verse code without hand-converting axes.
+- **Content Browser filters** (43.00): *Has Performance Validation Warnings* / *Has
+  Performance Validation Errors* — use them to list the assets the validator flags before
+  publishing.
+- **Asset validation severity levels** (43.00): each validation issue is a **warning** or an
+  **error**; fix errors first (they block), triage warnings. Validator output is a fix list,
+  never a delete list.
 
 ### Static vs Verse spawn
 

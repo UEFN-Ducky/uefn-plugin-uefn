@@ -48,6 +48,19 @@ If `available` is false or assemble fails:
   UEFN version — assemble in a supported pair of engine/UEFN builds, then migrate
   assets (`ue_to_uefn_migrate`).
 
+## 43.00 changes
+
+- **Normals are no longer recalculated** when you assemble from MetaHuman Creator.
+  Wrong shading on an older character → assemble it again (don't fix normals by hand).
+- **DNA import (Interchange):** DNA Import Settings has an option to turn off normal
+  recalculation; leave it off to keep the authored normals.
+- **Clothing in UEFN:** Chaos **outfit** and **cloth** assets are now created and
+  edited in UEFN with the **Dataflow editor**, MetaHuman clothing included — no
+  Unreal Engine build + migrate needed. Assign the outfit asset *or* the cloth asset
+  to a **Chaos Cloth component** (its asset property is visible again in 43.00).
+  Springs between pieces: Dataflow nodes `SimulationOutfitVertexSpringConfig` and
+  `SimulationOutfitVertexFaceSpringConfig`. USD import does **not** bring Chaos Cloth.
+
 ## Verify
 
 ```

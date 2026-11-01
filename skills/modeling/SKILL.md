@@ -133,7 +133,7 @@ Use `describe_class` to confirm method/enum names for this build before running.
 
 ## 42.30 notes
 
-- Epic `editor_toolset.toolsets.static_mesh.StaticMeshTools` and `.primitive.PrimitiveTools`
+- Epic `EditorToolset.StaticMeshToolset` and `EditorToolset.PrimitiveToolset` (43.00 names)
   inspect/edit static meshes and add primitive geometry when `epic_mcp_online`
   (uefn `epic_toolsets`).
 - Skinned-mesh import fixed (inverse bind matrices, bind-pose drift, multi-root files).

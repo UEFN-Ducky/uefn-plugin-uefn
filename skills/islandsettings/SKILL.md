@@ -14,7 +14,7 @@ metadata:
 
 # UEFN Island Settings — CORE session setup
 
-Island Settings + spawn pads: Epic `ValkyrieToolset.DeviceToolset` (`PlaceDevice`, `GetDeviceProperties`, `SetDeviceProperty`).
+Island Settings + spawn pads: Epic `ValkyrieFortniteToolset.DeviceToolset` (`PlaceDevice`, `GetDeviceProperties`, `SetDeviceProperty`).
 
 **CRITICAL — editor mutations are SERIAL:** spawn pads / Creative field sets —
 one heavy MCP call → wait → next. Never parallel `spawn_actor` for N pads in
@@ -67,7 +67,7 @@ If a Verse player-manager has `AllPlayerSpawners`, wire after placement: `wire_p
 | Job | Tool |
 |-----|------|
 | Find Island Settings / spawn pads | nested Epic `unreal__*` Creative device tools |
-| Read / write Island Settings | Epic `ValkyrieToolset.DeviceToolset` `GetDeviceProperties` / `SetDeviceProperty` (argument names from `unreal__describe_toolset` — never invent them) |
+| Read / write Island Settings | Epic `ValkyrieFortniteToolset.DeviceToolset` `GetDeviceProperties` / `SetDeviceProperty` (argument names from `unreal__describe_toolset` — never invent them) |
 | Wire pads → manager | `wire_player_spawners("<manager_label>")` |
 
 ## Session setup golden path (N players)

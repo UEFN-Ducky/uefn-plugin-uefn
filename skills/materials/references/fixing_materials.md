@@ -31,6 +31,19 @@ metadata:
 | **`Sky materials must be opaque or masked, and unlit`** | Additive (or lit) blend on a UEFN sky | `set_material_flags` **Opaque Unlit Two-Sided**. Keep the `starfield_recipe` graph — do not swap to a texture |
 | **Disallowed reference … Plugin: \<Island\>** (GameFeatureData) | Same illegal Creative mesh ref pulled into the cooked plugin | Fix the level actor first; re-save level; re-validate GameFeatureData |
 
+### 43.00 behaviour changes
+
+- **Float branches (If / Switch on a float condition) now select one value**
+  instead of blending between both for non-Boolean conditions. A material that
+  relied on the old blend now shows a hard cut: drive a `Lerp` with the float
+  instead of a branch.
+- Material Editor error hyperlinks now jump to the node in the graph (fixed).
+- RVT clear color for displacement is 0.5 (= no displacement).
+- Substrate: Single Layer Water BSDF works in ray-tracing hit shaders. Substrate
+  materials export to glTF correctly.
+- Verse-side compile errors after the 43.00 material inheritance change →
+  `runtime_materials_verse` (Verse material inheritance).
+
 ## Publish / cook gate (do this)
 
 UEFN ≠ full Unreal. The material editor can look fine while **submit validation fails**.

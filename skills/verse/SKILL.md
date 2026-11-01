@@ -15,7 +15,7 @@ metadata:
 # Verse — writing code for UEFN
 
 Source files are read and written with `workspace_*` (offline OK). In-editor build /
-file ops when Epic MCP is online: `ValkyrieToolset.VerseToolset` (`BuildAll`, …).
+file ops when Epic MCP is online: `VerseToolset.VerseToolset` (43.00 name; was `ValkyrieToolset.VerseToolset`) (`BuildAll`, …).
 Placing devices and wiring `@editable` refs is **serial** — one heavy editor call per
 message, never `_v2` copies of a device (`skill_read_subskill("uefn", "verse_devices")`).
 
@@ -34,7 +34,7 @@ message, never `_v2` copies of a device (`skill_read_subskill("uefn", "verse_dev
 
 - **Effects decide whether it compiles.** No effect specifier = `no_rollback`: not callable in `if (…)`, `if:`, `for` filters, `[]` or a `<decides>` body. Give every getter/helper `<transacts>`; pair `<decides>` with `<transacts>`; bind no-effect device getters on the line before the `if`. Field initialisers are literals; `int / int` is a failable `rational`. These rules were 72 % of real compile errors. → `effects`, `compile_errors`
 - **Folders before files.** Never write `.verse` at `Content/Verse/` root (only `module_declarations.verse` and tiny shared helpers). One system per folder; `workspace_list_dir("Verse")` first; reuse the system's folder. Generic (parametric) classes go in a Content-level folder that sorts first, helpers below them (3502). → `modules`
-- **Persistence `weak_map`.** Never remove keys; never delete persistable fields without migration; rebuild + `set`; four persistent weak_maps per island (Player Core + Economy + Progression + Time Tracker use them all; a fifth is error 3502). → `persistence`, `sys_persistence_migration`
+- **Persistence `weak_map`.** Never remove keys; never delete persistable fields without migration; rebuild + `set`; six persistent weak_maps per island from 43.00 (four on 42.x; Player Core + Economy + Progression + Time Tracker use four; the 7th is error 3502). Prefer nesting in the shared table over new maps. → `persistence`, `sys_persistence_migration`
 - **Player manager flow.** `player_manager` bus → `Init` (persist row) → each manager's `OnPlayerJoined` (config, then HUD). Roles are Manager / Tracker / Controller / Service. → `sys_architecture`
 - **UI = Epic's Verse UI Kit first**, custom kit buttons only (never Loud/Quiet/Regular presets). → `verse_ui_kit`, then the layer you write (`umg_widgets` index → `umg_*`; tools `umg_mcp_tools`). The widget type is its Assets digest name — never invent `MyUMGWidget := class`. Code-built canvas only as a fallback: `sys_canvas_cookbook` → `sys_hud_template` → `sys_custom_buttons` (`SetFocus` before `AddWidget`) → `sys_ui_menus`. Gatherable copy: `localization` skill, `ui_ready`.
 - **Digests are read only.** Never write, patch or delete any `*.digest.verse`.
@@ -45,9 +45,10 @@ message, never `_v2` copies of a device (`skill_read_subskill("uefn", "verse_dev
 
 | Task | Load (1–3, then write) |
 |------|------------------------|
-| A placed device: `@editable`, `OnBegin`, events and handlers | `devices` |
+| A placed device: `@editable`, `OnBegin`, events and handlers; 43.00 vehicle fuel / refuel, teleporting props | `devices` |
 | Any player-driven system (score, stats, joins, leaves) | `sys_architecture`, `sys_player_data` |
 | Currency, shop, XP, levels, playtime | apply the pack first; `sys_economy` / `sys_progression` / `sys_time_tracking` |
+| Quests, objectives, missions, achievements in the Fortnite quest UI (43.00) | `sys_quests` |
 | Saves across sessions | `persistence`, `sys_persistence_migration` |
 | Rounds, phases, countdowns | `sys_rounds_timers` |
 | Anything that loops, waits, races or must stop | `async`, `events_subscriptions` |
@@ -56,6 +57,7 @@ message, never `_v2` copies of a device (`skill_read_subskill("uefn", "verse_dev
 | Ground height, paths, obstacles, GPS / NPC routes without raycasts; seeded random | `sys_world_data` |
 | NPCs and enemies | `sys_npc_ai` (+ the `npc-ai` skill) |
 | Damage, healing, elimination | `sys_damage_health` |
+| Destructible props, custom health pools, damage types, damaging entities (43.00, Experimental) | `sys_health_pipeline` |
 | Teams, party, chat | `sys_teams`, `sys_party`, `sys_chat_channels`, `sys_text_chat` |
 | Weapons and items | `sys_owned_weapons`, `sys_inventory` (+ scenegraph `custom_weapons`, `custom_items`) |
 | Tycoon / idle | `sys_tycoon`, `sys_generators` |

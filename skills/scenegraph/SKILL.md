@@ -25,6 +25,25 @@ metadata:
 7. **Names come from the digest** (verse `digests`).
 8. **Done means played** — build, then one live run; two players for multiplayer (verse `runtime_pitfalls`).
 
+## 43.00 changes (Nov 1 2026)
+
+| Change | What to do | Page |
+|---|---|---|
+| Cameras use **radians**; `FieldOfViewDegrees` → `FieldOfView` | convert degrees (`* PiFloat / 180.0`) | `cameras` |
+| `GlobalModifierPosition` / `VisualModifierPosition` removed | director `PreCameraModifiers` / `PostCameraModifiers` / `PresentationCameraModifiers` | `cameras` |
+| User-written `camera_modifier` allowed | runs on the server, replicated | `cameras` |
+| **Known issue:** cameras don't activate on play servers | `using { /Fortnite.com/SceneGraphCameras }` in any file (private versions; fixed 43.10) | `cameras` |
+| Interacting is harder with a Scene Graph camera | add a Third Person Controls device | `cameras` |
+| Interactable hold: `OnStarted` at hold **start** | completion logic → `SucceededEvent`; remove workarounds | `components` |
+| Moves visible to overlap/sweep the same frame | no `Sleep` between move and query | `movement_transforms` |
+| Component on another entity → warning (future error) | fresh component per entity | `components` |
+| Prefabs subclass their parent; templates/items not `<final>` | `assault_rifle_template[E]` casts work | `custom_weapons` |
+| `fort_item_owner_pose_modifier_component` (5 hold poses) | `SetEquippedPose` | `held_items` |
+| **Known issue:** wedge target query misses actor-less entities | fixed 43.10 | `template_abilities` |
+| Editor uses entities directly (no proxy actors); prefab live edit | find entities with `FindEntities` | `editor_tools`, `prefab_only` |
+| Built-in damage hits entities | health pipeline | verse `sys_health_pipeline` |
+| Max `weak_map` per module 4 → 6 | — | verse `persistence` |
+
 ## What to build it with
 
 | You need | Build it as | Example |
@@ -217,7 +236,10 @@ free-text hunts, `list_verse_modules` for the module map.
   are in Verse, open enums need `_ =>`. Verse-authored abilities (`ability(context,
   effect)`, `ability_context.Instigator : ?entity`, `Use()` is no_rollback) —
   `custom_abilities`.
-  **Held items** (a carried torch / lantern / tool, `held_item_template`) — `held_items`.
+  **Held items** (a carried torch / lantern / tool, `held_item_template`) — `held_items`;
+  **43.00** hold pose via `fort_item_owner_pose_modifier_component` (torch default,
+  flashlight, map, small/large consumable). Prefabs made from a template are Verse
+  subclasses of it (templates are no longer `<final>`).
   Scene-event `OnReceive` runs on the server only (client calls are ignored).
 - **Mesh axis quirks**: put FBX yaw/pitch offsets on a **child** mesh entity
   (`SetLocalTransform`), keep root entity yaw = thrust/look heading.
@@ -240,8 +262,9 @@ free-text hunts, `list_verse_modules` for the module map.
 - **Entity Prefabs are first-class MCP tools.** `create_empty_prefab` /
   `create_prefab_from_entities` (loose entities → new name only) create assets
   under the project mount; `instantiate_prefab` places them via
-  `spawn_actor_from_object` (same as Content Browser → `EntityProxyActor`). Do
-  **not** `spawn_actor` an `EntityProxyActor` by class.
+  `spawn_actor_from_object` (same as Content Browser drag). Do
+  **not** `spawn_actor` an `EntityProxyActor` by class. From 43.00 the editor works on
+  entities directly (no proxy actors) — find placed prefabs with `FindEntities`.
 - **Module name collision** — do not put Verse under `Content/Verse/<Name>/`
   when `Content/<Name>/` already owns Assets module `Name`. Use a distinct
   folder (see `prefab_only` / `verse_authoring`).

@@ -1,10 +1,10 @@
 ---
-description: "Symptom→fix table for listener/wiring failures — STOP stays true, hash-not-in-cache, hung tools, wrong tool family"
+description: "Symptom→fix table for listener/wiring failures — STOP stays true, hash-not-in-cache, hung tools, wrong tool family; 43.00 editor changes (Python per project in Editor Preferences, InvalidIslandVersionOnServer, stuck launch with an idle client, ValkyrieMap=, Data Recovery save block, Lore)"
 metadata:
   order: 7
   label: "Troubleshooting"
   default_enabled: false
-  load_condition: "A listener/wiring call failed, STOP stays true, or tools hang"
+  load_condition: "A listener/wiring call failed, STOP stays true, or tools hang; the Ducky listener / init_unreal.py does not start after 43.00; players can't join with InvalidIslandVersionOnServer; launch stuck waiting for a client; save blocked by Data Recovery"
 ---
 
 ## Troubleshooting
@@ -24,7 +24,7 @@ metadata:
 | New `@editable` missing on device Script | `workspace_list_verse_errors` until Problems is clean → `workspace_compile_verse` once (wait; 10054 = started) → re-inspect the same device → wire. Still not readable = build did not land (errors / still linking) — fix and wait; placing another device never adds a hash. |
 | MCP bridge dies: `Request already responded to` | Cancel race — restart Ducky/MCP bridge (launcher patches idempotent respond); do not parallel long tools |
 | Launch fails at Downloading, "Waiting for client to be ready", **"Failed to connect to beacon"** (BeaconNetDriver ConnectionTimeout 30.00) while other islands launch | Not the network: generated Verse data too big for the server to load in 30 s. Measure `.verse` sizes, shrink to flat `[]int` ≤ ~250 KB, compile, close stale FortniteClient, relaunch. `skill_read_subskill("uefn", "launch_beacon_failure")` |
-| Validator **"Vertex count of LOD0 of this Static Mesh's render data is too high (30,000)"** on a Nanite mesh | The Nanite fallback is counted. `ObjectTools.set_properties` NaniteSettings `fallbackTarget: PercentTriangles`, 0.4–0.7 → ≤ 27k. `skill_read_subskill("uefn", "nanite_fallback_vertex_count")` |
+| Validator **"Vertex count of LOD0 of this Static Mesh's render data is too high (30,000)"** on a Nanite mesh | The Nanite fallback is counted. `EditorToolset.ObjectToolset.SetProperties` NaniteSettings `fallbackTarget: PercentTriangles`, 0.4–0.7 → ≤ 27k. `skill_read_subskill("uefn", "nanite_fallback_vertex_count")` |
 | ToyOptions error on Verse device | Wrong path — use Verse tools |
 | @editable ref won't set on granter | Wrong path — use Creative tools |
 
@@ -37,6 +37,28 @@ to Build Verse, paste T3D, drag Details refs, or restart UEFN. `reload_listener`
 ## Moved or renamed assets (v42.10+)
 
 Non-private assets, and every asset referenced from compiled Verse, now leave a **redirector** when moved or renamed, so `using` paths and `@editable` refs keep resolving. Run `fixup_redirectors` after a batch of moves before a Verse build; if the Assets digest still shows the old name, rebuild once and re-search.
+
+## 43.00 editor changes
+
+Everything 43.00 changed, with its skill page: `skill_read_subskill("uefn", "patch_43_00")`.
+Slow island, hitches, memory over budget → `profiling` / `profiling_mcp` / `profiling_fixes`.
+
+| Symptom / change | What to do |
+| --- | --- |
+| Ducky listener / `Content/Python/init_unreal.py` never runs on this island | 43.00 moved Python to **Editor Preferences** and enables it **per project**. Turn on Python scripting for this project there (Epic MCP: `ValkyrieToolset.ValkyriePythonToolset.EnablePythonForMainProject`, async; check `IsPythonReadyForMainProject`). Never delete `init_unreal.py`. |
+| Players permanently can't join: `InvalidIslandVersionOnServer` after the version history changed | Fixed in 43.00 — republish / relaunch on 43.00; no project change needed. |
+| Launch session stuck because an idle client never joined | Fixed in 43.00. Still stuck → `launch_beacon_failure`. |
+| Need a different startup map | Command line `ValkyrieMap=<map>` overrides the startup map. |
+| Save refused after renaming / deleting a Verse class | Data Recovery placeholders block saving until fixed — `verse_build_lifecycle`. |
+| Asset rename breaks Verse | Enable Reflect UE Redirectors into Verse Manifest — `verse_build_lifecycle`. |
+| Undo still showed "push needed"; entity placement errored in live edit; crash muting voice chat | Fixed in 43.00. Live edit now covers entity prefab assets, snap tools and brush volumes (Blocking / Post Process); Water Body Exclusion Volumes still need Push Changes. |
+| Migrated assets missing until restart | Fixed in 43.00 — do not restart UEFN for it. |
+| Logs tool | Epic `ConsoleToolset.LogsToolset.GetLogEntries` (renamed from `EditorToolset.LogsToolset`). |
+
+**Lore (43.00):** diff `.uefnproject`, `.verse` and `.uplugin` files in VS Code; the
+24-hour check-in reminder is gone (work is backed up automatically); the VS Code
+extension is `Lore.vsix` (was `URC.vsix`); Branch Explorer merge/archive display fixes.
+Never write or delete `.lore` files.
 
 ## 42.40 editor changes
 
@@ -59,7 +81,7 @@ Non-private assets, and every asset referenced from compiled Verse, now leave a 
   Context menus add **Copy File Path / Copy Package Path / Copy Verse Path**.
   In Verse, keep using the Assets-digest names (`list_verse_types(digest="assets")`).
 - **Launch Session** now logs *why* assets need resaving — read it with
-  `get_editor_log` / `EditorToolset.LogsToolset.GetLogEntries`.
+  `get_editor_log` / `ConsoleToolset.LogsToolset.GetLogEntries` (43.00 name).
 - **Restart session** is faster; **canceling a publish** now works.
 - **Content Pre-Checks** flag possible moderation problems during cook — `content_prechecks`.
 - Crashes fixed: undoing a deleted Gameplay Effect Component, creating spline meshes,

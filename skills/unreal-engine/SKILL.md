@@ -35,7 +35,7 @@ Missing tools do not prove the editor is stopped. Check the `unreal-mcp` / `unre
 
 ## Safety rules
 
-- **Save first, then save again.** Save (AssetTools save APIs) before any bulk change and after. MCP edits are not always undoable, especially across compilation boundaries. Anything touching multiple assets is destructive and needs a recovery point.
+- **Save first, then save again.** Save (`EditorToolset.AssetToolset.SaveAsset`; actors `LevelToolset.SaveActor`) before any bulk change and after. MCP edits are not always undoable, especially across compilation boundaries. Anything touching multiple assets is destructive and needs a recovery point.
 - **Wait for compilation.** With C++ or shader compilation in flight, calls hang or fail confusingly. To rebuild C++ from the running editor, call `LiveCodingToolset.CompileLiveCoding` and wait on its result — it blocks until the compile finishes and returns MSVC diagnostics. Never send the user to the IDE.
 - **Control concurrent calls.** MCP accepts concurrent requests and synchronizes dispatch, but async tools can overlap and request order is not completion order. Serialize dependent calls and mutations of the same asset/editor state; parallelize only independent work on tools that tolerate overlap. Multiple agents can share one editor; their conflicting changes collide. Ducky default: one mutating editor call per turn.
 - **Always check the result.** Blueprint compile, widget creation, material edits often return a status that flips success/failure with no exception on the wire. Read the response; anything not an explicit success is a stop.

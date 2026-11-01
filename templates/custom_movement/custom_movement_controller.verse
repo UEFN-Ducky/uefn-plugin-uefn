@@ -80,7 +80,8 @@ custom_movement_controller := class(creative_device):
         set Orbit.CameraHeightCentimeters = CameraHeightCentimeters
         set Orbit.EnableCollision = CameraCollision
         # AddModifier has NO <decides> -> parentheses (brackets give error 3511).
-        OrbitHandle := Cam.CameraModifiers.AddModifier(Orbit, VisualModifierPosition)
+        # 43.00 removed VisualModifierPosition / GlobalModifierPosition: Position is your own order (rational).
+        OrbitHandle := Cam.CameraModifiers.AddModifier(Orbit, 0)
         # Keep OrbitHandle if you need to pop the modifier later: OrbitHandle.Cancel()
 
     Detach(P : player) : void =

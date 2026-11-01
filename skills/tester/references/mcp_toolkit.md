@@ -47,7 +47,7 @@ Effect kinds: `grant_item`, `teleport`, `score`, `movement`, `hud`, `cinematic`,
 | Tool | Use |
 |------|-----|
 | `session_status` | Is play/PIE active? |
-| Epic `ValkyrieToolset.SessionToolset` `StartGame` / `StopGame` | Start/stop session |
+| Epic `ValkyrieFortniteToolset.SessionToolset` `StartGame` / `StopGame` | Start/stop session |
 | `get_editor_log` | Stream/filter log (`since_offset`, `regex`) |
 | `actor_state_snapshot` / `actor_state_diff` | Movement/teleport before/after |
 

@@ -1,5 +1,5 @@
 ---
-description: "UMG composition — kit widgets in your own screen, StackBox/Overlay layout (no Vertical/HorizontalBox), Z bands, named layers, safe zone and sizes, custom button hierarchy"
+description: "UMG composition — kit widgets in your own screen, StackBox/Overlay layout (no Vertical/HorizontalBox), Z bands, named layers, safe zone and sizes, the SafeZone widget (43.00), custom button hierarchy"
 metadata:
   order: 69
   label: "UMG layout"
@@ -28,7 +28,7 @@ Named layers swap by `visibility` or by adding and removing that child. Do not r
 
 Nested User Widgets for a card, a header, a details pane (`umg_compose`). Repeated buttons are one small widget built on a kit button, repeated — one edit restyles every copy.
 
-Safe zone and sizes: keep important UI about 5 % in from each screen edge, touch targets at least ~64 px, body text about 24 px or larger. A centered card uses a point anchor at 0.5, 0.5 with offsets that are the card size.
+Safe zone and sizes: from 43.00, wrap edge-anchored UI in a **`SafeZone`** widget (Panels in the UMG palette). It pads its child out of the notch, rounded corners and TV overscan on console and mobile, so HUD chrome stays visible. Put it directly under `Root_Canvas`, stretched full-screen, with the content inside. Before 43.00, or for content inside it, keep important UI about 5 % in from each screen edge. Touch targets at least ~64 px, body text about 24 px or larger. Check in Mobile Preview with a specific device (it draws cutouts and safe areas). A centered card uses a point anchor at 0.5, 0.5 with offsets that are the card size.
 
 ### Custom Button hierarchy
 

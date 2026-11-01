@@ -41,7 +41,7 @@ sky dome. Never Additive on a UEFN sky (Opaque Unlit Two-Sided).
 ## Tool ladder (in order)
 
 0. **Epic first:** `ducky_get_status` → when `epic_mcp_online` use
-   `editor_toolset.toolsets.material.MaterialTools` (and material_instance) via
+   `EditorToolset.MaterialToolset` (and `EditorToolset.MaterialInstanceToolset`) via
    nested `unreal__*`. 5+ graph ops → ProgrammaticToolset `execute_tool_script`.
 1. **Listener second — discover:** `list_uefn_material_expression_classes` (build-aware).
 2. **Listener second — create/inspect:** `create_material`, `create_material_instance`,
@@ -181,8 +181,8 @@ Verify with `get_asset_info` / `get_material_info` / `validate_uefn_asset` — n
 
 ## 42.30 notes
 
-- Epic `editor_toolset.toolsets.material_instance.MaterialInstanceTools` (create and set
-  MaterialInstanceConstant parameters) joins `MaterialTools` when `epic_mcp_online` —
+- Epic `EditorToolset.MaterialInstanceToolset` (43.00 name; create and set
+  MaterialInstanceConstant parameters) joins `EditorToolset.MaterialToolset` when `epic_mcp_online` —
   uefn `epic_toolsets` for exact tool names.
 - The material editor's shader count no longer includes local vertex factory shaders
   when static-mesh usage is off (viewport and platform stats are now right).

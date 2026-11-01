@@ -1,10 +1,10 @@
 ---
-description: "Map Content Drawer (All → Fortnite → Props / Prefabs / Devices) to real MCP search paths — walls, floors, prop kits, Creative devices, and Verse digests that list every device API"
+description: "Map Content Drawer (All → Fortnite → Props / Prefabs / Devices) to real MCP search paths — walls, floors, prop kits, Creative devices, Verse digests that list every device API; 43.00 Frenzy Fields galleries/prefabs, Gaussian splats (PLY/SPZ, Experimental, visual only)"
 metadata:
   order: 2
   label: "Content catalog (Props / Prefabs / Devices)"
   default_enabled: false
-  load_condition: "User asks to place props, walls, floors, prefabs, galleries, Creative devices, browse Content Drawer / Fortnite catalog, or find what Fortnite assets exist to build with"
+  load_condition: "User asks to place props, walls, floors, prefabs, galleries, Creative devices, browse Content Drawer / Fortnite catalog, find what Fortnite assets exist to build with, or mentions a gaussian splat, photoreal scan / capture, PLY, SPZ, real-world capture, Frenzy Fields, farm or barn"
 ---
 
 ## Content Drawer ≠ asset mount
@@ -25,11 +25,11 @@ That **Fortnite** tree is a **UI gallery filter**, not a registry path. These al
 The hit's `path` is `{package}.{asset}` — append `_C` for the Content Drawer class.
 
 **5+ pieces (HARD):** ProgrammaticToolset `execute_tool_script` →
-`SceneTools.add_to_scene_from_class` with `actor_type.refPath` = that `Package.Asset_C`,
+`EditorToolset.LevelToolset.AddToSceneFromClass` with `actorType.refPath` = that `Package.Asset_C`,
 then `set_actor_folder`. Example house kit:
 `/Game/Creative/Sets/ArtDeco_Bank/BuildingPieces/AD_Bank_Floor.AD_Bank_Floor_C`.
 
-**Never** `add_to_scene_from_asset` on `/Game/Creative` (mesh or not) — that creates
+**Never** `AddToSceneFromAsset` on `/Game/Creative` (mesh or not) — that creates
 `FortStaticMeshActor` and fails `AssetValidator_AssetReferenceRestrictions`. Leftover
 single props Epic cannot place: `spawn_actor(asset_path=…_C, label=…, folder=…)`.
 Devices: `PlaceDevice` only. Then `save_current_level`.
@@ -50,14 +50,14 @@ Devices: `PlaceDevice` only. Then `save_current_level`.
 | Themed kits (castle, military, houses…) | `/Game/Creative/Sets/<Theme>` | e.g. `ArtDeco_Bank` floors/walls/stairs (`AD_Bank_*_C`), `GrayBox`, `MilitaryBase` |
 | Prop-set packs | `/Game/Creative/Sets/PropSets` | `Playgrounds`, `Primitives`, … |
 | **Harrowville** (v42.10, horror) | `search_assets(search="Harrowville")` | Floor/Stair/Roof, Wall, Prop, Cliff galleries + `Harrowville House`; pairs with the Harrowville: Environment template |
-| **Stone Sanctum** (v42.20, temple) | `search_assets(search="Stone Sanctum")` | Temple + Floor / Wall / Roof / Prop / Foundation galleries. Place `_C` via `add_to_scene_from_class` |
+| **Stone Sanctum** (v42.20, temple) | `search_assets(search="Stone Sanctum")` | Temple + Floor / Wall / Roof / Prop / Foundation galleries. Place `_C` via `LevelToolset.AddToSceneFromClass` |
 | **Cluster Coast** (v42.10, coastal) | `search_assets(search="Cluster Coast")` | Floor, Wall, Roof, Prop galleries + `Duck Yacht`, `Salty Duck` |
 | Trees / hedges | `/Game/Creative/Environments` | `search="Tree"` / `ApolloTrees` / `ApolloHedges` / `AthenaHedges` |
 
 **First pass:** search `/Game/Creative/**` → keep only `BlueprintGeneratedClass` `_C`.
-Place with `add_to_scene_from_class` (batch) or leftover `spawn_actor(…_C)`. Skip
+Place with `LevelToolset.AddToSceneFromClass` (batch) or leftover `spawn_actor(…_C)`. Skip
 `StaticMesh`, `/BakeData/`, `/HLOD/`, `SM_*`, `…/Meshes/` — page or search again.
-**Never** `add_to_scene_from_asset`. Trees: `/Game/Creative/Environments`
+**Never** `AddToSceneFromAsset`. Trees: `/Game/Creative/Environments`
 (ApolloTrees, hedges) via `foliage_list_sources` → `foliage_scatter(sources=` those `_C` paths).
 
 **Browse folders** (like expanding Content Drawer):
@@ -88,7 +88,7 @@ Workflow for a themed kit:
 list_assets(directory="/Game/Creative/Sets", recursive=false, limit=50)   # pick theme
 search_assets(search="GrayBox", directory="/Game/Creative/Sets/GrayBox", limit=30,
               fields=["asset_name","package_path","asset_class"])
-# keep BlueprintGeneratedClass …_C — add_to_scene_from_class, never from_asset
+# keep BlueprintGeneratedClass …_C — LevelToolset.AddToSceneFromClass, never AddToSceneFromAsset
 ```
 
 ---
@@ -153,7 +153,7 @@ Custom project assets in Content Browser (weapons, imported meshes): `search_ass
 3. Pick a BlueprintGeneratedClass path ending in `_C` (the search hit `path` is not spawnable as-is — append `_C`)
 4. get_asset_info / get_actor_bounds after one test spawn if scale is unknown
 5. Creative devices → Epic DeviceToolset PlaceDevice
-   props → Epic ActorTools (5+ → ProgrammaticToolset execute_tool_script)
+   props → Epic LevelToolset.AddToSceneFromClass (5+ → ProgrammaticToolset execute_tool_script)
    leftovers → spawn_actor(…_C, label=..., folder=...) → snap_actor_to_ground
 6. take_high_res_screenshot → save_current_level
 ```
@@ -168,6 +168,29 @@ If zero hits: broaden keyword **or** step up one folder (e.g. Walls → Building
 - `CP_Prop_Rock_Wall_Moss` now exposes top-moss colour selection.
 - New Rare/Epic/Legendary **Striker Burst AR** variants for loadouts.
 - Themes: horror → Harrowville set + Horror audio; temple / stone ruin → Stone Sanctum; coastal/beach → Cluster Coast set.
+
+## New in 43.00
+
+| Content | Kind | Where / name |
+| --- | --- | --- |
+| **Frenzy Fields** | Floor, Wall, Roof and Props **galleries**; **Fields** prefab and **Barn** prefab | Content Browser → Fortnite → Galleries / Prefabs, search "Frenzy Fields". Farm / barnyard / countryside themes. Place the `*_C` Blueprint you find (`LevelToolset.AddToSceneFromClass`), never the meshes inside it |
+
+### Gaussian splats (Experimental, 43.00)
+
+Photoreal captures of real places (a room, building, landscape) used as an
+environment or backdrop.
+
+- **Import:** `.ply` or `.spz` file → Content Browser import (same as FBX). Then drag the
+  splat asset from the Content Browser into the level.
+- **Experimental:** the island can't be published while it uses one (Experimental
+  rule); fine for private versions and edit sessions.
+- **Platforms:** renders on every supported UEFN platform, **including mobile**, through a
+  native render path. Still check memory (Memory Snapshot) — captures are large.
+- **Niagara:** splats can be driven through Niagara for creative effects (dissolves,
+  reveals, distortion) — see the `vfx` pack.
+- **Not collision:** a splat is visual only. Add blocking volumes / invisible props
+  where players walk; never expect gameplay to hit it.
+- **Use for:** backdrops and set pieces. Gameplay geometry stays meshes/props.
 
 ## New in 42.40
 

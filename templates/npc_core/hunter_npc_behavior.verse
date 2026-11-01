@@ -1,11 +1,12 @@
 # SETUP: Assign this class on hunter NPCDefs via set_npc_definition_behavior.
 # After a catch, hunt someone else — never the prey you just downed.
+# 43.00: movement and focus go through npc_actions_component (GetNavigatable / GetFocusInterface are deprecated).
 using { /Fortnite.com/AI }
-using { /Fortnite.com/AI/movement_types }
 using { /Fortnite.com/Animation/PlayAnimation }
 using { /Fortnite.com/Characters }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 using { /Verse.org/Random }
+using { /Verse.org/SceneGraph }
 using { /Verse.org/Simulation }
 
 hunter_ai_state := enum:
@@ -33,18 +34,17 @@ hunter_npc_behavior<public> := class(npc_behavior):
         if:
             Agent := GetAgent[]
             Char := Agent.GetFortCharacter[]
-            Nav := Char.GetNavigatable[]
-            Focus := Char.GetFocusInterface[]
+            Actions := GetEntity[].GetComponent[npc_actions_component]
             Anim := Char.GetPlayAnimationController[]
         then:
             set SelfAgent = option{Agent}
             RegisterHunterAgent(Agent)
             race:
                 SenseLoop(Agent, Char)
-                BehaviorLoop(Char, Nav, Focus, Anim)
+                BehaviorLoop(Char, Actions, Anim)
                 WaitUntilInactive(Char)
             UnregisterHunterAgent(Agent)
-            Nav.StopNavigation()
+            Actions.StopNavigation()
 
     OnEnd<override>() : void =
         if (Agent := SelfAgent?):
@@ -92,52 +92,55 @@ hunter_npc_behavior<public> := class(npc_behavior):
         else:
             set Prey = false
 
-    BehaviorLoop(Char : fort_character, Nav : navigatable, Focus : focus_interface, Anim : play_animation_controller)<suspends> : void =
+    BehaviorLoop(Char : fort_character, Actions : npc_actions_component, Anim : play_animation_controller)<suspends> : void =
         loop:
             if (not Char.IsActive[]):
                 break
             case (CurrentState):
-                hunter_ai_state.Hunting => HuntOnce(Char, Nav, Focus)
-                hunter_ai_state.Attacking => AttackOnce(Char, Nav, Focus, Anim)
-                hunter_ai_state.GivingUp => GiveUpOnce(Char, Nav)
+                hunter_ai_state.Hunting => HuntOnce(Char, Actions)
+                hunter_ai_state.Attacking => AttackOnce(Char, Actions, Anim)
+                hunter_ai_state.GivingUp => GiveUpOnce(Char, Actions)
 
-    HuntOnce(Char : fort_character, Nav : navigatable, Focus : focus_interface)<suspends> : void =
+    HuntOnce(Char : fort_character, Actions : npc_actions_component)<suspends> : void =
         if (Target := Prey?, Target.IsActive[]):
-            Nav.SetMovementSpeedMultiplier(SprintSpeedMultiplier)
-            if (TargetAgent := Target.GetAgent[]):
+            set Actions.MovementSpeedMultiplier = SprintSpeedMultiplier
+            if (TargetAgent := Target.GetAgent[], TargetEntity := Target.GetEntity[]):
                 race:
-                    Nav.NavigateTo(MakeNavigationTarget(TargetAgent), ?MovementType := Running, ?ReachRadius := CatchRadius)
-                    Focus.MaintainFocus(TargetAgent)
+                    Actions.NavigateTo(MakeNavigationTarget(TargetAgent), ?MovementType := movement_type.Running, ?ReachRadius := CatchRadius)
+                    Actions.Focus(TargetEntity, ?LockFocus := true)
                     WaitWhileState(hunter_ai_state.Hunting)
             else:
                 TargetPos := Target.GetTransform().Translation
                 race:
-                    Nav.NavigateTo(MakeNavigationTarget(TargetPos), ?MovementType := Running, ?ReachRadius := CatchRadius)
-                    Focus.MaintainFocus(TargetPos)
+                    Actions.NavigateTo(MakeNavigationTarget(TargetPos), ?MovementType := movement_type.Running, ?ReachRadius := CatchRadius)
+                    Actions.Focus(FromVector3(TargetPos), ?LockFocus := true)
                     WaitWhileState(hunter_ai_state.Hunting)
-            Nav.SetMovementSpeedMultiplier(1.0)
+            set Actions.MovementSpeedMultiplier = 1.0
         else:
             Dest := NPCRandomPointAround(Char.GetTransform().Translation, 400.0, 700.0)
             race:
-                Nav.NavigateTo(MakeNavigationTarget(Dest), ?MovementType := Walking, ?ReachRadius := 100.0)
+                Actions.NavigateTo(MakeNavigationTarget(Dest), ?MovementType := movement_type.Walking, ?ReachRadius := 100.0)
                 Sleep(2.5)
                 WaitWhileState(hunter_ai_state.Hunting)
 
-    AttackOnce(Char : fort_character, Nav : navigatable, Focus : focus_interface, Anim : play_animation_controller)<suspends> : void =
-        Nav.StopNavigation()
-        Nav.SetMovementSpeedMultiplier(1.0)
+    AttackOnce(Char : fort_character, Actions : npc_actions_component, Anim : play_animation_controller)<suspends> : void =
+        Actions.StopNavigation()
+        set Actions.MovementSpeedMultiplier = 1.0
         Now := GetSimulationElapsedTime()
         if (Target := Prey?, TargetAgent := Target.GetAgent[]):
             MarkPreyDowned(TargetAgent, Now + PreyDownedSeconds)
-            race:
-                Focus.MaintainFocus(TargetAgent)
+            if (TargetEntity := Target.GetEntity[]):
+                race:
+                    Actions.Focus(TargetEntity, ?LockFocus := true)
+                    Sleep(AttackHoldSeconds)
+            else:
                 Sleep(AttackHoldSeconds)
         else:
             Sleep(AttackHoldSeconds)
         set CurrentState = hunter_ai_state.GivingUp
 
-    GiveUpOnce(Char : fort_character, Nav : navigatable)<suspends> : void =
-        Nav.StopNavigation()
+    GiveUpOnce(Char : fort_character, Actions : npc_actions_component)<suspends> : void =
+        Actions.StopNavigation()
         OldPrey := Prey
         set Prey = false
         Sleep(GiveUpSeconds)

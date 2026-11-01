@@ -196,7 +196,7 @@ Without the `defer`, a prop spawned inside a race arm that loses is never dispos
 
 ### Subscribing to events (the async trigger surface)
 
-Which events have `.Subscribe` (listenable) and which only `.Await` (your own `event(t)`, UMG event fields — until 43.00): `events_subscriptions`.
+From **43.00** every event has `.Subscribe`: device events, playspace and character events are `listenable`, and your own `event(t)` fields and UMG event fields are now `listenable` too (`MyEvent.Subscribe(Handler)` returns a `cancelable`). On a 42.x island, `event(t)` and UMG event fields have only `.Await`. Details: `events_subscriptions`.
 
 `.Subscribe(Handler)` registers an immediate handler; the event calls it later. Two
 shapes appear, depending on the API — an event **field** vs an event **accessor

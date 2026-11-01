@@ -1,10 +1,10 @@
 ---
-description: "creative_device pattern — @editable fields, OnBegin, subscribing to device/player events, what each event sends (handler payload table), agents vs players, GetPlayspace, never moving a placed device file, and the wrapper helpers"
+description: "creative_device pattern — @editable fields, OnBegin, subscribing to device/player events, what each event sends (handler payload table), agents vs players, GetPlayspace, never moving a placed device file, and the wrapper helpers. 43.00: vehicle fuel (fort_vehicle Get/SetFuelRemaining, GetFuelCapacity, per-state usage SetFuelUsageDriving/Boosting/Idle, refuel example), Teleporter props (Teleport/Activate a creative_prop, TeleportPropEvent, EnterPropEvent, enableable), SprintedEvent fix, has_tags on creative objects, GetSequenceLength"
 metadata:
   order: 7
   label: "Devices, @editable & events"
   default_enabled: false
-  load_condition: "Writing a placed device — @editable wiring, OnBegin, subscribing to triggers/buttons/player events, or working with agent/player/fort_character"
+  load_condition: "Writing a placed device — @editable wiring, OnBegin, subscribing to triggers/buttons/player events, or working with agent/player/fort_character; vehicle fuel, refuel, gas tank, fuel usage; teleport a prop, teleporter prop; SprintedEvent / sprint detection; tags on props or devices"
 ---
 
 ## Devices, `@editable` & events
@@ -113,6 +113,49 @@ agent->void, but this argument is of type tuple->void", a wrong one is 3509.
 
 To wait for a single occurrence instead of subscribing, use `.Await()` in a
 `<suspends>` context (see the `async` reference).
+
+### 43.00 device API changes (from the 43.00 digest)
+
+**Vehicle fuel** — `fort_vehicle` (`/Fortnite.com/Vehicles`; get one with
+`FortChar.GetVehicle[]`):
+
+| Member | Signature | Notes |
+|--------|-----------|-------|
+| `GetFuelRemaining()` | `<transacts>:float` | `0.0`…`GetFuelCapacity()`; `-1.0` if the vehicle uses no fuel |
+| `GetFuelCapacity()` | `<transacts>:float` | `≥ 1.0`; `-1.0` if no fuel |
+| `SetFuelRemaining(Amount:float)` | `<transacts>:void` | clamped to `0.0`…capacity |
+| `FuelUsageDriving` / `FuelUsageBoosting` / `FuelUsageIdle` | `var<private> …:float` (read) | fuel used per second in that state |
+| `SetFuelUsageDriving(Value)` / `SetFuelUsageBoosting(Value)` / `SetFuelUsageIdle(Value)` | `<transacts>:void` | per-second burn in that state (`0.0` = burns none) |
+
+```verse
+# Refuel whatever the player is driving (call from a button / volume handler).
+Refuel(Agent:agent):void =
+    if (FC := Agent.GetFortCharacter[], Vehicle := FC.GetVehicle[], Vehicle.GetFuelCapacity() > 0.0):
+        Vehicle.SetFuelRemaining(Vehicle.GetFuelCapacity())
+        Vehicle.SetFuelUsageIdle(0.0)       # idling no longer burns fuel
+```
+
+**Teleporter props** — `teleporter_device` is now `enableable` (`Enable`, `Disable`,
+`IsEnabled[]`) and moves props: `Teleport(Prop:creative_prop)`, `Activate(Prop:creative_prop)`,
+`TeleportPropEvent:listenable(creative_prop)` (a prop arrived), `EnterPropEvent:listenable(creative_prop)`
+(a prop entered). Physics props teleported from Verse are supported.
+
+**Sprint** — `fort_character.SprintedEvent():listenable(tuple(fort_character, logic))` now fires
+when **sprint input** changes (`true` = started sprinting). Before 43.00 it fired when movement
+started or stopped; drop any workaround that filtered that noise.
+
+**Tags on creative objects** — `creative_object_interface` (props and devices) now inherits
+`has_tags` (`@available 4300`, so only for islands uploaded on 43.00+): `Key := Obj.AddTag(my_tag{})`,
+`Obj.RemoveTag[Key]`, `Obj.ContainsTag[my_tag]`, `ContainsAnyTag[array{…}]`,
+`ContainsAllTags[array{…}]`, `RemoveAllTags[my_tag]`. Find tagged objects with
+`FindCreativeObjectsWithTag(my_tag)` (pass the tag **type**). `GetTags()`, `tag_view` and
+`tag_search_criteria` are deprecated. Compiled example: `classes` → "Tags on creative objects".
+
+**Cinematics** — `cinematic_sequence_device.GetSequenceLength()<transacts>:float`.
+
+**Interactables** — `basic_interactable_component.OnStarted` now runs when a hold **starts**
+(and `StartedEvent` fires once per hold). Move on-completion logic to `SucceededEvent`;
+`Cooldown` now also runs when an Interactable Duration is set (scenegraph pack).
 
 ### agent vs player vs fort_character
 

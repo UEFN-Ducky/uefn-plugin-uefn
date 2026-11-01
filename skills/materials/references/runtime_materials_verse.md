@@ -39,6 +39,29 @@ after Fortnite v33.00 — if parameters stop applying, retest with a plain mater
 swap to isolate, and check the Epic forums thread "Setting Materials with
 parameters from verse Not working after v33.00".
 
+### Verse material inheritance (43.00)
+
+From 43.00 UEFN generates material **instances as subclasses of their parent
+material class** in the Assets digest (MI_Red derives from M_Base). Effects:
+
+- A function taking the parent type accepts every instance: write one
+  `SetTint(M:M_Base)` helper instead of one per instance.
+- Less runtime memory for islands that use many material properties from Verse
+  (counts from the 43.00 upload on).
+- Check the real class chain in the project's Assets digest after a build
+  (`search_verse_digest("M_Base")`) — never assume it.
+
+**Upgrade errors on re-upload (rare):**
+
+| Error | Cause | Fix |
+| --- | --- | --- |
+| `unknown member` on `Value.(MI_Red)Param` | qualified access, but `Param` moved up to the parent class | drop the qualifier (`Value.Param`) or qualify with the parent: `Value.(M_Base)Param` |
+| conflicting / ambiguous extension method | same-name extension methods on a child and its parent material class | identical → delete the child's; different → rename one. Tip: rename all of them to surface every call site, fix children before parents |
+
+Material redirectors now generate Verse aliases too: renaming/moving a material
+keeps old references compiling with a deprecation warning (needs **Reflect UE
+Redirectors into Verse Manifest** in Project Settings).
+
 ### Design pattern
 
 - Pre-build one `M_` parent with parameter nodes + one `MI_` per themed variant.

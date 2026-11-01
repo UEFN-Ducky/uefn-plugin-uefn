@@ -117,7 +117,7 @@ Agents keep meeting a "display UMG from Verse" snippet that is partly obsolete. 
 | `MyUMGWidget := class:` empty placeholder + `@editable myUMGWidget : ?MyUMGWidget` | **Wrong.** Type is the real `UW_*` from Assets digest. Instantiate with `UW_X{}`. |
 | "Verse cannot get a named button from a UMG widget" | **Obsolete since 39.40.** Use **Verse field events** on the widget (`event()` fields bound to the Custom Button's `OnButtonClicked`; creatable by tool since 42.30). |
 | A parent listens to a child widget's Verse event | **No.** Bind the child's inner native button (`ToggleButton1.Main_Button.OnButtonClicked`) to a shared int event on your screen (`verse_ui_kit` — Clicks). |
-| `Widget.OnCloseClicked.Subscribe(...)` on a UMG event field | **No `Subscribe`.** Use the kit's `Helper.SubscribeToEvent`, or `Await` in a loop (`umg_verse_field_events`). |
+| `Widget.OnCloseClicked.Subscribe(...)` on a UMG event field | **43.00: works** (returns a `cancelable`). **42.x: no `Subscribe`** — use the kit's `Helper.SubscribeToEvent`, or `Await` in a loop (`umg_verse_field_events`). |
 | Must wrap UMG in a Verse `canvas` to show it | **Optional.** `player_ui.AddWidget(Widget)` / `AddWidget(Widget, player_ui_slot{…})` is enough. |
 | `canvas.GetSlots()` / `canvas.SetSlot(...)` | **Do not exist.** Digest: `canvas` has `Slots` (init), `AddWidget(Slot)`, `RemoveWidget(Widget)` only. |
 | `SizeToContent` / `ZOrder` on `canvas_slot` | **Real** — both exist on `canvas_slot` in UnrealEngine digest. |

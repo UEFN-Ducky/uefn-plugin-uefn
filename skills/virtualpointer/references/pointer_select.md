@@ -59,5 +59,5 @@ Keep every `cancelable` per player and `.Cancel()` them in `OnEnd` / when leavin
 
 - World hit-test: `screenspace_trace.md` (`DeprojectViewportToWorld` + `FindSweepHits`).
 - Swipes / taps: `swipe.md`.
-- Pinch: `pinch_zoom.md` (`PointerZoom`, Experimental).
+- Pinch: `pinch_zoom.md` (`PointerZoom`, publishable from 43.00).
 - Template: `verse_template_apply("vp_screenspace_trace")`.

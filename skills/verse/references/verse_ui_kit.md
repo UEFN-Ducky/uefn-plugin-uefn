@@ -146,7 +146,7 @@ settings_screen := class:
             Hide(Player)
 ```
 
-`Helper.SubscribeToEvent` is the kit's helper — UMG event fields themselves have no `Subscribe` in 42.40 (43.00 makes `event(t)` subscribable: `events_subscriptions`). Without the kit, await them in a loop (`umg_verse_field_events`).
+`Helper.SubscribeToEvent` is the kit's helper — UMG event fields themselves have no `Subscribe` on 42.x; on 43.00 `event(t)` is subscribable, so `Widget.OnX.Subscribe(Handler)` also works (`events_subscriptions`). Without the kit, await them in a loop (`umg_verse_field_events`).
 
 **Show a toast:** `ui_feedback_toast{}.ShowSuccessToast(Player, Heading, Body)` with `using { VerseUIKit.Verse.Feedback }`. `ShowToast` takes `toast_settings` for icon, colour, duration and placement.
 
@@ -172,8 +172,8 @@ Ducky's UMG tools wrap Epic's editor toolsets and compile + save each widget the
 |-----|------------|-----------|
 | Read a widget before changing it | `get_widget_blueprint_info`, `list_verse_fields`, `list_widget_bindings` | `GetWidgets`, `ListVerseFields`, `ListWidgetViewBindings` |
 | Screens that use a kit widget | `get_referencers` | — |
-| Set a property | `set_widget_property` (lists the real names first) | `editor_toolset.toolsets.object.ObjectTools`: `list_properties`, then `set_properties` |
-| Save | `save_asset(path)` for each asset you changed | `save_assets` with your paths — an **empty list saves every unsaved asset in the project**, other people's work included |
+| Set a property | `set_widget_property` (lists the real names first) | `EditorToolset.ObjectToolset`: `ListProperties`, then `SetProperties` (43.00 names) |
+| Save | `save_asset(path)` for each asset you changed | `EditorToolset.AssetToolset` `SaveAsset` per path (42.x `save_assets`: an **empty list saved every unsaved asset in the project**) |
 | Build Verse | `workspace_compile_verse` | `VerseToolset` `BuildAll` |
 | Asset validation | `validate_uefn_asset` | — |
 
@@ -183,7 +183,7 @@ Verified in UEFN 42.30 (Oct 16 2026) with the Ducky tools, on stand-in kit butto
 - Some overrides save and compile but fail asset validation: `isFocusable` on buttons, `Margin` on text blocks. Pad the slot instead.
 - Text blocks: the palette `Text` class. The tools add an `Image` and `ReplaceWidgetWithTemplate` it with `/Game/Valkyrie/UMG/UEFN_TextBlock.UEFN_TextBlock_C`. `build_widget_tree`'s `properties.text` writes localizable text with a fresh key. A `notes` entry "text: saved as a plain string, not localizable" means it could not — set it again. To set or change text later: `set_widget_property(widget_path, <text widget ref>, {"Text": "NSLOCTEXT(\"\", \"<unique 32-hex key>\", \"Play\")"})` — a new 32-hex key per text.
 - Desired focus: `set_widget_property(widget_path, "<package>.Default__<Name>_C", {"DesiredFocusWidget": {"widgetName": "ToggleButton1"}})` — the class default object, value `{"widgetName": <child name>}`.
-- `set_widget_property` fails with "Toolset 'ObjectTools.ObjectTools' not found" on older Ducky builds. Then call Epic's tool yourself: `unreal__call_tool(toolset_name="editor_toolset.toolsets.object.ObjectTools", tool_name="set_properties", arguments={"instance": {"refPath": <ref>}, "values": "<JSON object as a string>"})`, then `UMGToolSet` `CompileWidgetBlueprint` and `save_asset` the widget. On those builds `build_widget_tree` text is a plain string: set every label this way.
+- `set_widget_property` fails with "Toolset 'ObjectTools.ObjectTools' not found" on older Ducky builds. Then call Epic's tool yourself: `unreal__call_tool(toolset_name="EditorToolset.ObjectToolset", tool_name="SetProperties", arguments={"instance": {"refPath": <ref>}, "values": "<JSON object as a string>"})`, then `UMGToolSet` `CompileWidgetBlueprint` and `save_asset` the widget. On those builds `build_widget_tree` text is a plain string: set every label this way.
 - Renaming a named slot drops the content every parent put in it. Note each parent's content first and put it back after; never save a parent while its slot content is missing.
 - A call that hangs for minutes usually means an editor dialog is open (often revision control). Ask the user to check the editor (`uefn_popups` lists open dialogs).
 

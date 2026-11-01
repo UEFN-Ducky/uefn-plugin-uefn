@@ -1,5 +1,5 @@
 ---
-description: "Native Creative device workflows — inspect/set ToyOptions, place-in-level golden path, and Fortnite Audio Player for SFX/horns"
+description: "Native Creative device workflows — 43.00 classic device options (ListClassicDeviceOptions / SetClassicDeviceOption), place-in-level golden path, Fortnite Audio Player for SFX/horns, 43.00 Teleporter props + TeleportPropEvent, HUD Controller Interact/Pickup override and per-button Apply Canvas Transform, Cinematic Sequence GetSequenceLength, MetaSound via MCP"
 metadata:
   order: 4
   label: "Creative devices"
@@ -7,7 +7,7 @@ metadata:
   load_condition: "Configuring a native Creative device (granter, button, spawner, teleporter, audio player…) or placing devices / horns / SFX in the level"
 ---
 
-## Native Creative devices (Epic `ValkyrieToolset.DeviceToolset`)
+## Native Creative devices (Epic `ValkyrieFortniteToolset.DeviceToolset`)
 
 Epic-built devices: item granters, conditional buttons, player spawners,
 teleporters, timers, **Audio Players**, etc.
@@ -15,13 +15,21 @@ teleporters, timers, **Audio Players**, etc.
 **Prefer nested Epic UEFN MCP** (`skill_read_subskill("uefn", "epic_mcp")`):
 
 ```
-unreal__describe_toolset({ "toolset_name": "ValkyrieToolset.DeviceToolset" })
+unreal__describe_toolset({ "toolset_name": "ValkyrieFortniteToolset.DeviceToolset" })
 unreal__call_tool({
-  "toolset_name": "ValkyrieToolset.DeviceToolset",
-  "tool_name": "PlaceDevice",   # or ListDeviceAssets / GetDeviceProperties / SetDeviceProperty
+  "toolset_name": "ValkyrieFortniteToolset.DeviceToolset",
+  "tool_name": "PlaceDevice",   # or ListDeviceAssets / ListClassicDeviceOptions / SetClassicDeviceOption
   "arguments": { … }            # XYZ location/rotation; omit Scale — use refPath objects from prior Epic returns
 })
 ```
+
+**Settings (43.00):** classic (Blueprint) devices — granters, buttons, teleporters, Audio
+Player, HUD Controller … — use `ListClassicDeviceOptions(devicePath)` then
+`SetClassicDeviceOption(devicePath, optionName, value)` (validated like the Details panel:
+inactive options and unlisted values are rejected; `GetClassicDeviceOptionValues` when
+`allowedValues` is left out). `GetDeviceProperties` / `SetDeviceProperty(device,
+propertyName, value)` are only for **Verse `creative_device`** settings. The 42.40 device
+toolset had no classic options (old names: `epic_toolsets` rename table).
 
 The old Ducky Creative-device find/inspect/set tools were pruned and no longer exist.
 Call `unreal__describe_toolset` first to read the exact argument names — never invent them.
@@ -65,7 +73,7 @@ Rule: `MaxPlayers = N` requires **N Player Spawn Pads**.
 | Job | Tool |
 |-----|------|
 | Learn API / events | `search_verse_digest(query="teleporter")` → `get_verse_api(name="teleporter_device")` |
-| Place in level | Epic `ValkyrieToolset.DeviceToolset` `ListDeviceAssets` → `PlaceDevice`; offline fallback: `search_assets(search="…", directory="/Game/Creative")` → `spawn_actor(asset_path="…_C")` |
+| Place in level | Epic `ValkyrieFortniteToolset.DeviceToolset` `ListDeviceAssets` → `PlaceDevice`; offline fallback: `search_assets(search="…", directory="/Game/Creative")` → `spawn_actor(asset_path="…_C")` |
 
 **Props / Prefabs / full Creative catalog** (walls, Sets, Content Drawer map): not this
 file — `skill_read_subskill("leveldesign", "content_catalog")`. Device **API types** are
@@ -76,14 +84,14 @@ all listed via digests: `list_verse_types(digest="fortnite", kind="class", name_
 When the user says **place / add / put** triggers, granters, teleporters, spawn pads — **do it immediately** with defaults. Prefer Epic DeviceToolset:
 
 ```
-unreal__describe_toolset({ "toolset_name": "ValkyrieToolset.DeviceToolset" })
+unreal__describe_toolset({ "toolset_name": "ValkyrieFortniteToolset.DeviceToolset" })
 unreal__call_tool({
-  "toolset_name": "ValkyrieToolset.DeviceToolset",
+  "toolset_name": "ValkyrieFortniteToolset.DeviceToolset",
   "tool_name": "ListDeviceAssets",
   "arguments": {}
 })
 unreal__call_tool({
-  "toolset_name": "ValkyrieToolset.DeviceToolset",
+  "toolset_name": "ValkyrieFortniteToolset.DeviceToolset",
   "tool_name": "PlaceDevice",
   "arguments": { … }   # assetPath refPath + location/rotation XYZ — omit Scale
 })
@@ -106,11 +114,11 @@ cycled once each from the Verse handler.
 
 ```
 search_verse_digest(query="teleporter")   # optional — confirms teleporter_device API
-unreal__describe_toolset(toolset_name="ValkyrieToolset.DeviceToolset")   # exact argument names — never invent them
-unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="ListDeviceAssets", arguments={})
+unreal__describe_toolset(toolset_name="ValkyrieFortniteToolset.DeviceToolset")   # exact argument names — never invent them
+unreal__call_tool(toolset_name="ValkyrieFortniteToolset.DeviceToolset", tool_name="ListDeviceAssets", arguments={})
 # → Creative Teleporter device asset (not Athena B_Teleporter gadgets)
-unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="PlaceDevice",       arguments={…})  # ONE call, wait
-unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="SetDeviceProperty", arguments={…})  # one property per call
+unreal__call_tool(toolset_name="ValkyrieFortniteToolset.DeviceToolset", tool_name="PlaceDevice",       arguments={…})  # ONE call, wait
+unreal__call_tool(toolset_name="ValkyrieFortniteToolset.DeviceToolset", tool_name="SetClassicDeviceOption", arguments={…})  # after ListClassicDeviceOptions; one option per call
 save_current_level()
 ```
 
@@ -121,16 +129,19 @@ Offline fallback only (`epic_mcp_online` false or Epic errored twice):
 
 ### Audio Player (horns / wave SFX / alarms) — hard rule
 
+Making the sound asset first (import a wav/mp3, music, ambience loop, one-shot, MetaSound
+presets via MCP, tested 43.00 results): `skill_read_subskill("uefn", "audio_metasound")`.
+
 Gameplay SFX = Fortnite Creative **Audio Player** only (`audio_player_device` in
 Verse). **Never** Speakers, prop “horn” meshes, or Scene Graph `sound_component`
 as the primary path.
 
 ```
-unreal__describe_toolset(toolset_name="ValkyrieToolset.DeviceToolset")   # exact argument names — never invent them
-unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="ListDeviceAssets", arguments={})
+unreal__describe_toolset(toolset_name="ValkyrieFortniteToolset.DeviceToolset")   # exact argument names — never invent them
+unreal__call_tool(toolset_name="ValkyrieFortniteToolset.DeviceToolset", tool_name="ListDeviceAssets", arguments={})
 # pick the Creative Audio Player device (not a prop kit / Speakers)
-unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="PlaceDevice",       arguments={…})  # ONE call, wait
-unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="SetDeviceProperty", arguments={…})  # sound / play options, one at a time
+unreal__call_tool(toolset_name="ValkyrieFortniteToolset.DeviceToolset", tool_name="PlaceDevice",       arguments={…})  # ONE call, wait
+unreal__call_tool(toolset_name="ValkyrieFortniteToolset.DeviceToolset", tool_name="SetClassicDeviceOption", arguments={…})  # sound / play options, one at a time
 # wire to Verse ONE field per turn (workspace_compile_verse must have succeeded first):
 wire_verse_device_ref(actor_path="<VerseDevice>", field="HordeHornAudio", target_path="<AudioLabel>")
 save_current_level()   # once, at the end of the batch
@@ -169,6 +180,28 @@ assume it is the Player Movement Device until the asset name matches.
 **Wire to Verse device:** after placement, wait → `inspect_verse_device` →
 `wire_verse_device_ref(actor_path="MyDevice", field="SomeTriggerField", target_path="MyTrigger_1")` —
 **one field per turn**.
+
+## 43.00 device changes
+
+- **Teleporter + props (Verse):** `teleporter_device.Teleport` / `Activate` take a
+  `creative_prop`; `TeleportPropEvent` fires when a prop teleports. The device implements
+  `enableable`, teleports physics props moved by Verse, and has **On Teleported Prop** /
+  **On Enter Prop** events for device wiring. API: `get_verse_api(name="teleporter_device")`.
+- **HUD Controller:** **Interact** and **Pickup** can be overridden; they share one
+  contextual action, so one override applies to both and is static. **Apply Canvas
+  Transform** now works **per button** (on = your position wins over the player's layout;
+  off = keep the player's layout, still apply your icon) and no longer resets the rest of
+  the player's custom layout; it is separate from **Override Icon**. Custom HUD layout data
+  now affects button scale.
+- **Cinematic Sequence device:** `GetSequenceLength` in Verse.
+- **Audio:** sound waves and MetaSounds can be made through MCP
+  (`EditorToolset.SoundWaveToolset.ImportFile` → `MetaSoundToolset.MetaSoundAuthoringToolset`
+  preset builders; `BuildToAsset` failed in live tests) — `audio_metasound`; play them with the
+  **Audio Player** device as above.
+- Fixed: pasting a device that has an `@editable` device reference no longer shares that
+  reference with the original — after copy-paste, re-check the copy's wires once.
+- Fixed: `SprintedEvent` fired on movement start/stop instead of sprint input changes;
+  Pickaxes with built-in emotes could damage while Pickaxes were disabled.
 
 ## 42.40 device fixes
 

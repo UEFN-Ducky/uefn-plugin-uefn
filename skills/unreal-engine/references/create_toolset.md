@@ -16,12 +16,12 @@ Adapted from Epic `skills/create-toolset` (MIT). A toolset is a collection of st
 - **Clean** — the simplest API that does useful domain work. Don't mirror Unreal's (often overcomplex) APIs. Test: would a technical artist understand it without reading the implementation?
 - **Complete** — CRUD symmetry: set ⇒ get, create ⇒ delete. Getters without setters are fine when mutation isn't possible or useful.
 - **Composable** — same types for the same kinds of operation. If `get_graph()` returns a `Graph`, `get_graph_nodes()` takes a `Graph`.
-- **DRY** — no duplication within or across toolsets. `ObjectTools` already does generic UObject property get/set; don't reimplement it.
+- **DRY** — no duplication within or across toolsets. `EditorToolset.ObjectToolset` already does generic UObject property get/set; don't reimplement it.
 
 ## Before you write (in order)
 
 1. **Exists already?** Editor running → `list_toolsets`, then `describe_toolset` on anything relevant. No MCP → search for folders named `Toolsets` and read the C++ headers / Python files. Already exposed → tell the user, point to the tool, stop.
-2. **More general than it sounds?** "Read Blueprint asset metadata" is really asset metadata → `AssetTools`, not `BlueprintTools`. Generic beats narrow.
+2. **More general than it sounds?** "Read Blueprint asset metadata" is really asset metadata → `EditorToolset.AssetToolset`, not `BlueprintTools`. Generic beats narrow.
 3. **Domain toolset exists?** Add to it (a mesh query → `StaticMeshTools`) rather than a new one.
 4. **Own plugin?** Closely related to an existing plugin → add there; a distinct domain may warrant its own plugin. Ask if it isn't obvious.
 5. **Language (the user's call — help them decide).** Python is generally preferred (faster iteration, easier change).

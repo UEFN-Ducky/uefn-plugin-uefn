@@ -72,13 +72,14 @@ save_current_level()
 The fill tools save the asset themselves; still `save_current_level()` if
 anything in the level references the table.
 
-## Epic table toolsets (42.30)
+## Epic table toolsets (43.00 names)
 
 When `epic_mcp_online`, Epic also edits tables in the editor:
-`editor_toolset.toolsets.data_table.DataTableTools` (`create`, `get_schema`,
-`list_rows`, `get_rows`, `set_rows`, `add_rows`, `remove_rows`, `rename_rows`,
-`import_file`, `search_row_structs`, `diff`) and
-`editor_toolset.toolsets.curve_table.CurveTableTools` (`create`, `add_row`,
-`add_key`, `get_keys`, `set_keys`, `list_rows`, `remove_row`, `rename_row`,
-`import_file`, `diff`). Prefer them for single-row edits (`set_rows`) over a full
+`EditorToolset.DataTableToolset` (`Create`, `GetSchema`,
+`ListRows`, `GetRows`, `SetRows`, `AddRows`, `RemoveRows`, `RenameRows`,
+`ImportFile`, `SearchRowStructs`, `Diff`) and
+`EditorToolset.CurveTableToolset` (`Create`, `AddRow`,
+`AddKey`, `GetKeys`, `SetKeys`, `ListRows`, `RemoveRow`, `RenameRow`,
+`ImportFile`, `Diff`). The 42.x `editor_toolset.toolsets.data_table` / `curve_table` names fail
+in 43.00. Prefer them for single-row edits (`SetRows`) over a full
 `fill_data_table_from_json`; `unreal__describe_toolset` first for argument names.

@@ -1,5 +1,5 @@
 ---
-description: "NPC AI in Verse — npc_behavior templates, nearest-player lookup, spread/strafe movement, centralized damage, Scene Graph projectiles, and wave spawn managers"
+description: "NPC AI in Verse — npc_behavior templates on npc_actions_component (43.00: NavigateTo / Focus / Idle / StopNavigation / MovementSpeedMultiplier; GetNavigatable, GetFocusInterface, GetFortLeashable, movement_types deprecated), guard_actions_component Tether / RoamAround, nearest-player lookup, spread/strafe movement, centralized damage, Scene Graph projectiles, and wave spawn managers"
 metadata:
   order: 40
   label: "Game systems — NPC AI (npc_behavior)"
@@ -15,10 +15,22 @@ metadata:
 > block applies to all of them — copy those imports (or start from the matching
 > `verse_template_apply` pack) when pasting into a real `.verse` file.
 
-The code below is **pre-verified** against current digests — copy names and
-signatures as-is (`npc_behavior`, `GetNavigatable`, `PlayAndAwait`,
-`npc_spawner_device`, `Distance`, focus/anim interfaces); do NOT re-check them
-one by one. Digest-check only APIs you add that are not shown here (e.g.
+The code below is verified against the **43.00** digests (the chaser and guard
+behaviors compiled with 0 errors on Nov 1 2026) — copy names and signatures as-is
+(`npc_behavior`, `npc_actions_component`, `guard_actions_component`, `PlayAndAwait`,
+`npc_spawner_device`, `Distance`); do NOT re-check them one by one.
+
+> **43.00 deprecated the old NPC interfaces.** Use `npc_actions_component` (from
+> `Char.GetEntity[].GetComponent[npc_actions_component]`) instead of:
+>
+> | Deprecated | Use |
+> |-----------|-----|
+> | `Char.GetNavigatable[]` → `NavigateTo` / `StopNavigation` / `Wait` / `SetMovementSpeedMultiplier` / `GetCurrentDestination` | `Actions.NavigateTo(…)` (returns `result(navigation_action_success_type, navigation_action_error_type)`, not the `navigation_result` enum) / `StopNavigation()` / `Idle(?Duration)` / `set Actions.MovementSpeedMultiplier = 1.2` (0.5–2) / `GetCurrentDestination[]` (`/Verse.org/SpatialMath` vector) |
+> | `Char.GetFocusInterface[]` → `MaintainFocus(Pos or Agent)` (never ended) | `Actions.Focus(Entity or /Verse.org/SpatialMath vector3, ?LockFocus := true)`; `LockFocus := false` ends once facing |
+> | `Char.GetFortLeashable[]` → `SetLeashPosition` / `SetLeashAgent` / `ClearLeash` | guards: `guard_actions_component.Tether(Entity or vector3, Radius)` / `Untether()` |
+> | `movement_types.Running` | `movement_type.Running` (also `Walking`, `Sprinting`) |
+>
+> Old code still compiles with deprecation warnings; write new code on the component. Digest-check only APIs you add that are not shown here (e.g.
 foliage/grass queries), then write and let `workspace_list_verse_errors` catch
 drift. Pair this with the **animation** pack's `npc_characters` reference for
 character definitions and AnimPresets — Verse owns behavior; content owns mesh/anim.
@@ -63,8 +75,7 @@ melee_enemy_behavior<public> := class(npc_behavior):
         if:
             Agent := GetAgent[]
             Char := Agent.GetFortCharacter[]
-            Nav := Char.GetNavigatable[]
-            Focus := Char.GetFocusInterface[]
+            Actions := Char.GetEntity[].GetComponent[npc_actions_component]
             Anim := Char.GetPlayAnimationController[]
         then:
             loop:
@@ -74,16 +85,83 @@ melee_enemy_behavior<public> := class(npc_behavior):
                 if (Target := FindNearestPlayer(Self, Char, MaxChaseRange)?):
                     # chase / attack — see sections below
                 else:
-                    Sleep(1.0)
+                    Actions.Idle(?Duration := 1.0)
 ```
 
-**Interfaces you almost always need:**
+**What you almost always need:**
 
-- `GetNavigatable[]` → `NavigateTo(MakeNavigationTarget(...), ?MovementType := movement_types.Running, ?ReachRadius := …)`
-- `GetFocusInterface[]` → `MaintainFocus(LookAtPoint)` (async — race it)
-- `GetPlayAnimationController[]` → `PlayAndAwait(Clip)` for attack swings
+- `Actions.NavigateTo(MakeNavigationTarget(Agent or Position), ?MovementType := movement_type.Running, ?ReachRadius := …)`; read failure with `if (NavError := Result.GetError[])`. Never name the binding `Err`: it clashes with Verse's `Err` function (3588/3532).
+- `Actions.Focus(TargetEntity, ?LockFocus := true)`: async and never ends while locked, so race it.
+- `Char.GetPlayAnimationController[]` → `PlayAndAwait(Clip)` for attack swings (not deprecated).
+- Guards: `Ent.GetComponent[guard_actions_component]` adds `Tether`, `Untether`, `RoamAround`, `MoveInRangeToAttack`, `Attack(Target)`, `Crouch`, `Jump`, `Slide`.
 
-These member names are current — if a compile error flags one, re-check just that name with `get_verse_api`.
+### Complete chaser (compiled, 43.00)
+
+```verse
+using { /Fortnite.com/AI }
+using { /Fortnite.com/Characters }
+using { /Fortnite.com/Playspaces }
+using { /UnrealEngine.com/Temporary/SpatialMath }
+using { /Verse.org/SceneGraph }
+using { /Verse.org/Simulation }
+
+chaser_behavior<public> := class(npc_behavior):
+    @editable ChaseRange:float = 5000.0
+    @editable SpeedMultiplier:float = 1.2
+
+    OnBegin<override>()<suspends>:void =
+        if:
+            Char := GetAgent[].GetFortCharacter[]
+            Actions := Char.GetEntity[].GetComponent[npc_actions_component]
+        then:
+            set Actions.MovementSpeedMultiplier = SpeedMultiplier
+            loop:
+                if (not Char.IsActive[]):
+                    break
+                if (Target := NearestPlayer(Char)?, TargetEnt := Target.GetFortCharacter[].GetEntity[]):
+                    race:
+                        ChaseOnce(Actions, Target)
+                        Actions.Focus(TargetEnt, ?LockFocus := true)   # never ends: race it
+                        Sleep(0.5)                                     # re-target twice a second
+                else:
+                    Actions.Idle(?Duration := 1.0)
+
+    ChaseOnce(Actions:npc_actions_component, Target:agent)<suspends>:void =
+        Result := Actions.NavigateTo(MakeNavigationTarget(Target), ?MovementType := movement_type.Running, ?ReachRadius := 150.0)
+        if (NavError := Result.GetError[], NavError = navigation_action_error_type.Unreachable):
+            Actions.StopNavigation()
+
+    NearestPlayer(Char:fort_character)<transacts>:?player =
+        var Best:?player = false
+        var BestDist:float = ChaseRange
+        if (Ent := GetEntity[], PS := Ent.GetPlayspaceForEntity[]):
+            SelfPos := Char.GetTransform().Translation
+            for (P : PS.GetPlayers(), PC := P.GetFortCharacter[], PC.IsActive[]):
+                D := Distance(SelfPos, PC.GetTransform().Translation)
+                if (D < BestDist):
+                    set Best = option{P}
+                    set BestDist = D
+        Best
+
+# Guards: tether to a player and roam inside the radius.
+guard_roam_behavior<public> := class(npc_behavior):
+    @editable TetherRadius:float = 1500.0
+
+    OnBegin<override>()<suspends>:void =
+        if:
+            Ent := GetAgent[].GetFortCharacter[].GetEntity[]
+            Guard := Ent.GetComponent[guard_actions_component]
+            Ps := Ent.GetPlayspaceForEntity[]
+            Anchor := Ps.GetPlayers()[0].GetFortCharacter[].GetEntity[]
+        then:
+            Guard.Tether(Anchor, TetherRadius)
+            Guard.RoamAround(?MovementType := movement_type.Walking)
+```
+
+Passing a target **entity** to `Focus` and an **agent** to `MakeNavigationTarget` keeps the
+file on `/UnrealEngine.com/Temporary/SpatialMath` (fort_character positions). Position
+overloads of `Focus`, `Tether` and `GetCurrentDestination` take `/Verse.org/SpatialMath`
+vectors, so convert or put that code in its own file.
 
 ### Nearest-player helper (no wired manager required)
 
@@ -117,10 +195,10 @@ Chase and fight while facing the player. Cap each hop with `Sleep` so the loop
 can re-target:
 
 ```verse
-LookAt := TargetPos   # or a helper that returns TargetPos
+TargetEnt := TargetChar.GetEntity[]   # bind in the if that found the target
 race:
-    Nav.NavigateTo(MakeNavigationTarget(Approach), ?MovementType := movement_types.Running, ?ReachRadius := 150.0)
-    Focus.MaintainFocus(LookAt)
+    Actions.NavigateTo(MakeNavigationTarget(Approach), ?MovementType := movement_type.Running, ?ReachRadius := 150.0)
+    Actions.Focus(TargetEnt, ?LockFocus := true)
     Sleep(0.55)
 ```
 
@@ -178,7 +256,7 @@ Melee attack block pattern:
 
 ```verse
 race:
-    Focus.MaintainFocus(LookAt)
+    Actions.Focus(TargetEnt, ?LockFocus := true)
     block:
         if (Clip := AttackAnim?):
             Anim.PlayAndAwait(Clip)

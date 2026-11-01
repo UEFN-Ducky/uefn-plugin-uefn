@@ -1,5 +1,6 @@
+# 43.00: movement and focus go through npc_actions_component (GetNavigatable / GetFocusInterface are deprecated).
 using { /Fortnite.com/AI }
-using { /Fortnite.com/AI/movement_types }
+using { /Verse.org/SceneGraph }
 using { /Fortnite.com/Animation/PlayAnimation }
 using { /Fortnite.com/Characters }
 using { /UnrealEngine.com/Temporary/SpatialMath }
@@ -63,18 +64,17 @@ cat_npc_behavior<public> := class(npc_behavior):
         if:
             Agent := GetAgent[]
             Char := Agent.GetFortCharacter[]
-            Nav := Char.GetNavigatable[]
-            Focus := Char.GetFocusInterface[]
+            Actions := GetEntity[].GetComponent[npc_actions_component]
             Anim := Char.GetPlayAnimationController[]
         then:
             set SelfAgent = option{Agent}
             RegisterCatAgent(Agent)
             race:
                 SenseLoop(Agent, Char)
-                BehaviorLoop(Char, Nav, Focus, Anim)
+                BehaviorLoop(Char, Actions, Anim)
                 WaitUntilInactive(Char)
             UnregisterCatAgent(Agent)
-            Nav.StopNavigation()
+            Actions.StopNavigation()
 
     OnEnd<override>() : void =
         if (Agent := SelfAgent?):
@@ -196,47 +196,47 @@ cat_npc_behavior<public> := class(npc_behavior):
         set FollowTarget = false
         set FollowUntilTime = 0.0
 
-    BehaviorLoop(Char : fort_character, Nav : navigatable, Focus : focus_interface, Anim : play_animation_controller)<suspends> : void =
+    BehaviorLoop(Char : fort_character, Actions : npc_actions_component, Anim : play_animation_controller)<suspends> : void =
         loop:
             if (not Char.IsActive[]):
                 break
             case (CurrentState):
-                cat_ai_state.Exploring => ExploreOnce(Char, Nav, Focus, Anim)
-                cat_ai_state.Following => FollowOnce(Char, Nav, Focus, Anim)
-                cat_ai_state.Fleeing => FleeOnce(Char, Nav, Focus, Anim)
-                cat_ai_state.Greeting => GreetOnce(Char, Nav, Focus, Anim)
-                cat_ai_state.PlayingDead => PlayDeadOnce(Char, Nav, Anim)
+                cat_ai_state.Exploring => ExploreOnce(Char, Actions, Anim)
+                cat_ai_state.Following => FollowOnce(Char, Actions, Anim)
+                cat_ai_state.Fleeing => FleeOnce(Char, Actions, Anim)
+                cat_ai_state.Greeting => GreetOnce(Char, Actions, Anim)
+                cat_ai_state.PlayingDead => PlayDeadOnce(Char, Actions, Anim)
 
-    ExploreOnce(Char : fort_character, Nav : navigatable, Focus : focus_interface, Anim : play_animation_controller)<suspends> : void =
+    ExploreOnce(Char : fort_character, Actions : npc_actions_component, Anim : play_animation_controller)<suspends> : void =
         SelfPos := Char.GetTransform().Translation
         Dest := CatRandomPointAround(SelfPos, ExploreMinRadius, ExploreMaxRadius)
-        Nav.SetMovementSpeedMultiplier(1.0)
+        set Actions.MovementSpeedMultiplier = 1.0
         race:
             block:
-                Nav.NavigateTo(MakeNavigationTarget(Dest), ?MovementType := Walking, ?ReachRadius := ExploreReachRadius)
-                MaybeSniff(Char, Nav)
+                Actions.NavigateTo(MakeNavigationTarget(Dest), ?MovementType := movement_type.Walking, ?ReachRadius := ExploreReachRadius)
+                MaybeSniff(Char, Actions)
             WaitWhileState(cat_ai_state.Exploring)
 
-    MaybeSniff(Char : fort_character, Nav : navigatable)<suspends> : void =
+    MaybeSniff(Char : fort_character, Actions : npc_actions_component)<suspends> : void =
         Roll := GetRandomInt(1, SniffChanceOneIn)
         if (Roll = 1):
-            Nav.StopNavigation()
+            Actions.StopNavigation()
             Sleep(GetRandomFloat(SniffMinSeconds, SniffMaxSeconds))
 
-    FollowOnce(Char : fort_character, Nav : navigatable, Focus : focus_interface, Anim : play_animation_controller)<suspends> : void =
+    FollowOnce(Char : fort_character, Actions : npc_actions_component, Anim : play_animation_controller)<suspends> : void =
         if (Target := FollowTarget?):
             if (Target.IsActive[]):
                 TargetPos := Target.GetTransform().Translation
                 Dist := Distance(Char.GetTransform().Translation, TargetPos)
                 if (Dist <= FollowReachRadius * 1.35):
-                    Nav.StopNavigation()
-                    Nav.SetMovementSpeedMultiplier(1.0)
+                    Actions.StopNavigation()
+                    set Actions.MovementSpeedMultiplier = 1.0
                     Now := GetSimulationElapsedTime()
                     ReactSeconds := GetRandomFloat(PlayerReactMinSeconds, PlayerReactMaxSeconds)
                     Roll := GetRandomInt(1, PlayerReactChanceOneIn)
-                    if (TargetAgent := Target.GetAgent[]):
+                    if (TargetAgent := Target.GetAgent[], TargetEntity := Target.GetEntity[]):
                         race:
-                            Focus.MaintainFocus(TargetAgent)
+                            Actions.Focus(TargetEntity, ?LockFocus := true)
                             block:
                                 if (Roll = 1, Now - LastPlayerReactTime >= PlayerReactCooldownSeconds):
                                     set LastPlayerReactTime = Now
@@ -245,7 +245,7 @@ cat_npc_behavior<public> := class(npc_behavior):
                                     Sleep(ReactSeconds)
                     else:
                         race:
-                            Focus.MaintainFocus(TargetPos)
+                            Actions.Focus(FromVector3(TargetPos), ?LockFocus := true)
                             block:
                                 if (Roll = 1, Now - LastPlayerReactTime >= PlayerReactCooldownSeconds):
                                     set LastPlayerReactTime = Now
@@ -253,18 +253,18 @@ cat_npc_behavior<public> := class(npc_behavior):
                                 else:
                                     Sleep(ReactSeconds)
                 else:
-                    Nav.SetMovementSpeedMultiplier(SprintSpeedMultiplier)
-                    if (TargetAgent := Target.GetAgent[]):
+                    set Actions.MovementSpeedMultiplier = SprintSpeedMultiplier
+                    if (TargetAgent := Target.GetAgent[], TargetEntity := Target.GetEntity[]):
                         race:
-                            Nav.NavigateTo(MakeNavigationTarget(TargetAgent), ?MovementType := Running, ?ReachRadius := FollowReachRadius)
-                            Focus.MaintainFocus(TargetAgent)
+                            Actions.NavigateTo(MakeNavigationTarget(TargetAgent), ?MovementType := movement_type.Running, ?ReachRadius := FollowReachRadius)
+                            Actions.Focus(TargetEntity, ?LockFocus := true)
                             WaitWhileState(cat_ai_state.Following)
                     else:
                         race:
-                            Nav.NavigateTo(MakeNavigationTarget(TargetPos), ?MovementType := Running, ?ReachRadius := FollowReachRadius)
-                            Focus.MaintainFocus(TargetPos)
+                            Actions.NavigateTo(MakeNavigationTarget(TargetPos), ?MovementType := movement_type.Running, ?ReachRadius := FollowReachRadius)
+                            Actions.Focus(FromVector3(TargetPos), ?LockFocus := true)
                             WaitWhileState(cat_ai_state.Following)
-                    Nav.SetMovementSpeedMultiplier(1.0)
+                    set Actions.MovementSpeedMultiplier = 1.0
             else:
                 ClearFollow()
                 set CurrentState = cat_ai_state.Exploring
@@ -274,9 +274,9 @@ cat_npc_behavior<public> := class(npc_behavior):
             set CurrentState = cat_ai_state.Exploring
             Sleep(0.1)
 
-    FleeOnce(Char : fort_character, Nav : navigatable, Focus : focus_interface, Anim : play_animation_controller)<suspends> : void =
+    FleeOnce(Char : fort_character, Actions : npc_actions_component, Anim : play_animation_controller)<suspends> : void =
         set StateLocked = true
-        Nav.StopNavigation()
+        Actions.StopNavigation()
         SelfPos := Char.GetTransform().Translation
         var ThreatPos : vector3 = SelfPos
         if (Target := FollowTarget?):
@@ -292,22 +292,22 @@ cat_npc_behavior<public> := class(npc_behavior):
         FleeDest := CatFleePointFrom(SelfPos, ThreatPos, FleeDistance)
 
         # No jump — jump spam looked like the catch bug.
-        Nav.SetMovementSpeedMultiplier(FleeSpeedMultiplier)
+        set Actions.MovementSpeedMultiplier = FleeSpeedMultiplier
         race:
-            Nav.NavigateTo(MakeNavigationTarget(FleeDest), ?MovementType := Running, ?ReachRadius := FleeReachRadius)
-            Focus.MaintainFocus(ThreatPos)
+            Actions.NavigateTo(MakeNavigationTarget(FleeDest), ?MovementType := movement_type.Running, ?ReachRadius := FleeReachRadius)
+            Actions.Focus(FromVector3(ThreatPos), ?LockFocus := true)
             WaitWhileState(cat_ai_state.Fleeing)
             Sleep(3.5)
-        Nav.SetMovementSpeedMultiplier(1.0)
+        set Actions.MovementSpeedMultiplier = 1.0
         ClearFollow()
         if (CurrentState = cat_ai_state.Fleeing):
             set CurrentState = cat_ai_state.Exploring
         set StateLocked = false
 
-    PlayDeadOnce(Char : fort_character, Nav : navigatable, Anim : play_animation_controller)<suspends> : void =
+    PlayDeadOnce(Char : fort_character, Actions : npc_actions_component, Anim : play_animation_controller)<suspends> : void =
         set StateLocked = true
-        Nav.StopNavigation()
-        Nav.SetMovementSpeedMultiplier(1.0)
+        Actions.StopNavigation()
+        set Actions.MovementSpeedMultiplier = 1.0
         ClearFollow()
         set GreetingPartner = false
         PlayOneShot(Anim, AS_CatReact_Die, DieHoldSeconds)
@@ -316,22 +316,22 @@ cat_npc_behavior<public> := class(npc_behavior):
         set CurrentState = cat_ai_state.Exploring
         set StateLocked = false
 
-    GreetOnce(Char : fort_character, Nav : navigatable, Focus : focus_interface, Anim : play_animation_controller)<suspends> : void =
+    GreetOnce(Char : fort_character, Actions : npc_actions_component, Anim : play_animation_controller)<suspends> : void =
         set StateLocked = true
-        Nav.StopNavigation()
-        Nav.SetMovementSpeedMultiplier(1.0)
+        Actions.StopNavigation()
+        set Actions.MovementSpeedMultiplier = 1.0
         set LastGreetingTime = GetSimulationElapsedTime()
         GreetSeconds := GetRandomFloat(GreetMinSeconds, GreetMaxSeconds)
         if (Partner := GreetingPartner?):
             if (Partner.IsActive[]):
-                if (PartnerAgent := Partner.GetAgent[]):
+                if (PartnerEntity := Partner.GetEntity[]):
                     race:
-                        Focus.MaintainFocus(PartnerAgent)
+                        Actions.Focus(PartnerEntity, ?LockFocus := true)
                         PlayRandomReact(Anim, GreetSeconds)
                 else:
                     PartnerPos := Partner.GetTransform().Translation
                     race:
-                        Focus.MaintainFocus(PartnerPos)
+                        Actions.Focus(FromVector3(PartnerPos), ?LockFocus := true)
                         PlayRandomReact(Anim, GreetSeconds)
             else:
                 Sleep(0.2)

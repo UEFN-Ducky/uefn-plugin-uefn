@@ -9,7 +9,7 @@ metadata:
 
 # Island Settings — writable key categories
 
-Only keys that Epic `GetDeviceProperties` / `ListDeviceProperties` (`ValkyrieToolset.DeviceToolset`) reports as writable (not `readonly_override`) can be set via `SetDeviceProperty`. Confirm on the live device — Epic adds/renames options over time.
+Only keys that Epic `GetDeviceProperties` / `ListDeviceProperties` (`ValkyrieFortniteToolset.DeviceToolset`) reports as writable (not `readonly_override`) can be set via `SetDeviceProperty`. Confirm on the live device — Epic adds/renames options over time.
 
 ## Matchmaking & session (CORE)
 

@@ -64,7 +64,25 @@ sniper or minigun is one of them re-meshed and re-tuned. Templates already ship
 a full fire/reload loop — you tune and re-skin them.
 
 **Build Verse** after creating or renaming a prefab: only then is it a class in
-Assets.digest (`EP_CustomAR<scoped {…}> := class<final><concrete>(entity)`).
+Assets.digest. **43.00:** a prefab whose parent is a template is a **subclass of that
+template** in Verse (before: a plain `(entity)` class), and the templates are no longer
+`<final>` — so casts and parent-member access work:
+
+```verse
+using { /Fortnite.com/Armory }
+
+AsRifle(E:entity)<decides><transacts>:assault_rifle_template = assault_rifle_template[E]
+# if (Rifle := AsRifle[EP_CustomAR{}]) { ... }   # succeeds for any AR-template prefab
+
+my_rifle := class<concrete>(assault_rifle_template):   # legal from 43.00 (was 'final' error)
+    Tier : int = 1
+```
+
+Compiled 0 errors in 43.00. Read the generated parent with
+`get_verse_api("EP_CustomAR", digest_path=<Assets digest>)` rather than assuming it.
+Same for `pistol_template`, `sub_machine_gun_template`, `shotgun_template`,
+`held_item_template` — and the stock `/Fortnite.com/Weapons` classes are now
+`class<concrete>(entity)` (no `<final>`).
 Verse in another folder reaches it only after the prefab folder is declared
 `<public>` — `sys_owned_weapons` → "Reach the prefab from any folder".
 
@@ -103,6 +121,37 @@ too:
 | Aim (42.30) | `AllowAimDownSightsInAir`, `AllowAimDownSightsDuringReload` | `logic` |
 
 There is no separate reserve-ammo setter on this component.
+
+**Fire from Verse (43.00, `@available 4300`, not experimental)** — on `fort_trace_weapon_component`:
+`BeginFire():void` (as if the wielder pressed and kept holding fire), `EndFire():void`
+(release), `IsFiring()<decides><reads>:void`. Trap: `IsFiring[]` can **fail right after
+`BeginFire`** — e.g. while the weapon reloads. Always pair every `BeginFire` with an
+`EndFire` (also on cleanup), or the weapon keeps firing. Auto-fire / AI turret (compiled
+0 errors, 0 warnings in 43.00):
+
+```verse
+using { /Fortnite.com/Armory }
+using { /Verse.org/SceneGraph }
+using { /Verse.org/Simulation }
+
+auto_fire_component := class<final_super>(component):
+    @editable
+    BurstSeconds : float = 2.0
+
+    OnSimulate<override>()<suspends>:void =
+        loop:
+            if (Weapon := Entity.GetComponent[fort_trace_weapon_component]):
+                Weapon.BeginFire()
+                Sleep(BurstSeconds)
+                if (not Weapon.IsFiring[]):
+                    Print("not firing (reloading?)")
+                Weapon.EndFire()
+            Sleep(1.0)
+```
+
+**Stock weapon catalog 42.40 → 43.00:** unchanged — the same 1,445 `/Fortnite.com/Weapons`
+/ `Items` entity classes; the only difference is `<final>` dropped
+(`class<final><concrete>(entity)` → `class<concrete>(entity)`). No new class names.
 
 **Base weapon** — `fort_weapon_component`: `IsHolstered`, `HolsterChangedEvent`.
 

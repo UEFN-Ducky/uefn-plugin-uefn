@@ -79,7 +79,7 @@ Assemble UEFN Export
   → AnimPreset_BasicLocomotion (idle / run)
   → NPCCharacterDefinition + CharacterModifier_VerseBehavior
   → npc_spawner_device
-  → npc_behavior: MaintainFocus / NavigateTo / PlayAndAwait(Clip)
+  → npc_behavior: npc_actions_component Focus / NavigateTo + PlayAndAwait(Clip)
 ```
 
 Details and gotchas: `skill_read_subskill("metahuman", "npc_spawn")`.

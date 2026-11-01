@@ -24,7 +24,7 @@ Types (42.30, `list_verse_field_types`): `bool` (`logic`), `int`, `float`, `stri
 Change fields with `edit_verse_field` (retype, default, `mutable`, `visibility`, `new_name`),
 `duplicate_verse_field`, `remove_verse_field`.
 
-`event` fields (42.30: creatable, ≤1 bool/int/float parameter) are for clicks — `umg_verse_field_events`. They reflect as `event(tuple())` / `event(tuple(int))`: await them — no `Subscribe` in 42.40 (43.00 adds one: `events_subscriptions`).
+`event` fields (42.30: creatable, ≤1 bool/int/float parameter) are for clicks — `umg_verse_field_events`. They reflect as `event(tuple())` / `event(tuple(int))`: on 43.00 `.Subscribe(Handler)` them (returns a `cancelable`); on 42.x await them — no `Subscribe` there (`events_subscriptions`).
 
 Name fields the kit's way (`verse_ui_kit` — Naming): bools `Is<Adjective>`, text ends `Text`, textures end `Texture`, events `On<Event>`; on a screen start with the child's name (`IsToggleButton1Active`, `Button1LabelText`). Keep fields to the minimum the screen needs. Default values of `message` fields are set in the Details panel — a manual step for the user.
 

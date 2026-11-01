@@ -32,9 +32,9 @@ wait for each result before the next** (never same-turn multi wire/spawn/save).
 ## Creative golden path (granter example)
 
 ```
-unreal__describe_toolset(toolset_name="ValkyrieToolset.DeviceToolset")   # read exact argument names — never invent them
-unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="GetDeviceProperties", arguments={…})  # device ref for "MyGoldGranter"
-unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="SetDeviceProperty",  arguments={…})  # one property per call, wait
+unreal__describe_toolset(toolset_name="ValkyrieFortniteToolset.DeviceToolset")   # read exact argument names — never invent them
+unreal__call_tool(toolset_name="ValkyrieFortniteToolset.DeviceToolset", tool_name="GetDeviceProperties", arguments={…})  # device ref for "MyGoldGranter"
+unreal__call_tool(toolset_name="ValkyrieFortniteToolset.DeviceToolset", tool_name="SetDeviceProperty",  arguments={…})  # one property per call, wait
 save_current_level()                                                     # once at the end — never save_level=true inside other calls
 ```
 

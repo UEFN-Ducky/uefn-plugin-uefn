@@ -197,6 +197,16 @@ timeline and end events fire once; unequipping mid-use still fires end events; t
 queries return entities for players, NPCs and actors that have them; burn VFX shows on
 the player.
 
+> [!WARNING] 43.00 known issue (fixed in 43.10)
+> A `fort_wedge_ability_target_query` does **not find Scene Graph entities that have no
+> actor**, so wedge/cone abilities don't damage them (built-in damage on entities is new in
+> 43.00 via the health pipeline). Until 43.10, damage actor-less entities yourself from Verse
+> (`skill_read_subskill("verse", "sys_health_pipeline")`) or test another target query in a
+> session first. Players, NPCs and actors are still found.
+
+43.00: ability item prefabs subclass their parent class in Verse and the item templates are
+no longer `<final>` (`custom_weapons` → prefab inheritance).
+
 Target queries and modifiers in Verse (compiled in 42.40):
 
 ```verse

@@ -1,5 +1,6 @@
+# 43.00: movement and focus go through npc_actions_component (GetNavigatable / GetFocusInterface are deprecated).
 using { /Fortnite.com/AI }
-using { /Fortnite.com/AI/movement_types }
+using { /Verse.org/SceneGraph }
 using { /Fortnite.com/Animation/PlayAnimation }
 using { /Fortnite.com/Characters }
 using { /UnrealEngine.com/Temporary/SpatialMath }
@@ -35,18 +36,17 @@ dog_npc_behavior<public> := class(npc_behavior):
         if:
             Agent := GetAgent[]
             Char := Agent.GetFortCharacter[]
-            Nav := Char.GetNavigatable[]
-            Focus := Char.GetFocusInterface[]
+            Actions := GetEntity[].GetComponent[npc_actions_component]
             Anim := Char.GetPlayAnimationController[]
         then:
             set SelfAgent = option{Agent}
             RegisterDogAgent(Agent)
             race:
                 SenseLoop(Agent, Char)
-                BehaviorLoop(Char, Nav, Focus, Anim)
+                BehaviorLoop(Char, Actions, Anim)
                 WaitUntilInactive(Char)
             UnregisterDogAgent(Agent)
-            Nav.StopNavigation()
+            Actions.StopNavigation()
 
     OnEnd<override>() : void =
         if (Agent := SelfAgent?):
@@ -109,51 +109,54 @@ dog_npc_behavior<public> := class(npc_behavior):
         else:
             set Prey = false
 
-    BehaviorLoop(Char : fort_character, Nav : navigatable, Focus : focus_interface, Anim : play_animation_controller)<suspends> : void =
+    BehaviorLoop(Char : fort_character, Actions : npc_actions_component, Anim : play_animation_controller)<suspends> : void =
         loop:
             if (not Char.IsActive[]):
                 break
             case (CurrentState):
-                dog_ai_state.Hunting => HuntOnce(Char, Nav, Focus)
-                dog_ai_state.Attacking => AttackOnce(Char, Nav, Focus, Anim)
-                dog_ai_state.GivingUp => GiveUpOnce(Char, Nav)
+                dog_ai_state.Hunting => HuntOnce(Char, Actions)
+                dog_ai_state.Attacking => AttackOnce(Char, Actions, Anim)
+                dog_ai_state.GivingUp => GiveUpOnce(Char, Actions)
 
-    HuntOnce(Char : fort_character, Nav : navigatable, Focus : focus_interface)<suspends> : void =
+    HuntOnce(Char : fort_character, Actions : npc_actions_component)<suspends> : void =
         if (Target := Prey?):
             if (Target.IsActive[]):
-                Nav.SetMovementSpeedMultiplier(SprintSpeedMultiplier)
+                set Actions.MovementSpeedMultiplier = SprintSpeedMultiplier
                 TargetPos := Target.GetTransform().Translation
-                if (TargetAgent := Target.GetAgent[]):
+                if (TargetAgent := Target.GetAgent[], TargetEntity := Target.GetEntity[]):
                     race:
-                        Nav.NavigateTo(MakeNavigationTarget(TargetAgent), ?MovementType := Running, ?ReachRadius := CatchRadius)
-                        Focus.MaintainFocus(TargetAgent)
+                        Actions.NavigateTo(MakeNavigationTarget(TargetAgent), ?MovementType := movement_type.Running, ?ReachRadius := CatchRadius)
+                        Actions.Focus(TargetEntity, ?LockFocus := true)
                         WaitWhileDogState(dog_ai_state.Hunting)
                 else:
                     race:
-                        Nav.NavigateTo(MakeNavigationTarget(TargetPos), ?MovementType := Running, ?ReachRadius := CatchRadius)
-                        Focus.MaintainFocus(TargetPos)
+                        Actions.NavigateTo(MakeNavigationTarget(TargetPos), ?MovementType := movement_type.Running, ?ReachRadius := CatchRadius)
+                        Actions.Focus(FromVector3(TargetPos), ?LockFocus := true)
                         WaitWhileDogState(dog_ai_state.Hunting)
-                Nav.SetMovementSpeedMultiplier(1.0)
+                set Actions.MovementSpeedMultiplier = 1.0
             else:
                 set Prey = false
                 Sleep(0.2)
         else:
-            Nav.SetMovementSpeedMultiplier(1.0)
+            set Actions.MovementSpeedMultiplier = 1.0
             Dest := CatRandomPointAround(Char.GetTransform().Translation, 400.0, 700.0)
             race:
-                Nav.NavigateTo(MakeNavigationTarget(Dest), ?MovementType := Walking, ?ReachRadius := 100.0)
+                Actions.NavigateTo(MakeNavigationTarget(Dest), ?MovementType := movement_type.Walking, ?ReachRadius := 100.0)
                 Sleep(2.5)
                 WaitWhileDogState(dog_ai_state.Hunting)
 
-    AttackOnce(Char : fort_character, Nav : navigatable, Focus : focus_interface, Anim : play_animation_controller)<suspends> : void =
-        Nav.StopNavigation()
-        Nav.SetMovementSpeedMultiplier(1.0)
+    AttackOnce(Char : fort_character, Actions : npc_actions_component, Anim : play_animation_controller)<suspends> : void =
+        Actions.StopNavigation()
+        set Actions.MovementSpeedMultiplier = 1.0
         Now := GetSimulationElapsedTime()
         if (Target := Prey?):
             if (TargetAgent := Target.GetAgent[]):
                 MarkCatDowned(TargetAgent, Now + CatDownedSeconds)
-                race:
-                    Focus.MaintainFocus(TargetAgent)
+                if (TargetEntity := Target.GetEntity[]):
+                    race:
+                        Actions.Focus(TargetEntity, ?LockFocus := true)
+                        PlayAttack(Anim)
+                else:
                     PlayAttack(Anim)
             else:
                 PlayAttack(Anim)
@@ -161,9 +164,9 @@ dog_npc_behavior<public> := class(npc_behavior):
             PlayAttack(Anim)
         set CurrentState = dog_ai_state.GivingUp
 
-    GiveUpOnce(Char : fort_character, Nav : navigatable)<suspends> : void =
-        Nav.StopNavigation()
-        Nav.SetMovementSpeedMultiplier(1.0)
+    GiveUpOnce(Char : fort_character, Actions : npc_actions_component)<suspends> : void =
+        Actions.StopNavigation()
+        set Actions.MovementSpeedMultiplier = 1.0
         OldPrey := Prey
         set Prey = false
         Sleep(GiveUpSeconds)
@@ -182,7 +185,7 @@ dog_npc_behavior<public> := class(npc_behavior):
             else:
                 Dest := CatRandomPointAround(Char.GetTransform().Translation, 500.0, 900.0)
                 race:
-                    Nav.NavigateTo(MakeNavigationTarget(Dest), ?MovementType := Walking, ?ReachRadius := 100.0)
+                    Actions.NavigateTo(MakeNavigationTarget(Dest), ?MovementType := movement_type.Walking, ?ReachRadius := 100.0)
                     Sleep(2.0)
         set CurrentState = dog_ai_state.Hunting
 

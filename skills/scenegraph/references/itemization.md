@@ -85,8 +85,9 @@ Entity Prefab items** (mesh/icon/pickup, KFM spin, equipped detect) →
 `/Fortnite.com/Weapons` / `/Fortnite.com/Items` grants and shared
 inventory/pickup APIs.
 
-Each weapon is `class<final><concrete>(entity)`, so `{}` constructs one. Find
-them without guessing:
+Each weapon is `class<concrete>(entity)` (`<final>` dropped in 43.00 — built-in
+entity classes can be subclassed now), so `{}` constructs one. Find them without
+guessing:
 
 ```
 list_verse_types({"kind": "class", "name_filter": "Shotgun"})
@@ -125,7 +126,7 @@ The four things that break this if you change them:
    each entry. **From v42.10 the editor validator enforces that every type you
    put into a `concrete_subtype(foo)` field is itself `<concrete>`** (every field
    has a default). Stock `/Fortnite.com/Weapons` and `/Fortnite.com/Items`
-   classes are `class<final><concrete>`; your own item prefab classes must be
+   classes are `class<concrete>` (no longer `<final>` in 43.00); your own item prefab classes must be
    `<concrete>` too or the project fails validation on republish.
 3. `AddItemDistribute` returns a `result`, it is **not** failable. Do not wrap
    it in `if`; read the result if you care whether the inventory was full.

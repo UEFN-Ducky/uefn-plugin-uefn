@@ -16,6 +16,9 @@ player registry. Apply the missing pack, then `@editable PlayerManager` +
 `GetCurrencyProvider()` / `GetXPAwarder()` / `GetPlaytimeProvider()`. Same wallet
 pays the shop, the tycoon plot, and the weapon stall. Tycoon purchaseables are
 mode-local (no new `player_manager` slot) — see `sys_tycoon`.
+Quests (43.00 Progression API, `sys_quests`) are mode-local too: their own folder,
+their own `fort_quest_collection`, and rewards that pay through
+`GetXPAwarder()` / `GetCurrencyProvider()` — never a quest-owned wallet or XP table.
 
 Player-driven features (economy, progression, playtime, inventory, score, HUD)
 are all built from the **same five parts** and the **same call order**. Learn this

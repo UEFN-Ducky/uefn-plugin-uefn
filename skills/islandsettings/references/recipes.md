@@ -13,12 +13,12 @@ Read with Epic `GetDeviceProperties` first; only set keys that are writable. Adj
 
 **Every recipe that sets `MaxPlayers` assumes matching Player Spawn Pads** (`count == MaxPlayers` when `SpawnLocation` = `SpawnPads`). See `session_setup`.
 
-**Pattern for every recipe** — Epic `ValkyrieToolset.DeviceToolset`, one property per call, wait for each result:
+**Pattern for every recipe** — Epic `ValkyrieFortniteToolset.DeviceToolset`, one property per call, wait for each result:
 
 ```
-unreal__describe_toolset(toolset_name="ValkyrieToolset.DeviceToolset")   # once — read the exact argument names, never invent them
-unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="GetDeviceProperties", arguments={…})  # IslandSettings0: which keys are writable
-unreal__call_tool(toolset_name="ValkyrieToolset.DeviceToolset", tool_name="SetDeviceProperty",  arguments={…})  # one key from the recipe block
+unreal__describe_toolset(toolset_name="ValkyrieFortniteToolset.DeviceToolset")   # once — read the exact argument names, never invent them
+unreal__call_tool(toolset_name="ValkyrieFortniteToolset.DeviceToolset", tool_name="GetDeviceProperties", arguments={…})  # IslandSettings0: which keys are writable
+unreal__call_tool(toolset_name="ValkyrieFortniteToolset.DeviceToolset", tool_name="SetDeviceProperty",  arguments={…})  # one key from the recipe block
 # … repeat SetDeviceProperty for each remaining key …
 save_current_level()   # once, after the whole recipe — never save_level=true inside other calls
 ```

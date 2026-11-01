@@ -21,7 +21,7 @@ Assembled MetaHuman (BP + meshes)
   → AnimPreset_BasicLocomotion (idle / run)
   → NPCCharacterDefinition (CharacterType_Custom + modifiers + VerseBehavior)
   → npc_spawner_device in level → Verse spawn manager
-  → npc_behavior: MaintainFocus / NavigateTo / PlayAndAwait
+  → npc_behavior: npc_actions_component Focus / NavigateTo + PlayAndAwait
 ```
 
 Generic custom-NPC details (AnimPreset slots, modifiers):
@@ -59,10 +59,14 @@ Verse AI loops: `skill_read_subskill("verse", "sys_npc_ai")`.
 
 ## Verse behavior (turns / chase / play clips)
 
-`npc_behavior` subclass `OnBegin` loop typically uses (digest-verified — re-check only if the build flags one):
+`npc_behavior` subclass `OnBegin` loop typically uses (43.00 digest-verified):
 
-- `GetFocusInterface[]` → `MaintainFocus` — look / turn toward the player
-- `GetNavigatable[]` → `NavigateTo` — chase / strafe
+- `Actions := GetEntity[].GetComponent[npc_actions_component]` (`using { /Verse.org/SceneGraph }`)
+- `Actions.Focus(Target.GetEntity[], ?LockFocus := true)` — look / turn toward the player
+  (raced; a position is `FromVector3(Pos)`)
+- `Actions.NavigateTo(MakeNavigationTarget(Agent), ?MovementType := movement_type.Running)` — chase / strafe
+- 43.00 **deprecated** `GetFocusInterface` / `MaintainFocus`, `GetNavigatable`, `GetFortLeashable` and
+  `movement_types` — don't write them in new code.
 - `GetPlayAnimationController[]` → `PlayAndAwait(Clip)` — play custom
   `animation_sequence` (attack, gesture, emote)
 
@@ -91,5 +95,5 @@ MH assets → assign spawner → PIE.
 4. Definition: custom mesh + AnimPreset + Health + VerseBehavior (`create_npc_character_definition`). Clips: duplicate into the Verse module folder — not Details.
 5. Spawner label + definition set; Verse `npc_behavior` compiled clean.
 6. `save_asset` / `save_current_level`.
-7. PIE: spawn, idle/walk, **turn/look** (MaintainFocus), chase, PlayAndAwait
+7. PIE: spawn, idle/walk, **turn/look** (`Actions.Focus`), chase, PlayAndAwait
    attack/gesture, elimination if combat-relevant.

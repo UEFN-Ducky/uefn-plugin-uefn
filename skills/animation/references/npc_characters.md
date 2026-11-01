@@ -184,7 +184,7 @@ once per material, or `duplicate_asset` a finished def then
 
 ## 7. Place + assign the spawner — tool, not Details
 
-1. Epic `unreal__call_tool` → `ValkyrieToolset.DeviceToolset` → `PlaceDevice`
+1. Epic `unreal__call_tool` → `ValkyrieFortniteToolset.DeviceToolset` → `PlaceDevice`
    (Character Spawner / `npc_spawner_device`). Label + folder in that call
    (e.g. `Cat Spawner 01` in `NPCs/Cats`). One device per definition.
 2. **Immediately:**

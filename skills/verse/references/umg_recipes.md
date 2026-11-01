@@ -46,7 +46,7 @@ CanvasPanel Root_Canvas
 - `add_verse_field` `IsIntroActive` type `logic` (the tool stores `bool`). Bind to `Fill_Image.RenderOpacity` when the intro should fade the fill.
 - `add_verse_field` `OnPlayClicked` and `OnCloseClicked`, type `event` (42.30). `bind_widget_event` `Play_Button` `OnButtonClicked` → `OnPlayClicked`. With the kit close button, bind both of its inner buttons to `OnCloseClicked` (`verse_ui_kit` — Input). Check `compiled`.
 - Desired Focus Widget = `Play_Button` (`umg_navigation`).
-- Verse: with the kit, `Helper.SubscribeToEvent(Player, Widget.OnPlayClicked, OnPlayClicked)`; without it, `loop: Widget.OnPlayClicked.Await()` in one spawned watcher per widget — event fields have no `Subscribe` (`umg_verse_field_events`).
+- Verse: with the kit, `Helper.SubscribeToEvent(Player, Widget.OnPlayClicked, OnPlayClicked)`; without it on 43.00, `Sub := Widget.OnPlayClicked.Subscribe(OnPlayClicked)` (cancel on close); on 42.x, where event fields have no `Subscribe`, `loop: Widget.OnPlayClicked.Await()` in one spawned watcher per widget (`umg_verse_field_events`).
 - Highlight graph: `umg_animations`. Device: `umg_widget` template. Volume opens it. Add with `ui_input_mode.All`, then focus. Remove on Back and on leave.
 
 ### 4 — Shop frame

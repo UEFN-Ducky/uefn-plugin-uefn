@@ -1,10 +1,10 @@
 ---
-description: "Full Scene Graph builtin component catalog — mesh/asset vs plain, BasicShapes, lights (one per entity), KFM, interactable (no button_component), itemization components, project Verse class paths"
+description: "Full Scene Graph builtin component catalog — mesh/asset vs plain, BasicShapes, lights (one per entity), KFM, interactable (no button_component), itemization components, project Verse class paths, 43.00 hold interactions (OnStarted at hold start, completion in SucceededEvent, Cooldown with duration), entity damage"
 metadata:
   order: 3
   label: "Component catalog"
   default_enabled: false
-  load_condition: "Attaching or explaining entity components, mesh/light/sound/particle assets, interactables, keyframed movement, or project Verse component class paths"
+  load_condition: "Attaching or explaining entity components, mesh/light/sound/particle assets, interactables, hold to interact, long press, OnStarted (rolled back / runs too early), SucceededEvent, interaction cooldown, keyframed movement, or project Verse component class paths"
 ---
 
 ## Scene Graph component catalog
@@ -37,6 +37,49 @@ There is **no** Scene Graph `button_component`. Player interaction uses
 `interactable_component` / `basic_interactable_component`. Creative
 `button_device` is a **device**, not an entity component — wire it with device
 tools, not Scene Graph.
+
+#### Interactables in 43.00 (behavior change)
+
+- **Hold interactions:** on a `basic_interactable_component` with an
+  `InteractableDuration`, `OnStarted` now runs **when the hold starts** and
+  `StartedEvent` fires once per hold. (Before 43.00 it ran when the hold finished, the
+  base call rejected it and your override was rolled back.) **Completion logic belongs
+  in `SucceededEvent`** — if you moved it into `OnStarted` or forced `Succeed[]` from
+  there as a workaround, it now fires at the *start* of the hold: move it and delete the
+  workaround.
+- `Cooldown` now runs when an `InteractableDuration` is also set (was skipped).
+- `interaction_component.Disable()` no longer leaves an interaction prompt visible.
+- With a Scene Graph camera active, interacting can be harder (known issue) — add a
+  **Third Person Controls** device next to the camera (`cameras`).
+
+```verse
+# 43.00 pattern: start feedback in StartedEvent, the reward in SucceededEvent.
+Interactable.StartedEvent.Subscribe(OnHoldStarted)       # e.g. play a charge VFX
+Interactable.SucceededEvent.Subscribe(OnHoldCompleted)   # grant / open / score here
+Interactable.CanceledEvent.Subscribe(OnHoldCanceled)     # stop the VFX
+```
+
+#### Other 43.00 component changes
+
+- **Adding a component that already belongs to another entity logs a warning** (an
+  error in a future release). Call `Component.RemoveFromEntity()` first, or construct a new
+  component — never share one instance between entities.
+- Component queries (`FindEntitiesWithComponent`, `FindDescendantComponents`,
+  `FindComponents`) no longer miss components added/removed during lifetime functions
+  (`OnAddedToScene`, `OnBeginSimulation`, …) — drop retry/Sleep-then-requery workarounds.
+- `Enable()` on `sound_component` / `particle_system_component` no longer starts playback
+  when AutoPlay is off — call `Play()` explicitly.
+- `description_component` text from the server is no longer ignored.
+- `SetPresentableToPlayers` behaves consistently across entities with the same component.
+- Socket-attached objects (weapons) no longer twitch on clients.
+- Built-in Fortnite damage now hits Scene Graph entities (health pipeline — verse
+  `sys_health_pipeline`).
+- **Handles:** `entity_handle` (`GetEntity[]`), `component_handle(t)` (`GetComponent[]`),
+  `mesh_part_handle`; overlap/sweep hits carry `SourceMeshHandle` / `TargetMeshHandle`.
+  `mesh_component.CanAffectNavigation` (server-only). Recipe: `movement_transforms` →
+  Scene Graph handles.
+- `fort_trace_weapon_component.BeginFire()` / `EndFire()` / `IsFiring[]` fire a weapon from
+  Verse (`custom_weapons`).
 
 ---
 
@@ -95,9 +138,9 @@ subclass — `Ent.AddComponents(array{sphere{Entity := Ent}})`.
 
 | Alias | Role |
 |-------|------|
-| `camera_component` | Scene Graph camera — `<abstract>`, place `perspective_` / `orthographic_` / `physical_camera_component` or `camera_director_component`. **Experimental.** `Director.AddCamera[Cam, Priority]` IS `<decides>` (brackets); `Cam.CameraModifiers.AddModifier(Mod, VisualModifierPosition)` is NOT (parens). Fortnite modifiers `fort_orbit_camera_modifier` / `fort_fixed_angle_` / `fort_fixed_point_` live in `/Fortnite.com/SceneGraphCameras` (42.00+). Full tables: `skill_read_subskill("scenegraph", "cameras")`. **Transitions (working from v42.10):** override `GetEnterTransition(SourceCamera)` / `GetExitTransition(DestinationCamera)` (both `<transacts><decides>`) on your `camera_component` subclass and return `camera_transition{Blend := camera_mode_blend_smoothstep{}, Duration := 0.5}`. Blends: `camera_mode_blend_pop{}` (instant **cut**), `_linear`, `_smoothstep`, `_smootherstep`, `_orbit{DrivingBlend := …}`. All `<concrete>`, all Experimental (blocks publishing). |
-| `interactable_component` | Player interaction surface (not a UI button) |
-| `basic_interactable_component` | Simpler interactable |
+| `camera_component` | Scene Graph camera — `<abstract>`, place `perspective_` / `orthographic_` / `physical_camera_component` or `camera_director_component`. **Experimental.** `Director.AddCamera[Cam, Priority]` IS `<decides>` (brackets); `Cam.CameraModifiers.AddModifier(Mod, 0)` is NOT (parens). **43.00:** angles in radians (`FieldOfView`, not `FieldOfViewDegrees`); `GlobalModifierPosition`/`VisualModifierPosition` removed — use the director's `PreCameraModifiers` / `PostCameraModifiers` / `PresentationCameraModifiers`; user-written `camera_modifier`s run on the server; play-server known issue. Fortnite modifiers `fort_orbit_camera_modifier` / `fort_fixed_angle_` / `fort_fixed_point_` live in `/Fortnite.com/SceneGraphCameras` (42.00+). Full tables: `skill_read_subskill("scenegraph", "cameras")`. **Transitions (working from v42.10):** override `GetEnterTransition(SourceCamera)` / `GetExitTransition(DestinationCamera)` (both `<transacts><decides>`) on your `camera_component` subclass and return `camera_transition{Blend := camera_mode_blend_smoothstep{}, Duration := 0.5}`. Blends: `camera_mode_blend_pop{}` (instant **cut**), `_linear`, `_smoothstep`, `_smootherstep`, `_orbit{DrivingBlend := …}`. All `<concrete>`, all Experimental (blocks publishing). |
+| `interactable_component` | Player interaction surface (not a UI button). `StartedEvent` / `SucceededEvent` / `CanceledEvent`; override `OnStarted` (`<protected>`, `<transacts><decides>`) for custom start behavior |
+| `basic_interactable_component` | Composable interactable: `Cooldown`, `CooldownPerAgent`, `SuccessLimit`, `InteractableDuration`, `Succeed[Agent]`, `Cancel[Agent]`. 43.00: `OnStarted` at hold **start** — completion logic in `SucceededEvent` (see above) |
 | `possessable_component` | Possession |
 | `icon_component` | Editor / UI icon |
 | `rarity_component` | Rarity metadata — instances in `/Fortnite.com/Itemization/FortniteRarities` |
@@ -111,6 +154,7 @@ subclass — `Ent.AddComponents(array{sphere{Entity := Ent}})`.
 | `inventory_component` | Holds items. `AddItemDistribute` is the grant call; also `AddItem`, `RemoveItem`, `GetItems`, `FindItems`, `GetEquippedItems`, add/remove/equip events. On a player it sits on a **subentity** of the agent. |
 | `fort_item_pickup_interactable_component` | World pickup. Owning entity needs `item_component` + `mesh_component`; exposes `GetInteractorInventory(Agent)`. Gated `MinUploadedAtFNVersion := 4040`. Fields from `basic_interactable_component`: `CanInteractMessage`, `CannotInteractMessage`, `Cooldown`, `CooldownPerAgent`, `SuccessLimit`, `InteractableDuration`, `Enable`/`Disable`. |
 | `fort_inventory_component` (+ `fort_inventory_*` subclasses) | **Player inventory** types (weapon hotbar, resources, currencies, ammo, …) — not components for custom item prefabs. Custom items use `item_component` (+ optional `Categories`). |
+| `fort_item_owner_pose_modifier_component` | 43.00, `/Fortnite.com/Itemization`: hold pose while equipped (fire torch default, flashlight, map, small/large consumable); `SetEquippedPose(option{fort_character_pose_modifier_map{}})`. Ships on `held_item_template` → `held_items` |
 | `fort_item_ability_component` | Template abilities on an item (`ItemAbilities` / `ItemEquippedAbilities`, InputTrigger, TargetQuery, AbilityElements). Out of Experimental since 42.40 (publishable). Recipes: `template_abilities`; Verse-authored abilities: `custom_abilities`. |
 
 #### Armory (`/Fortnite.com/Armory`)

@@ -86,8 +86,9 @@ That pre-empts `NavigateTo` without cancellation plumbing.
 stomp mid-clip.
 
 `OnBegin` must succeed the full `if:` chain (`GetAgent`, `GetFortCharacter`,
-`GetNavigatable`, `GetFocusInterface`, `GetPlayAnimationController`) or the NPC
-never registers. `OnEnd` unregisters.
+`GetEntity[].GetComponent[npc_actions_component]`, `GetPlayAnimationController`) or the NPC
+never registers. (43.00 deprecated `GetNavigatable` / `GetFocusInterface`; the templates use
+`Actions.NavigateTo` / `Actions.Focus(…, ?LockFocus := true)` / `set Actions.MovementSpeedMultiplier`.) `OnEnd` unregisters.
 
 Anti-bugs worth keeping when you write hunt/flee:
 

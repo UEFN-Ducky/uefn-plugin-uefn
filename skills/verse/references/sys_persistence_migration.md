@@ -126,3 +126,7 @@ after join, then vanishes the first time another system saves.
   fresh join — fresh joins skip migration entirely.
 - Keep migration `<transacts>` and pure (no world side effects); it only reshapes
   data.
+- **Migrate into the existing table, not a new map.** 43.00 raised the persistent
+  `weak_map` cap from 4 to 6 (3502 "Only 6 persistent `var`s allowed" on the 7th), but a
+  second map is a second save with its own version: keep one versioned table per
+  player and nest new data in it (`persistence`).

@@ -35,6 +35,7 @@ using { /Fortnite.com/Devices }
 using { /UnrealEngine.com/Assets }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 using { /Verse.org/Assets }
+using { /Verse.org/SceneGraph }   # GetComponent[npc_actions_component]
 using { /Verse.org/Simulation }
 
 enemy_melee_behavior<public> := class(npc_behavior):
@@ -54,8 +55,7 @@ enemy_melee_behavior<public> := class(npc_behavior):
         if:
             Agent := GetAgent[]
             Char := Agent.GetFortCharacter[]
-            Nav := Char.GetNavigatable[]
-            Focus := Char.GetFocusInterface[]
+            Actions := GetEntity[].GetComponent[npc_actions_component]   # 43.00: replaces GetNavigatable / GetFocusInterface
             Anim := Char.GetPlayAnimationController[]
         then:
             loop:
@@ -69,7 +69,7 @@ enemy_melee_behavior<public> := class(npc_behavior):
                     LookAt := EnemyLookPoint(SelfPos, TargetPos, FocusYawOffsetDeg)
                     if (Dist <= HitRange):
                         race:
-                            Focus.MaintainFocus(LookAt)
+                            Actions.Focus(FromVector3(LookAt), ?LockFocus := true)
                             block:
                                 if (Clip := AttackAnim?):
                                     Anim.PlayAndAwait(Clip)
@@ -80,14 +80,14 @@ enemy_melee_behavior<public> := class(npc_behavior):
                         if (ShouldStrafe = true):
                             Strafe := EnemyStrafePoint(SelfPos, TargetPos, 160.0, 420.0)
                             race:
-                                Nav.NavigateTo(MakeNavigationTarget(Strafe), ?MovementType := movement_types.Running, ?ReachRadius := NavReach)
-                                Focus.MaintainFocus(LookAt)
+                                Actions.NavigateTo(MakeNavigationTarget(Strafe), ?MovementType := movement_type.Running, ?ReachRadius := NavReach)
+                                Actions.Focus(FromVector3(LookAt), ?LockFocus := true)
                                 Sleep(RetargetSecs)
                         else:
                             Approach := EnemySpreadApproachPoint(SelfPos, TargetPos, SpreadDist, 180.0, 520.0)
                             race:
-                                Nav.NavigateTo(MakeNavigationTarget(Approach), ?MovementType := movement_types.Running, ?ReachRadius := NavReach)
-                                Focus.MaintainFocus(LookAt)
+                                Actions.NavigateTo(MakeNavigationTarget(Approach), ?MovementType := movement_type.Running, ?ReachRadius := NavReach)
+                                Actions.Focus(FromVector3(LookAt), ?LockFocus := true)
                                 Sleep(RetargetSecs)
                     else:
                         Sleep(0.4)

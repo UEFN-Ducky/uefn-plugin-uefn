@@ -1,18 +1,20 @@
 ---
-description: "PointerZoom (experimental, not publishable): pinch, mouse wheel and right-stick zoom, logging it and scaling a Scene Graph entity with pinch"
+description: "PointerZoom (publishable from 43.00; Experimental on 42.x): pinch, mouse wheel and right-stick zoom, the 43.00 50x touch value change, logging it and scaling a Scene Graph entity with pinch"
 metadata:
   label: "Pinch zoom"
 ---
 
-# PointerZoom — pinch, scroll, right-stick zoom / scale (Experimental)
+# PointerZoom — pinch, scroll, right-stick zoom / scale
 
-`PointerZoom` is an `@experimental` `input_action(vector3)` in `/Verse.org/Input/UI` (FN ≥ 4120). **Islands that use PointerZoom cannot be published.** Say so before writing it, and keep it in its own device so it can be removed.
+`PointerZoom` is an `input_action(vector3)` in `/Verse.org/Input/UI` (FN ≥ 4120). **43.00: out of Experimental, so islands that use it can be published.** On a 42.x island it is still `@experimental` and blocks publishing.
+
+**43.00 breaking change:** touch pinch values are now **50× larger** to match mouse wheel and gamepad. Any threshold or sensitivity tuned on 42.x touch is now 50× too sensitive on phones. Divide sensitivities by 50 and multiply dead-zones by 50, then retune on a device (Mobile Preview / UE Remote). Mouse and gamepad values didn't change.
 
 Pinch is a continuous input for camera zoom and object scaling. The pinch magnitude arrives in the payload's `vector3.Forward`.
 
 | Device | Control | Value | Center |
 |--------|---------|-------|--------|
-| Touch | Two fingers together / apart | Speed of pinch; `0` = no change | Midpoint between the fingers |
+| Touch | Two fingers together / apart | Speed of pinch, now on roughly the same scale as wheel and stick (50× the 42.x value); `0` = no change | Midpoint between the fingers |
 | Mouse + keyboard | Scroll wheel | `-1` to `1` by direction; freewheel mode behaves more like a stick | Current pointer position |
 | Controller | Right stick Up = zoom in, Down = zoom out | Deflection from neutral `-1`…`1` | Virtual Pointer position |
 
@@ -64,13 +66,13 @@ using { /Verse.org/SpatialMath }
 @editable
 var PropToScale : entity = entity{}
 @editable
-var ScaleSensitivity : float = 2.0
+var ScaleSensitivity : float = 2.0      # 42.x touch value; on 43.00 touch start near 0.04
 @editable
 var MinScale : float = 0.25
 @editable
 var MaxScale : float = 5.0
 @editable
-var MinPinchAmount : float = 0.001
+var MinPinchAmount : float = 0.001      # 42.x touch dead-zone; on 43.00 start near 0.05
 
 var CurrentScale : float = 1.0
 var BaseScale : vector3 = vector3{Forward := 1.0, Left := 1.0, Up := 1.0}

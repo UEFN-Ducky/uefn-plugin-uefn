@@ -61,7 +61,7 @@ ReleasePlayer(Player : player):void =
 ## Caveats
 
 - Does **not** work while the Fortnite game menus are open.
-- `TouchMapping` and `PointerSelect` are **publishable** (FN ≥ 4100). `PointerZoom` is **Experimental** (FN ≥ 4120) and cannot be published.
+- `TouchMapping` and `PointerSelect` are **publishable** (FN ≥ 4100). `PointerZoom` (FN ≥ 4120) is **publishable from 43.00** (Experimental on 42.x); its touch values are 50× larger from 43.00 (`pinch_zoom.md`).
 - An `input_action` only fires while at least one `input_mapping` that references it is active on that player.
 
 ## Disable

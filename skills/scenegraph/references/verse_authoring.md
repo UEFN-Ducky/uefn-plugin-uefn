@@ -335,6 +335,26 @@ Scene Graph `button_component`), `possessable_component`, `rarity_component`,
 queries: `FindOverlapHits` / `FindSweepHits` with
 `collision_sphere/box/capsule/point`.
 
+### 43.00 changes that affect component code
+
+- **Moves are visible to overlap/sweep queries the same frame** — no `Sleep` between
+  `SetGlobalTransform` and `FindOverlapHits` / `FindSweepHits` (`movement_transforms`).
+- **Component queries are reliable inside lifetime functions:** `FindEntitiesWithComponent`,
+  `FindDescendantComponents`, `FindComponents` no longer miss components added/removed during
+  `OnAddedToScene` / `OnBeginSimulation` / `OnRemovingFromScene`.
+- **One owner per component:** `AddComponents` with a component that already belongs to
+  another entity logs a warning (future: error). Build a fresh component per entity.
+- **Interactable hold:** `OnStarted` runs at hold start — put completion logic in
+  `SucceededEvent` (`components`).
+- **Prefab classes inherit their parent:** a prefab made from `assault_rifle_template` (or any
+  non-`entity` class) is a Verse subclass of it; built-in entity classes are no longer
+  `<final>` (`custom_weapons`).
+- Editables on Verse class objects stay independent across prefab instances; assigning a
+  device to an optional `@editable` on a component no longer crashes UEFN.
+- `@editable` tooltips + categories: the 43.00 Scene Graph feature example sets both on every
+  property — follow it as the house example for component editables.
+- Verse event `Subscribe` now works on `event(t)` (verse `events_subscriptions`).
+
 ### Performance rules (Epic's guidance)
 
 - Find children once at simulation start; store references or subscribe to

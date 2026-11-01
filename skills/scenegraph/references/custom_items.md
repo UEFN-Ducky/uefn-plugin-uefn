@@ -146,6 +146,15 @@ the matching inventory UI tab, not the weapon hotbar.
 
 Cross-links: `modeling`, `materials`; optional `blender` / meshy.
 
+**43.00 prefab classes:** a prefab whose parent is a class other than `entity` (a template
+such as `held_item_template` or `assault_rifle_template`, or your own entity subclass) is
+generated as a **subclass of that parent** in the Assets digest, so `parent[E]` casts and
+parent fields work. Built-in entity classes are no longer `<final>`; you may subclass
+them in Verse. Plain entity prefabs still derive from `entity`. Need a hold stance for
+the item → `held_items` (pose modifier). Since 43.00 editables on Verse class objects stay
+independent per prefab instance, and assigning a device to an optional `@editable` on a
+Verse component no longer crashes UEFN.
+
 ## World use
 
 - Save the Entity Prefab, then Content Browser drag or `instantiate_prefab` +

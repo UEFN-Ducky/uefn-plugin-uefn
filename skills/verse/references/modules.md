@@ -1,5 +1,5 @@
 ---
-description: "Project structure — module declarations, using {} imports (engine paths vs project modules), how folders map to modules, making nested and asset folders <public> (Script error 3593), module-level var rules, parse order for generic classes, moving files, and cross-file references"
+description: "Project structure — module declarations, using {} imports (engine paths vs project modules), how folders map to modules, making nested and asset folders <public> (Script error 3593; 43.00: asset modules are project-wide by default, new 3588 name clashes), module-level var rules, parse order for generic classes, moving files, and cross-file references"
 metadata:
   order: 11
   label: "Modules, using & file layout"
@@ -136,12 +136,20 @@ SceneGraph<public> := module:
 - Never put the declaration inside the folder it names — a file in
   `Verse/PlayerCore/` declaring `PlayerCore<public> := module:` creates
   `PlayerCore.PlayerCore`.
-- **Asset folders need it.** Assets.digest generates every asset folder module
-  with no access specifier (`Materials := module:`), so a nested folder of
-  materials, meshes or prefabs (`EP_*`) gives 3593 from your code until each
-  folder on its path is declared `<public>`. The asset classes themselves are
-  `<scoped>` to the whole island and need nothing. Custom weapons:
-  `sys_owned_weapons`.
+- **Asset folders (42.x needed it; 43.00 mostly doesn't).** On 42.x Assets.digest
+  generates every asset folder module with no access specifier
+  (`Materials := module:`), so a nested folder of materials, meshes or prefabs
+  (`EP_*`) gives 3593 from your code until each folder on its path is declared
+  `<public>`. **43.00:** Verse modules that contain reflected assets default to
+  **project-wide accessibility**, so you no longer need to declare accessibility for
+  them and those 3593s go away. A `<public>` declaration you already have is harmless.
+  Your own nested **code** folders still need it. The asset classes themselves are
+  `<scoped>` to the whole island and need nothing. Custom weapons: `sys_owned_weapons`.
+- **43.00 side effect: name clashes.** More asset identifiers are now visible across
+  the project, so a binding or type named like an asset or asset folder (`Materials`,
+  `T_Coin`, `M_Glow`) can become 3588 "Ambiguous identifier". Fix: rename yours, or
+  qualify the asset (`(/YourIsland/Materials:)M_Glow`), or narrow the `using` path
+  (`compile_errors` 3588).
 - Build Verse after adding the declaration, then `search_verse_digest` the
   asset to copy its exact path.
 
@@ -164,8 +172,8 @@ AllPlayers := MyPlayerManager.GetAllGamePlayers()
   is 3502 "Module-scoped `var` must have `weak_map` type". Session state belongs on a manager device instead — reach for
   `weak_map(session, …)` only when there is no device to hold it.
 - Imported module-level `var`s are shared global state. Keep them `<public>` only
-  when other systems truly need them; persistent ones count toward the four-map
-  cap (`persistence`).
+  when other systems truly need them; persistent ones count toward the
+  persistent-map cap (6 from 43.00, 4 on 42.x; `persistence`).
 
 ### Parse order — generic classes first
 

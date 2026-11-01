@@ -10,7 +10,7 @@ metadata:
 ## Which tool path? (read first)
 
 **Creative devices + census:** use nested Epic UEFN MCP — `skill_read_subskill("uefn", "epic_mcp")`.
-`unreal__call_tool` → `ValkyrieToolset.DeviceToolset` (`ListDeviceAssets`, `PlaceDevice`,
+`unreal__call_tool` → `ValkyrieFortniteToolset.DeviceToolset` (43.00 name; was `ValkyrieToolset.DeviceToolset`) (`ListDeviceAssets`, `PlaceDevice`,
 `GetDeviceProperties`, `SetDeviceProperty`, …). The old Ducky Creative-device
 find/inspect/set tools were pruned and no longer exist. Epic offline or erroring twice →
 degrade to `spawn_actor` (props/Verse devices) / `get_all_actors(label_filter=…)` and finish.

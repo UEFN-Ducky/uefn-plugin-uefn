@@ -168,6 +168,25 @@ instead of reinventing chains, and correct any remaining pose difference with th
 retarget-pose tools in §3b. Full MH create/spawn path:
 `skill_read_subskill("metahuman", "npc_spawn")`.
 
+## IK Retargeter through Epic MCP (43.00)
+
+The 43.00 notes say MCP "supports the IK Retargeter", but the live 43.00 Epic catalog
+has **no IK Retargeter toolset** (`uefn` `epic_toolsets`). Use these routes, in order:
+
+1. Ducky's retarget tools above (`create_ik_retargeter_asset`, `auto_map_retarget_chains`,
+   `retarget_animation`).
+2. Epic `editor_toolset.toolsets.python_scripting.PythonScriptingTools`: `search_symbols`
+   / `get_symbol` for `IKRetargeter` / `IKRetargetBatchOperation`, then `execute_python`
+   (Python must be enabled for the project: `ValkyriePythonToolset`).
+3. Bring the result into a sequence with
+   `SequencerControlRigTools.load_anim_into_rig` / `SequencerImportExportTools`.
+
+Re-check `unreal__list_toolsets` once per session — if a retarget toolset appears, use it.
+
+**RigMapper (experimental RigMapperOp plugin):** the RigMapper Definition graph editor
+now has a Preview panel with an animation picker and input curve selector — preview a
+mapping before baking. **Control Rig Dynamics** gained convex collider and confiner shapes.
+
 ## Not the UEFN path
 
 Montages, `AnimationLibrary` notifies, `AnimationModifierLibrary`, and

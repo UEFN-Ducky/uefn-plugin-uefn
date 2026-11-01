@@ -2,12 +2,16 @@
 description: "What changed in UEFN / Fortnite 42.40 (Oct 15 2026) and which skill covers each item — text chat channels, abilities out of Experimental (Instigator ?entity, renames), 43.00 subscribable events, Discover redesign + required artwork from Oct 22, LEGO Brick Editor, HUD Controller touch overrides, VerseVM session toggle, IARC in Creator Portal, Fab source assets, Gatekeeper Shotgun, bug fixes"
 metadata:
   order: 1
-  label: "42.40 patch (Oct 15 2026)"
+  label: "42.40 patch (Oct 15 2026, previous)"
   default_enabled: false
   load_condition: "The user asks what is new in UEFN / 42.40 / the latest update / patch notes, or something the 42.40 notes changed (text chat, abilities, Discover thumbnails / logo / gameplay video, LEGO bricks, touch controls, VerseVM, IARC, Gatekeeper Shotgun, 43.00 Verse errors)"
 ---
 
 # UEFN 42.40 (released Oct 15 2026)
+
+> **43.00 is now live** — what changed since 42.40 and where it is covered:
+> `skill_read_subskill("uefn", "patch_43_00")`. The Epic MCP toolset names below are
+> 42.40 names; 43.00 renamed them (`epic_toolsets`).
 
 Build `++Fortnite+Release-42.40-CL-59247843`. Checked against the 42.40 Verse digests
 (diffed with 42.30), compile probes in UEFN 42.40 and every Epic MCP toolset described
@@ -25,7 +29,7 @@ digest disagree, the digest wins; rows marked *not in the notes* came from the d
 | Open enums | `fort_ability_attach_socket`, `fort_target_query_affiliation` — a `case` needs `_ =>` (3512) | scenegraph `template_abilities` |
 | In the digest now | attribute modifier point / span (`fort_attribute_modifier{Attribute, Modifier, Value}`), projectile `LifetimeAfterStop`, `@editable_number` minimums of 0, `torch_mesh` (*not in the notes*); `MakeAbilityEffectComponent` removed | scenegraph `template_abilities`, `held_items` |
 | Ability fixes | `Use()` with a player instigator, animations replicate and loop, rejected uses don't run their timeline, `Cancel` stops the timeline, end events fire once (also after unequip mid-use), burn VFX shows | scenegraph `template_abilities` |
-| **43.00 Verse errors (upcoming)** | `event(t)` becomes subscribable; your own `Subscribe` extension on events turns into an ambiguous overload — delete it. Published islands keep running | verse `events_subscriptions`, `umg_verse_field_events` |
+| **43.00 Verse errors (now live)** | `event(t)` is subscribable in 43.00; your own `Subscribe` extension on events is an ambiguous overload — delete it. Published islands keep running | verse `events_subscriptions`, `umg_verse_field_events`; uefn `patch_43_00` |
 | Gatekeeper Shotgun | `GatekeeperShotgun_BR_CH7S4_Rare`, `GatekeeperShotgun_BR_CH7S4_Epic`, `GatekeeperShotgun_BR_CH7S2_Legendary` (`/Fortnite.com/Weapons`) | scenegraph `itemization`, leveldesign `content_catalog` |
 | Reality Reign | Prefabs + Floor / Wall / Prop galleries, Processor Base, Display Tower | leveldesign `content_catalog` |
 | **LEGO Brick Editor** | 50 new bricks, categories by brick type, wider LOD, primitive bricks change type when Kragled | leveldesign `lego_brick_editor` |

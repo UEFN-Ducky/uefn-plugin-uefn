@@ -74,6 +74,19 @@ buttons without duplicates; any `input_events` event (`BeginDetectEvent`,
 `DetectionOngoingEvent`, `EndDetectEvent`, `CancelActivationEvent`) counts as using
 the action.
 
+## 43.00 changes
+
+- **Apply Canvas Transform is per button.** Turn it on for a button to place it at your
+  position, which then wins over the player's own layout. Leave it off to keep the
+  player's layout and still apply your icon. Turning it on for one button no longer
+  resets the player's custom layout for the rest of the HUD.
+- **Separate from Override Icon:** use either one on its own.
+- **Interact and Pickup** are now overridable. They share one contextual action, so an
+  override applies to both and is static.
+- **Button scale:** layout data in a custom HUD layout now affects button scale.
+- Keep custom touch UI inside the safe area with the 43.00 UMG **`SafeZone`** widget
+  (verse `umg_layout`).
+
 ## 42.40 fixes
 
 - Items that turn Jump / Sprint into **Up** / **Boost** (e.g. the Mandalorian Jetpack)

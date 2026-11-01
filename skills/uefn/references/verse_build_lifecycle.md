@@ -1,10 +1,10 @@
 ---
-description: "Verse build wait, digest vs VM relink, VERSE_DEAD, the 9002/9000 digest-deadlock recovery, the 42.40 VerseVM session toggle (Verse Reload off), and deleted .verse files (3000)"
+description: "Verse build wait, digest vs VM relink, VERSE_DEAD, the 9002/9000 digest-deadlock recovery, the 42.40 VerseVM session toggle (Verse Reload off), deleted .verse files (3000), 43.00 asset redirectors into Verse (Reflect UE Redirectors into Verse Manifest), Data Recovery placeholders that block saving, diagnostics for incrementally skipped packages"
 metadata:
   order: 9
   label: "Verse build lifecycle"
   default_enabled: false
-  load_condition: "WinError 10054 on compile, STALE REFLECTION / no compiled hash, Script error 9002/9000, Script linking is incomplete, VERSE_DEAD component, a new mesh/prefab class is missing from the digest, VerseVM / BPVM, Verse Reload / push Verse changes unavailable, or Script error 3000 Error getting text contents of snippet"
+  load_condition: "WinError 10054 on compile, STALE REFLECTION / no compiled hash, Script error 9002/9000, Script linking is incomplete, VERSE_DEAD component, a new mesh/prefab class is missing from the digest, VerseVM / BPVM, Verse Reload / push Verse changes unavailable, or Script error 3000 Error getting text contents of snippet, renaming / moving / deleting an asset Verse uses, a deprecation warning for an old asset name, Data Recovery placeholder blocks save, cannot save level after a Verse class was renamed or deleted"
 ---
 
 # Verse build lifecycle
@@ -146,8 +146,44 @@ The toggle only changes where your sessions run; the compiler and digests are th
 
 "Error getting text contents of snippet `…/Verse/X/file.verse`" — the file was deleted on
 disk while UEFN was open. Put it back, then delete it through Epic
-`ValkyrieToolset.VerseToolset.Delete` (it tells the build), or restart UEFN. Epic
+`VerseToolset.VerseToolset.Delete` (it tells the build), or restart UEFN. Epic
 `VerseToolset.WriteFile` / `Delete` keep the build's file list right.
+
+## Asset redirectors into Verse (43.00)
+
+Enable **Project Settings → Reflect UE Redirectors into Verse Manifest**. Then UEFN checks
+Verse code and prefabs before an asset change:
+
+- **Rename / move:** the redirector generates a Verse **alias under the old name**; code
+  still compiles, with a **deprecation warning** per reference. Update each reference to the
+  new Assets-digest name, then `fixup_redirectors`.
+- **Delete:** the dialog offers **Replace References** (leaves a redirector, references stay
+  valid) or **Force Delete** (breaks them).
+- **Fix Up Redirectors** keeps a redirector that Verse or a prefab still uses.
+- Fixed with it: material redirectors now get aliases, the `*_asset` manifest/digest entry
+  gets one, aliases keep the target's access specifier, and renames detect generated Verse
+  types used by other packages.
+
+Without the setting the 42.10 behavior applies (redirector, rebuild, re-search the digest).
+
+## Data Recovery placeholders block saving (43.00)
+
+When a placed object's **Verse class can't be found** (class renamed, moved, deleted, or
+Verse doesn't compile), UEFN keeps the object as a **placeholder** with its saved values
+instead of dropping it — and **blocks saving until it is fixed**. The **Data Recovery**
+tool opens by itself (or Tools → Data Recovery): replace the missing class or delete the
+object there.
+
+Agent order: "can't save" / save refused after a Verse change → `workspace_list_verse_errors`
+→ fix the code or restore the class name → `workspace_compile_verse` → placeholders resolve
+on relink. Only if the class is really gone, ask the user before replacing or deleting the
+object in Data Recovery (never pick for them). Never force a level save around it.
+
+## Incremental build diagnostics (43.00)
+
+Verse build diagnostics are now also shown for packages that incremental compilation
+skipped. Errors that appear after 43.00 in untouched files were there before — fix them,
+don't revert your edit.
 
 ## Related
 

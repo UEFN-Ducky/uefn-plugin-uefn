@@ -1,5 +1,5 @@
 ---
-description: "Party-aware gameplay (Social Synergy API, v42.10) — GetLocalParty, party size, same-party checks, join/leave events, party-only access, difficulty that scales with party size"
+description: "Party-aware gameplay (Social Synergy API, v42.10; 43.00 fix: works in playtest / private / live) — GetLocalParty, party size, same-party checks, join/leave events, party-only access, difficulty that scales with party size"
 metadata:
   order: 13
   label: "Party / Social Synergy API (v42.10)"
@@ -138,3 +138,7 @@ party_gameplay_device := class(creative_device):
   session membership.
 - `GetMemberMap()` includes the player themself; subtract one for "mates".
 - Requires FN ≥ 42.10 (`@available 4210`); older uploads will not compile it.
+- **Fixed in 43.00:** party members are detected in playtest, private and live sessions.
+  Before 43.00 it only worked in edit sessions, so party code that "did nothing" in a
+  private version was this bug. Retest there on 43.00 and remove any edit-session-only
+  workaround.

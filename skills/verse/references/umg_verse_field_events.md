@@ -1,5 +1,5 @@
 ---
-description: "Verse field events in UMG (39.40+, tool-created in 42.30) — add_verse_field type event (≤1 bool/int/float param), Custom Button OnButtonClicked → event field (OnClicked no longer compiles), the widget-editor-open requirement, reflected types event(tuple()) / event(tuple(int)), Await from Verse (no Subscribe in 42.40), race-to-stop watcher, the 43.00 subscribable-events change"
+description: "Verse field events in UMG (39.40+, tool-created in 42.30) — add_verse_field type event (≤1 bool/int/float param), Custom Button OnButtonClicked → event field (OnClicked no longer compiles), the widget-editor-open requirement, reflected types event(tuple()) / event(tuple(int)), Subscribe from Verse in 43.00 (returns cancelable) or Await (42.x: Await only), race-to-stop watcher"
 metadata:
   order: 62
   label: "UMG Verse field events (39.40+, 42.30)"
@@ -10,7 +10,7 @@ metadata:
 ## UMG Verse field events (39.40+)
 
 UMG Verse fields can be **events**. Bind a Custom Button's click to a Verse event field on the
-widget, then **await** that event from your `creative_device`. This replaces the obsolete myth that
+widget, then **subscribe to** (43.00) or **await** that event from your `creative_device`. This replaces the obsolete myth that
 "Verse cannot get a named button from a UMG widget." Everything below was verified live in UEFN
 42.30 (Oct 2 2026): tool-made widget → event field → button binding → Verse device awaits the click
 (0 compile errors), and the binding survives a save + reload from disk.
@@ -50,14 +50,25 @@ must be made again (`bind_widget_event`).
 
 | Field | Assets digest | Await gives |
 | --- | --- | --- |
-| event, no parameter | `OnBuyClicked<public>:event(tuple()) = external {}` | nothing |
-| event with one `int` | `OnSlotPicked<public>:event(tuple(int)) = external {}` | a one-element tuple: `Picked(0)` |
+| event, no parameter | `OnBuyClicked<public>:event(tuple()) = external {}` | nothing (handler `OnBuy():void`) |
+| event with one `int` | `OnSlotPicked<public>:event(tuple(int)) = external {}` | a one-element tuple: `Picked(0)` (handler `(Picked:tuple(int))`) |
 | value field | `var Price<public>:int = external {}` | — (`set Widget.Price = 10`) |
 
-A UMG event field is a Verse `event`, **not** a `listenable`: in 42.40 it has **no `Subscribe`**
-(Script error 3506 "Unknown member `Subscribe` in `event(tuple())`"). Await it in a loop instead.
-**43.00** makes `event(t)` subscribable — `Widget.OnBuyClicked.Subscribe(OnBuy)` will return a
-`cancelable`; the Await loop keeps working either way (`events_subscriptions`).
+A UMG event field is a Verse `event`. **43.00:** `event(t)` is also a `listenable`, so
+`Sub := Widget.OnBuyClicked.Subscribe(OnBuy)` returns a `cancelable` — call `Sub.Cancel()` when the
+widget closes (compiled on 43.00 with an `event(int)`). **42.x:** no `Subscribe` (Script error 3506
+"Unknown member `Subscribe` in `event(tuple())`"); Await it in a loop. The Await loop below works on
+both (`events_subscriptions`).
+
+```verse
+# 43.00: one subscription per widget instance; cancel on close.
+var BuySub:?cancelable = false
+Open(Widget:UW_Shop_Screen):void =
+    set BuySub = option{Widget.OnBuyClicked.Subscribe(OnBuy)}
+Close():void =
+    if (S := BuySub?) { S.Cancel() }
+OnBuy():void = {}
+```
 
 ### Await from Verse (verified)
 
@@ -119,9 +130,9 @@ shop_watcher := class:
 ```
 
 Don't add Epic's interim tutorial helper (an `event_subscription` class, `AwaitForEvent` and an
-extension `(Event:event(t) where t:type).Subscribe(…)`): it compiles on 42.40, but on 43.00 its
-`Subscribe` becomes an ambiguous overload of the built-in one. A project that already has it:
-delete the extension when it moves to 43.00 (`events_subscriptions` — migration).
+extension `(Event:event(t) where t:type).Subscribe(…)`): it compiled on 42.40, but on 43.00 its
+`Subscribe` is an ambiguous overload of the built-in one. A project that has it: delete the
+extension (`events_subscriptions` — migration).
 
 ### Related
 

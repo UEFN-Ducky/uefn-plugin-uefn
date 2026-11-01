@@ -42,7 +42,7 @@ Specifiers and what each buys you:
 | Specifier | Meaning / when to use |
 |-----------|-----------------------|
 | `class(creative_device)` | **A placed device.** Subclass of `creative_device`; gets `OnBegin`, shows in UEFN with `@editable` fields. `player_manager := class(creative_device):` |
-| `class(tag)` | A **tag** for `FindCreativeObjectsWithTag(collectable_coins)` (pass the tag **type**; `GetCreativeObjectsWithTag` and the tag-instance overload are deprecated in 42.40). Write it `collectable_coins := class(tag){}` |
+| `class(tag)` | A **tag** for `FindCreativeObjectsWithTag(collectable_coins)` (pass the tag **type**; `GetCreativeObjectsWithTag` and the tag-instance overload are deprecated in 42.40). Write it `collectable_coins := class(tag){}`. 43.00: add/remove tags at runtime with `has_tags` (below) |
 | `class()` / `class:` | Plain class — a helper/manager you `new` yourself. `save_service := class():` |
 | `<concrete>` | **Every field has a default**, so it can be made with `{}` and used as an `@editable` struct or array element. `tower_data := class<concrete>():` |
 | `<unique>` | **Reference identity** — instances compare with `=` / `<>` and can be map keys; needed for stateful helper objects. `game_player := class<unique>():` (devices are **not** comparable — track them by index, 3509) |
@@ -74,6 +74,27 @@ top_hud_system := class<unique>():
 - `var` = mutable; without `var` the field is a constant. `@editable var Price : int = 100`
   is both editor-exposed **and** mutable.
 - One-line methods: `ResetKills<public>(): void = set KillCount = 0`.
+
+#### A field initializer that reads an earlier field (43.00)
+
+```verse
+round_config := class:
+    RoundSeconds<final>:float = 90.0
+    WarnAt:float = RoundSeconds - 10.0     # reads the <final> field above
+```
+
+Compiled 0 errors with `workspace_compile_verse` on 43.00. Rules (release notes):
+
+- The field you read must be **`<final>`** and **not `@editable`**.
+- Only fields declared **earlier in the same class** — not later ones, not a
+  supertype's, not the field itself.
+- Classes and interfaces only (no structs); no fields with accessor functions; no
+  `<localizes>` fields.
+- Write the bare name. `Self.RoundSeconds` in an initializer is Script error 3502
+  "`Self` in an instance variable initializer is not yet implemented".
+- **Trap:** the offline LSP (`workspace_list_verse_errors`, Problems panel) still reports
+  "Accessing instance member `RoundSeconds` from this scope is not yet implemented" for
+  this; the UEFN build accepts it. Trust `workspace_compile_verse`.
 
 ### Instantiating (the archetype `{ … }`)
 
@@ -256,6 +277,34 @@ my_device := class(creative_device):
 
 See the `devices` reference for `@editable`, events, and agents/players; the
 `async` reference for what `<suspends>` unlocks.
+
+### Tags on creative objects: `has_tags` (43.00)
+
+Creative objects (`creative_prop`, devices) now implement `/Verse.org/Simulation/Tags`
+`has_tags`, the same interface as Scene Graph `entity`:
+
+```verse
+using { /Verse.org/Simulation/Tags }
+using { /Fortnite.com/Devices }
+
+hot_tag := class(tag){}
+
+tag_demo := class(creative_device):
+    @editable Prop:creative_prop = creative_prop{}
+
+    OnBegin<override>()<suspends>:void =
+        Key := Prop.AddTag(hot_tag{})          # returns a tag_key
+        if (Prop.ContainsTag[hot_tag]):        # pass the tag TYPE
+            Print("tagged")
+        if (Prop.RemoveTag[Key]):              # remove that one instance
+            Print("untagged")
+```
+
+Compiled 0 errors on 43.00. Also `RemoveAllTags[T]`, `RemoveAllTagsExcept[T]` /
+`[array{T1, T2}]`, `ContainsAllTags[array{…}]`, `ContainsAnyTag[array{…}]` (all
+`<decides>`). **Deprecated in 43.00:** `tag_view` (`Has`, `HasAny`, `HasAll`),
+`tag_search_criteria`, and `GetTags()` on creative objects — use `has_tags`;
+search with `FindCreativeObjectsWithTag(tag_type)`.
 
 ### `concrete_subtype` fields (validator enforced from v42.10)
 

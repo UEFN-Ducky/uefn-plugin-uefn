@@ -30,11 +30,11 @@ Big levels: fewer, larger pieces; build or stream at most one piece per tick; mo
 **Epic UEFN MCP FIRST (HARD):** `ducky_get_status` → when `epic_mcp_online`,
 place/move/batch via nested Epic `unreal__*` only
 (`unreal__list_toolsets` → `unreal__describe_toolset` → `unreal__call_tool`).
-Devices → `ValkyrieToolset.DeviceToolset` (`PlaceDevice`). Actors/props →
-`editor_toolset.toolsets.actor.ActorTools`. **5+ placements** →
+Devices → `ValkyrieFortniteToolset.DeviceToolset` (`PlaceDevice`). Actors/props →
+`EditorToolset.LevelToolset` (`AddToSceneFromClass`) / `EditorToolset.ActorToolset`. **5+ placements** →
 `editor_toolset.toolsets.programmatic.ProgrammaticToolset` `execute_tool_script`
 (not a listener `execute_python` loop). PIC/session →
-`ValkyrieToolset.SessionToolset`. Map: `skill_read_subskill("uefn", "epic_mcp")`.
+`ValkyrieFortniteToolset.SessionToolset`. Map: `skill_read_subskill("uefn", "epic_mcp")`.
 
 Ducky listener is **second** — spatial facts (`get_actor_bounds`, `find_clear_area`,
 `get_ground_z`), `area_create` / `foliage_scatter`, `spawn_actor` for leftover
@@ -50,11 +50,11 @@ SERIAL: one mutating/editor call per assistant message.. Gameplay SFX/horns = Cr
 
 **Place like Content Drawer (HARD):** search `/Game/Creative/**` → keep only
 `BlueprintGeneratedClass` / `*_C`. **5+ Fortnite pieces** → ProgrammaticToolset
-`execute_tool_script` → `editor_toolset.toolsets.scene.SceneTools.add_to_scene_from_class`
-with `actor_type.refPath` = full `Package.Asset_C`, then `set_actor_folder`.
-**Never** `add_to_scene_from_asset` for `/Game/Creative` — that spawns
+`execute_tool_script` → `EditorToolset.LevelToolset.AddToSceneFromClass`
+with `actorType.refPath` = full `Package.Asset_C`, then `set_actor_folder`.
+**Never** `AddToSceneFromAsset` for `/Game/Creative` — that spawns
 `FortStaticMeshActor` and cook-fails `AssetValidator_AssetReferenceRestrictions`.
-Devices → `ValkyrieToolset.DeviceToolset.PlaceDevice` (location + yaw, no Scale).
+Devices → `ValkyrieFortniteToolset.DeviceToolset.PlaceDevice` (location + yaw, no Scale).
 Skip `StaticMesh`, `/BakeData/`, `/HLOD/`, `SM_*`, `…/Meshes/`. Leftover
 `spawn_actor(asset_path=…_C, label=…, folder=…)` only for props Epic cannot place.
 Trees: `foliage_list_sources` → `foliage_scatter(sources=those `_C` paths)`.
@@ -118,7 +118,7 @@ Always `search_assets(search=…, directory=…)` — never `query` / `name_filt
 
 ```
 ducky_get_status                            # 0. Epic first when epic_mcp_online
-unreal__* ActorTools / PlaceDevice          #    official UEFN MCP
+unreal__* LevelToolset / PlaceDevice         #    official UEFN MCP
 get_asset_info / get_actor_bounds           # 1. know the SIZE
 find_clear_area({"near": [x,y,z], "extent": [ex,ey,ez]})   # 2. know it FITS
 spawn_actor({"asset_path": "...", "location": <spot>, "label": "...", "folder": "..."})
@@ -233,7 +233,7 @@ Load with `skill_read_subskill("leveldesign", "<id>")`:
 | Id | When |
 |----|------|
 | `area_management` | **Always-on** — per-area terrains, 100k slots, `Areas/<id>/` folders |
-| `content_catalog` | Find Fortnite Props / Prefabs / Devices via MCP (Content Drawer map) |
+| `content_catalog` | Find Fortnite Props / Prefabs / Devices via MCP (Content Drawer map); 43.00 Frenzy Fields galleries/prefabs; Gaussian splats (PLY/SPZ photoreal captures, Experimental, visual only) |
 | `full_game_director` | Build a complete mode / whole island game loop |
 | `blockout_playtest` | Greybox fly-through, fail before dressing |
 | `player_flow` | Critical path, wayfinding, hubs |
@@ -247,7 +247,7 @@ Load with `skill_read_subskill("leveldesign", "<id>")`:
 | `design_styles` | Genre layout sketches |
 | `cinematic_composition` | Vistas, reveals, framing |
 | `lighting` | Sun/sky/local lights, Day Sequence (stars → materials `starfield_recipe`) |
-| `procedural_generation` | PCG / seeded mass placement |
+| `procedural_generation` | PCG in UEFN 43.00 (MCP `PCGToolset`, PCG Library, reusable PCG tools; forests / cities / POIs, seeds) / seeded mass placement |
 | `landscape_foliage` | Terrain + foliage scatter |
 | `lego_brick_editor` | LEGO islands: Brick Editor mode, Kragle / Separate, brick rules (42.40) |
 | `urban_design` | **Cities start here** — real→uu conversion, Lynch/Jacobs/Gehl, city anti-patterns, router |

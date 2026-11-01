@@ -22,6 +22,24 @@ Always `anim_author_capabilities({})` first. Tool availability varies by UEFN bu
 | Camera cutscene | Level Sequence + **Cinematic Sequence device** |
 | Skeletal acting | AnimSequence / retargeted clips on bindings |
 
+## Sequencer through Epic MCP (43.00)
+
+43.00 ships 7 Sequencer toolsets (Python-backed: check
+`ValkyrieToolset.ValkyriePythonToolset.IsPythonReadyForMainProject` first, enable with
+`EnablePythonForMainProject`). Prefer them over `execute_python` for cameras, cuts and keys:
+
+| Toolset | Use for |
+| --- | --- |
+| `animation_toolset.toolsets.sequencer.SequencerTools` | `create_level_sequence`, `open_sequence`, `add_actors`, `add_spawnable_from_class`, `add_track_to_binding`, `add_section`, `set_section_range`, `create_camera`, `set_camera_cut_binding`, `set_playback_range`, `play`, `bake_transform` |
+| `…keyframing.SequencerKeyframingTools` | `add_key_float`/`bool`/`integer`/`string`, `get_keys`, `remove_key_at_frame`, `bake_channel_keys`, curve editor |
+| `…controlrig_sequencer.SequencerControlRigTools` | character acting: `load_anim_into_rig`, `key_controls`, `set_transform`, `bake_to_control_rig`, `import_fbx_to_rig` |
+| `…custom_bindings.SequencerCustomBindingTools` | `convert_to_possessable` / `convert_to_spawnable` |
+| `…import_export.SequencerImportExportTools` | `import_fbx`, `export_anim_sequence`, `link_anim_sequence` |
+| `…outliner.SequencerOutlinerTools`, `…conditions.SequencerConditionTools` | mute/solo/lock nodes; section/track conditions |
+
+Full tool list: `unreal__describe_toolset`. Camera cuts no longer need `execute_python`:
+`create_camera` → `set_camera_cut_binding`. VFX activated through Sequencer now play (fixed).
+
 ## Create sequence + bind actors
 
 ```
@@ -81,6 +99,28 @@ Playback is **not** "press play in Sequencer" for players — it's the device:
 
 Verse: trigger the device's play function after `search_verse_digest` /
 `get_verse_api` for the exact API — don't guess event names.
+
+**43.00:** `cinematic_sequence_device.GetSequenceLength()<transacts>:float` returns the
+sequence length in seconds — use it instead of a hard-coded `Sleep`:
+
+```verse
+Cine.Play()
+Sleep(Cine.GetSequenceLength())   # then hand control back / start the round
+```
+
+## Cutscene audio: MetaSound through Epic MCP (43.00)
+
+Import → MetaSound → device, all by MCP:
+
+1. `EditorToolset.SoundWaveToolset.ImportFile` — wav/ogg → Sound Wave asset under the
+   project's content root.
+2. `MetaSoundToolset.MetaSoundAuthoringToolset`: `CreateSourcePresetBuilder` (or
+   `CreatePatchPresetBuilder`) → `SetDefaults` (looping, volume, the wave input) →
+   `BuildToAsset`. Edit an existing one: `FindMetaSoundAssets` → `AttachBuilderToAsset`
+   → `SetDefaults` → `CommitBuilderToAsset` → `DetachBuilderFromAsset`.
+3. Play it with an **Audio Player** device (music, ambience, loops, one-shots); set the
+   asset with `DeviceToolset.SetDeviceProperty`. Streaming-sound subtitles now wait for
+   the sound to start.
 
 ## Multi-actor choreography
 

@@ -19,7 +19,19 @@ number (speed, acceleration, friction, gravity, jump impulse) is an `@editable`.
 > **Experimental — cannot be published.** The `Move` / `Interact` input actions
 > (`/Fortnite.com/Input/Character`), the Scene Graph camera components and the
 > `fort_*` camera modifiers all emit `Script warning 2304`. Tell the user this
-> first. Everything below compiles in UEFN with **0 errors**.
+> first. Everything below compiles in UEFN 43.00 with **0 errors**.
+
+> [!WARNING] 43.00 camera changes
+> Angles are **radians** (`FieldOfView`, not `FieldOfViewDegrees`), and
+> `GlobalModifierPosition` / `VisualModifierPosition` are gone — pass your own `rational`
+> (`0`) to `AddModifier`. A template applied before 43.00 fails with 3506 on those names;
+> fix them as below. Details and the modifier layers: `cameras`.
+>
+> **Play servers (43.00 only, fixed 43.10):** the camera never activates because
+> `GetComponent[camera_director_component]` fails. The `using { /Fortnite.com/SceneGraphCameras }`
+> line below is also the workaround (private versions) — never remove it.
+> If interacting with devices gets hard while the rig camera is active, add a
+> **Third Person Controls** device next to the rig.
 
 ### Start from the compiled templates
 
@@ -105,7 +117,7 @@ if (Cam := (for (C : RigPrefabRoot.FindDescendantComponents(perspective_camera_c
     set Orbit.CameraDistanceCentimeters = 450.0
     set Orbit.CameraHeightCentimeters = 120.0
     set Orbit.EnableCollision = true
-    OrbitHandle := Cam.CameraModifiers.AddModifier(Orbit, VisualModifierPosition)   # parens!
+    OrbitHandle := Cam.CameraModifiers.AddModifier(Orbit, 0)   # parens! (43.00: no position constants)
     if (Director := (for (D : P.FindDescendantComponents(camera_director_component)) do D)[0]):
         if (CamHandle := Director.AddCamera[Cam, 100]) {}                            # brackets!
 ```
@@ -151,6 +163,9 @@ height test with a downward `FindSweepHits` probe (see the virtualpointer skill'
 | `3511` / `3513` on the modifier line | `AddModifier` is not `<decides>` | parens, not brackets |
 | `3511` on the camera line | `AddCamera` **is** `<decides>` | brackets, and put it in an `if` |
 | "Invalid access of internal function" on a tick subscribe | `execution_listenable` is `epic_internal` | `OnSimulate` + `Sleep(0.0)` |
+| `3506 Unknown identifier 'VisualModifierPosition'` / `'FieldOfViewDegrees'` | removed in 43.00 | `AddModifier(Orbit, 0)`; `FieldOfView` in radians |
+| Camera works in UEFN session, not on a private play server | 43.00 known issue | keep `using { /Fortnite.com/SceneGraphCameras }` (fixed 43.10) |
+| Camera tilt way off | degrees passed where radians expected | `Deg * PiFloat / 180.0` |
 | `3588` on a local named like a method | local shadowed the component's `Step` | rename the local |
 | Rig teleports back each frame | stock character still driving | `PutInStasis` + `Hide` |
 
@@ -172,6 +187,9 @@ height test with a downward `FindSweepHits` probe (see the virtualpointer skill'
 - Don't read a position out of `Move`'s `EndDetectEvent` — it carries only a float.
 - Don't leave a player's `cancelable`s uncancelled on leave (camera stays claimed).
 - Don't mix the two `vector3` families — SpatialMath (Forward/Left/Up) here.
+- Don't write a custom `camera_modifier` for the follow camera: user-written modifiers
+  run on the server (43.00) and lag; `fort_orbit_camera_modifier` runs client-side.
+- Sound already follows the rig camera (43.00 fix) — no audio listener workaround.
 
 ### Related
 

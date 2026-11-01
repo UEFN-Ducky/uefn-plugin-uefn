@@ -69,9 +69,9 @@ This guide is already in your context — load reference files with `skill_read_
 
 ## 42.30 notes
 
-- Logs from Epic when `epic_mcp_online`: `EditorToolset.LogsToolset.GetLogEntries(category,
+- Logs from Epic when `epic_mcp_online`: `ConsoleToolset.LogsToolset.GetLogEntries(category,
   pattern, maxEntries)` (editor: Verse compile results, blueprint errors, Content Pre-Checks)
-  and `ValkyrieToolset.SessionToolset.GetClientLogEntries(pattern, maxResults, startLine)`
+  and `ValkyrieFortniteToolset.SessionToolset.GetClientLogEntries(pattern, maxResults, startLine)`
   (the launched client).
 - Restarting a session is faster; Launch Session logs why assets needed resaving.
 - Fixed: proximity voice chat, consumables vanishing on respawn, the Ready Up button

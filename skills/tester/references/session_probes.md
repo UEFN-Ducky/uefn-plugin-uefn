@@ -18,7 +18,7 @@ from sim + harness. Never retry a probe or `reload_listener` to make it work.
 ## Tools
 
 - `session_status` — is a play/PIE session active?
-- Epic `ValkyrieToolset.SessionToolset` `StartGame` / `StopGame` — start/stop (best-effort on UEFN builds).
+- Epic `ValkyrieFortniteToolset.SessionToolset` `StartGame` / `StopGame` — start/stop (best-effort on UEFN builds).
 - `get_editor_log(last_n, since_offset, regex)` — stream new log bytes; use `regex` for `[DUCKY-TEST]` or custom markers.
 - `actor_state_snapshot(labels|label_filter)` — capture transforms.
 - `actor_state_diff(before_json, after_json, epsilon)` — movement/teleport deltas in uu.

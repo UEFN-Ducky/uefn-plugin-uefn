@@ -62,7 +62,15 @@ Rules for a persistable class:
 - Nest persistables — `game_player_table` holds `player_wallet`, `player_level`,
   etc., each its own `class<final><persistable>`. Owned custom weapons nest here
   (`PlayerWeapons`) — never a second player `weak_map` for guns
-  (`sys_owned_weapons`). Island cap is **4 persist `weak_map`s** (compiler error 3502 on the fifth — verified on a live build; `compile_errors`).
+  (`sys_owned_weapons`). Island cap is **6 persistent `weak_map` vars from 43.00** (4 on 42.x). The 7th fails with 3502 "Only 6 persistent `var`s allowed (used 7)" (verified on a 43.00 build; `compile_errors`). The four packs (Player Core, Economy, Progression, Time Tracker) use 4, which leaves 2 free. Still prefer nesting a new table on `game_player_table`: a new map is a separate save that can't be migrated together with the others.
+
+**Fixed in 43.00** (no code change needed, retest after upgrading):
+- Items duplicated when several players disconnected at once from a session that used
+  persistence.
+- The JSON parser misread integers near the 32-bit signed and unsigned maximums
+  (±2 147 483 647 / 4 294 967 295). Save data or JSON strings with large ints now
+  round-trip. Ints that were corrupted before 43.00 stay corrupted: validate on load and
+  clamp.
 
 **3. A manager** that initializes and updates entries:
 

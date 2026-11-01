@@ -42,7 +42,7 @@ get_all_actors(class_filter="PointLight")
 ```
 
 Spawn engine lights with `spawn_actor` when the class/asset is available in the
-project; Creative lighting devices via Epic `ValkyrieToolset.DeviceToolset` (`ListDeviceAssets`) or `get_all_actors(label_filter=…)`.
+project; Creative lighting devices via Epic `ValkyrieFortniteToolset.DeviceToolset` (`ListDeviceAssets`) or `get_all_actors(label_filter=…)`.
 Confirm class names with `list_actor_classes` / `search_assets` — don't invent paths.
 
 Tune via `get_actor_properties` → `set_actor_properties` (Intensity, LightColor,

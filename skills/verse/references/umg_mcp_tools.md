@@ -96,8 +96,8 @@ Never `get_editor_property` on `WidgetTree`. Never dump a toolset JSON schema. N
 
 Epic's own tools, when you call them through `unreal__call_tool`:
 
-- `editor_toolset.toolsets.object.ObjectTools`: `list_properties` before `set_properties` (`instance` + `values` as a JSON string). A wrong property name fails the call in 42.30.
-- `save_assets` always gets the paths you changed. An empty list saves every unsaved asset in the project, including other people's work.
+- `EditorToolset.ObjectToolset` (43.00 name; 42.x `editor_toolset.toolsets.object.ObjectTools`): `ListProperties` before `SetProperties` (`instance` + `values` as a JSON string; confirm the argument names with `unreal__describe_toolset`). A wrong property name fails the call.
+- Save with `EditorToolset.AssetToolset` `SaveAsset` for each path you changed (42.x `save_assets`, where an empty list saved every unsaved asset in the project, including other people's work).
 - Overrides that save and compile but fail asset validation: `isFocusable` on buttons, `Margin` on text blocks. Pad the slot instead.
 - A call that hangs for minutes usually means an editor dialog is open (often revision control) — ask the user to check the editor.
 

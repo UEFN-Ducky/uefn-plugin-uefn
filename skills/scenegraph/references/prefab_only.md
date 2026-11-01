@@ -15,6 +15,21 @@ Mutating a level `EntityProxyActor` / prefab instance creates **instance overrid
 (or wrecks the tree). Do not move `Body_*`, attach meshes, or add Verse components
 on the level copy as the primary workflow for prefab-owned content.
 
+### 43.00 prefab changes
+
+- **Live edit for entity prefab assets:** saving a change to a prefab asset updates every
+  instance in the running session — edit the asset, not the instances, and watch it apply.
+- Editor no longer wraps entities in proxy actors; "level instance" below means the placed
+  prefab entity.
+- Prefabs whose parent is a template/class subclass it in Verse (`custom_weapons`).
+- Asset redirectors work with Verse and prefabs: rename/move an asset or run Fix Up
+  Redirectors and references in prefabs stay valid (UEFN keeps a redirector still in use).
+- Undoing a deleted component no longer breaks Live Edit.
+- The **Scene Graph feature example** (43.00) is the reference: the UFO keeps its whole
+  abduction beam in one component, the beam is its own prefab nested under the UFO, and the
+  prefab-spawn sample uses an `@editable` entity for the spawn point. Nest reusable parts as
+  their own prefabs the same way.
+
 ### MCP vs prefab asset tabs
 
 - Prefab-editor windows are **transient worlds**. Scene Graph MCP tools only see

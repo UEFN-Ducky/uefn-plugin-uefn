@@ -99,6 +99,55 @@ frame pass (`Sleep(0.0)` in a `<suspends>` context, or act on the next tick),
 then set the transform. The same "too fast" class of bug leaves the mesh behind
 while collision moves, so avoid rapid attach/detach/move bursts.
 
+**Move, then query, same frame (43.00).** An entity moved with `SetGlobalTransform` /
+`SetLocalTransform` is visible to `FindOverlapHits` / `FindSweepHits` **in the same
+frame** — query right after the move. Remove any `Sleep(0.0)` you put between a move and
+an overlap/sweep query before 43.00; it now only costs a frame of latency.
+
+```verse
+Entity.SetGlobalTransform(NewTransform)
+for (Hit : Entity.FindOverlapHits()):    # sees the new position (43.00+)
+    HandleHit(Hit)
+```
+
+### Scene Graph handles (43.00)
+
+A **handle** refers to an entity or component *without granting access to it*; you
+resolve it with a failable getter (fails if unset or not accessible). All
+`@available 4300`, `/Verse.org/SceneGraph`, not experimental:
+
+| Type | Resolve | Notes |
+|---|---|---|
+| `entity_handle` | `H.GetEntity[]` | base of the others |
+| `component_handle(t)` | `H.GetComponent[]` → `t` | also an `entity_handle` (`GetEntity[]` = owner) |
+| `mesh_part_handle` | `GetComponent[]` → `mesh_component` | `component_handle(mesh_component)`; the mesh (and part) at one end of a hit |
+
+`overlap_hit` and `sweep_hit` (and `collision_hit`) gained `SourceMeshHandle` /
+`TargetMeshHandle : mesh_part_handle` — which mesh on each side was touched, even inside
+a compound hierarchy. `mesh_component` also gained `var CanAffectNavigation : logic`
+(server-only, not replicated; the mesh still needs collision that blocks pawns, and NPCs
+won't route around meshes with it off).
+
+```verse
+# Which meshes did this sweep hit, and whose are they? (compiled 0 errors in 43.00)
+HitMeshes(Mover:entity, Delta:vector3):[]mesh_component =
+    for:
+        Hit : Mover.FindSweepHits(Delta)
+        Mesh := Hit.TargetMeshHandle.GetComponent[]
+    do:
+        Mesh
+
+HitEntities(Mover:entity):[]entity =
+    for:
+        Hit : Mover.FindOverlapHits()
+        Owner := Hit.TargetMeshHandle.GetEntity[]
+    do:
+        Owner
+```
+
+Handles are `<epic_internal>` classes: you get them from hit results, you never
+construct one.
+
 ### `keyframed_movement_component`
 
 `class<final><final_super>(component)` — **`<final>`, so it cannot be

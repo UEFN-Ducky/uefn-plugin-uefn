@@ -1,5 +1,5 @@
 ---
-description: "The real Fortnite client a UEFN session launches — fortnite_client_status/wait/capture/move tools and uefn.client.* workflow nodes; never touch a loading client; prove movement from before/after captures"
+description: "The real Fortnite client a UEFN session launches — fortnite_client_status/wait/capture/move tools and uefn.client.* workflow nodes; never touch a loading client; prove movement from before/after captures; 43.00 compact connectivity HUD"
 metadata:
   order: 6
   label: "Fortnite client"
@@ -10,7 +10,7 @@ metadata:
 ## Fortnite client (after a session launch)
 
 These work on the separate Fortnite client window (titled "Fortnite"), never the editor
-or the launcher. Start the session first (Epic `SessionToolset.StartSession` /
+or the launcher. Start the session first (Epic `ValkyrieFortniteToolset.SessionToolset.StartSession` /
 `StartGame`).
 
 | Tool | Does |
@@ -28,6 +28,13 @@ Workflow nodes: `uefn.client.wait`, `uefn.client.capture`, `uefn.client.move`; t
 Capture and move refuse until the client is in play mode. Loading the client and UEFN on
 one GPU can still stall it ("GPU timeout" in `%LOCALAPPDATA%/FortniteGame/Saved/Logs`);
 if the client stops responding, report it, do not send more input.
+
+**Connectivity HUD (43.00).** The top-left connectivity HUD in iteration sessions is now a
+compact semi-transparent tile in Edit Mode and Game Mode. It expands only when something
+needs attention (disconnected from the UEFN editor, a performance warning), then shrinks
+again. An expanded HUD in a capture is a signal: disconnected → check `GetSessionStatus`;
+performance warning → `profiling`. Don't mistake the tile for island UI, and don't read
+it as a landmark when comparing before/after captures.
 
 **Prove, don't assume.** `input_sent` is not movement: compare the before/after images
 against fixed landmarks; blocked by a wall or unsure → FAIL. Never invent a position,

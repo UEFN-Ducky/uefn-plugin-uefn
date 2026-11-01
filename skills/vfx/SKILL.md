@@ -86,7 +86,7 @@ create_niagara_mesh({"asset_name": "SM_Planet_Rocky", "shape": "sphere",
 create_niagara_system({"asset_name": "NS_Solar", "folder": "{content_root}<Effect>/Niagara"})
 add_niagara_emitter({...})                       # ONE emitter — finalizes + saves
 validate_uefn_asset                              # require VALID, 0 errors
-# place: Epic ActorTools first; spawn_actor leftover only
+# place: Epic EditorToolset.LevelToolset first; spawn_actor leftover only
 spawn_actor({"asset_path": ".../NS_Solar", "label": "...", "folder": "..."})
 control_niagara_actor reset
 save_current_level

@@ -104,6 +104,16 @@ More array methods (`/Verse.org/Verse`, no `using`; all return a new array):
 | `Arr.Insert[Index, Items]`, `Arr.ReplaceElement[Index, Item]` | changed array | bad index |
 | `Arr.Slice[Start, Stop]` / `Arr.Slice[Start]` | part of the array | bad index |
 | `Arr.ReplaceFirstElement[Old, New]` / `Arr.ReplaceAllElements(Old, New)` | changed array | first form: not found |
+| `Arr.Last[]` (43.00) | the last element | empty array |
+| `Arr.Last[N]` (43.00) | the element N from the end (`Last[0]` = last, `Last[1]` = second-to-last) | fewer than N+1 elements |
+
+```verse
+LastScore(Scores:[]int)<decides><transacts>:int = Scores.Last[]
+SecondToLast(Scores:[]int)<decides><transacts>:int = Scores.Last[1]
+```
+
+(Compiled 0 errors on 43.00; `Last` is `<computes><decides>`, so call it in a failure
+context. Before 43.00: `Arr[Arr.Length - 1]`.)
 
 Element type must be `comparable` for the find/remove/replace-by-value forms.
 `set Arr[I] = X` fails unless index `I` already exists — append instead.

@@ -1,11 +1,12 @@
 # SETUP: Assign this class on prey NPCDefs via set_npc_definition_behavior.
 # Duplicate react/die clips into this folder, then swap the Sleep fallbacks for Play(AS_…).
+# 43.00: movement and focus go through npc_actions_component (GetNavigatable / GetFocusInterface are deprecated).
 using { /Fortnite.com/AI }
-using { /Fortnite.com/AI/movement_types }
 using { /Fortnite.com/Animation/PlayAnimation }
 using { /Fortnite.com/Characters }
 using { /UnrealEngine.com/Temporary/SpatialMath }
 using { /Verse.org/Random }
+using { /Verse.org/SceneGraph }
 using { /Verse.org/Simulation }
 
 prey_ai_state := enum:
@@ -42,18 +43,17 @@ prey_npc_behavior<public> := class(npc_behavior):
         if:
             Agent := GetAgent[]
             Char := Agent.GetFortCharacter[]
-            Nav := Char.GetNavigatable[]
-            Focus := Char.GetFocusInterface[]
+            Actions := GetEntity[].GetComponent[npc_actions_component]
             Anim := Char.GetPlayAnimationController[]
         then:
             set SelfAgent = option{Agent}
             RegisterPreyAgent(Agent)
             race:
                 SenseLoop(Agent, Char)
-                BehaviorLoop(Char, Nav, Focus, Anim)
+                BehaviorLoop(Char, Actions, Anim)
                 WaitUntilInactive(Char)
             UnregisterPreyAgent(Agent)
-            Nav.StopNavigation()
+            Actions.StopNavigation()
 
     OnEnd<override>() : void =
         if (Agent := SelfAgent?):
@@ -122,44 +122,44 @@ prey_npc_behavior<public> := class(npc_behavior):
         if (CurrentState <> prey_ai_state.Fleeing):
             set CurrentState = prey_ai_state.Exploring
 
-    BehaviorLoop(Char : fort_character, Nav : navigatable, Focus : focus_interface, Anim : play_animation_controller)<suspends> : void =
+    BehaviorLoop(Char : fort_character, Actions : npc_actions_component, Anim : play_animation_controller)<suspends> : void =
         loop:
             if (not Char.IsActive[]):
                 break
             case (CurrentState):
-                prey_ai_state.Exploring => ExploreOnce(Char, Nav)
-                prey_ai_state.Following => FollowOnce(Char, Nav, Focus)
-                prey_ai_state.Fleeing => FleeOnce(Char, Nav, Focus)
-                prey_ai_state.PlayingDead => PlayDeadOnce(Char, Nav, Anim)
+                prey_ai_state.Exploring => ExploreOnce(Char, Actions)
+                prey_ai_state.Following => FollowOnce(Char, Actions)
+                prey_ai_state.Fleeing => FleeOnce(Char, Actions)
+                prey_ai_state.PlayingDead => PlayDeadOnce(Char, Actions, Anim)
 
-    ExploreOnce(Char : fort_character, Nav : navigatable)<suspends> : void =
+    ExploreOnce(Char : fort_character, Actions : npc_actions_component)<suspends> : void =
         Dest := NPCRandomPointAround(Char.GetTransform().Translation, ExploreMinRadius, ExploreMaxRadius)
-        Nav.SetMovementSpeedMultiplier(1.0)
+        set Actions.MovementSpeedMultiplier = 1.0
         race:
-            Nav.NavigateTo(MakeNavigationTarget(Dest), ?MovementType := Walking, ?ReachRadius := ExploreReachRadius)
+            Actions.NavigateTo(MakeNavigationTarget(Dest), ?MovementType := movement_type.Walking, ?ReachRadius := ExploreReachRadius)
             WaitWhileState(prey_ai_state.Exploring)
 
-    FollowOnce(Char : fort_character, Nav : navigatable, Focus : focus_interface)<suspends> : void =
+    FollowOnce(Char : fort_character, Actions : npc_actions_component)<suspends> : void =
         if (Target := FollowTarget?, Target.IsActive[]):
             TargetPos := Target.GetTransform().Translation
-            if (TargetAgent := Target.GetAgent[]):
+            if (TargetAgent := Target.GetAgent[], TargetEntity := Target.GetEntity[]):
                 race:
-                    Nav.NavigateTo(MakeNavigationTarget(TargetAgent), ?MovementType := Running, ?ReachRadius := FollowReachRadius)
-                    Focus.MaintainFocus(TargetAgent)
+                    Actions.NavigateTo(MakeNavigationTarget(TargetAgent), ?MovementType := movement_type.Running, ?ReachRadius := FollowReachRadius)
+                    Actions.Focus(TargetEntity, ?LockFocus := true)
                     WaitWhileState(prey_ai_state.Following)
             else:
                 race:
-                    Nav.NavigateTo(MakeNavigationTarget(TargetPos), ?MovementType := Running, ?ReachRadius := FollowReachRadius)
-                    Focus.MaintainFocus(TargetPos)
+                    Actions.NavigateTo(MakeNavigationTarget(TargetPos), ?MovementType := movement_type.Running, ?ReachRadius := FollowReachRadius)
+                    Actions.Focus(FromVector3(TargetPos), ?LockFocus := true)
                     WaitWhileState(prey_ai_state.Following)
         else:
             set FollowTarget = false
             set CurrentState = prey_ai_state.Exploring
             Sleep(0.1)
 
-    FleeOnce(Char : fort_character, Nav : navigatable, Focus : focus_interface)<suspends> : void =
+    FleeOnce(Char : fort_character, Actions : npc_actions_component)<suspends> : void =
         set StateLocked = true
-        Nav.StopNavigation()
+        Actions.StopNavigation()
         SelfPos := Char.GetTransform().Translation
         var ThreatPos : vector3 = SelfPos
         if (Target := FollowTarget?):
@@ -167,22 +167,22 @@ prey_npc_behavior<public> := class(npc_behavior):
         else if (Hunter := FindNearestHunter(Char, HunterDetectRange * 2.0)?):
             set ThreatPos = Hunter.GetTransform().Translation
         FleeDest := NPCFleePointFrom(SelfPos, ThreatPos, FleeDistance)
-        Nav.SetMovementSpeedMultiplier(FleeSpeedMultiplier)
+        set Actions.MovementSpeedMultiplier = FleeSpeedMultiplier
         race:
-            Nav.NavigateTo(MakeNavigationTarget(FleeDest), ?MovementType := Running, ?ReachRadius := FleeReachRadius)
-            Focus.MaintainFocus(ThreatPos)
+            Actions.NavigateTo(MakeNavigationTarget(FleeDest), ?MovementType := movement_type.Running, ?ReachRadius := FleeReachRadius)
+            Actions.Focus(FromVector3(ThreatPos), ?LockFocus := true)
             WaitWhileState(prey_ai_state.Fleeing)
             Sleep(3.5)
-        Nav.SetMovementSpeedMultiplier(1.0)
+        set Actions.MovementSpeedMultiplier = 1.0
         set FollowTarget = false
         if (CurrentState = prey_ai_state.Fleeing):
             set CurrentState = prey_ai_state.Exploring
         set StateLocked = false
 
-    PlayDeadOnce(Char : fort_character, Nav : navigatable, Anim : play_animation_controller)<suspends> : void =
+    PlayDeadOnce(Char : fort_character, Actions : npc_actions_component, Anim : play_animation_controller)<suspends> : void =
         set StateLocked = true
-        Nav.StopNavigation()
-        Nav.SetMovementSpeedMultiplier(1.0)
+        Actions.StopNavigation()
+        set Actions.MovementSpeedMultiplier = 1.0
         set FollowTarget = false
         # ponytail: Sleep until you duplicate a die clip into this folder and Play it here.
         Sleep(PlayDeadSeconds)

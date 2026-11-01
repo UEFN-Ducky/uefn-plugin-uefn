@@ -28,6 +28,7 @@ When the project has Epic's Verse UI Kit, `list_widget_classes` also returns its
 | `ScrollBox` | Scroll. Slot is padding. There is no Verse scroll-offset API |
 | `SizeBox` | Fixed desired size |
 | `ScaleBox` | Scale to fit |
+| `SafeZone` | 43.00. Keeps its child inside the screen's safe area (notches, rounded corners, TV overscan) on console and mobile. Wrap full-screen HUD content in it (`umg_layout`) |
 | `NamedSlot` | One hole a child User Widget or Verse fills |
 | `WidgetSwitcher` | One visible child |
 | `UIFrameworkCustomButtonWidget` | Custom Button. Alias `CustomButton`. The only raw button — the kit's buttons are built on it |

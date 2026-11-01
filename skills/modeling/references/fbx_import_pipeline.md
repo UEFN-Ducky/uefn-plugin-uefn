@@ -94,6 +94,22 @@ in a LOD chain (`modeling` SKILL.md). Generate LODs via
 - Missing morphs → re-export with shape keys + import morph option on.
 - Wrong skeleton → animation pack retargeting / don't force mismatched bones.
 
+## USD and glTF import (43.00)
+
+| Format | Route | Brings in |
+| --- | --- | --- |
+| **USD** `.usd` `.usda` `.usdc` `.usdz` | Interchange import, same dialog as FBX | static + skeletal meshes, materials, textures, skeletal animations |
+| **glTF** `.glb` `.gltf` | static mesh tools import (Epic `EditorToolset.StaticMeshToolset.ImportFile` / Content Browser) | static mesh + embedded materials and textures |
+
+- USD defaults work for most files; subdivision level, material purpose and prim
+  collapsing are under **Advanced**.
+- The USD dialog lists types UEFN skips: Audio, Chaos Cloth, Geometry Cache, Groom,
+  MaterialX, Sparse Volume Texture. **USD export is not supported.**
+- glTF export keeps material names (round-trip fixed) and exports Substrate materials.
+- Interchange reimport no longer strips static mesh assignments from instanced static
+  mesh components.
+- Degenerate triangles are handled better in vertex paint, displace mesh and baking.
+
 ## Failure table
 
 | Symptom | Fix |

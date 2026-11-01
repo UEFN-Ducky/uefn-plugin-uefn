@@ -92,9 +92,39 @@ Consumers wire phase advancement to the finished event:
 | A countdown or stopwatch | a deadline on `GetSimulationElapsedTime()` (`<transacts>`, resets each session), checked ~10 times a second |
 | Motion every frame | nothing in Verse — keyframed movement (scenegraph `movement_transforms`) |
 | Real-world time across sessions (logins, offline earnings) | `GetSecondsSinceEpoch()` (`<reads>`) → `sys_time_tracking` |
+| A pausable count up/down with a speed knob (43.00, **Experimental**) | `timer` (below) |
 
 Never count `Sleep(1.0)` passes as seconds: each pass runs a little long, so the
 count drifts. Measure against the clock instead.
+
+### `clock` and the experimental `timer` (43.00)
+
+`/Verse.org/Verse` (no `using`) now has a `clock` interface (`GetSeconds()<reads>:float`)
+and a global `SecondsSinceEpochClock:clock`. `timer := class(clock, playable)` counts from
+`StartSeconds` toward `EndSeconds` against a `ReferenceClock`, `PlayRate` times as fast:
+
+```verse
+count_demo := class:
+    NowSeconds()<transacts>:float = SecondsSinceEpochClock.GetSeconds()
+
+    # Count-down 10 → 0; swap Start/End for a count-up.
+    MakeCountdown():timer =
+        timer{ReferenceClock := SecondsSinceEpochClock, StartSeconds := 10.0, EndSeconds := 0.0}
+
+    Run():void =
+        T := MakeCountdown()
+        set T.PlayRate = 2.0          # twice as fast
+        T.Play()
+        Print("left {T.GetSeconds()}")
+```
+
+Compiled 0 errors on 43.00, with warning 2304 "`timer` is experimental, and its use will
+prevent you from publishing your project". `playable` gives `Play`, `Pause`, `Resume`,
+`Stop`, `IsPlaying` / `IsPaused`, and `PlayEvent`, `PauseEvent`, `ResumeEvent`,
+`StopEvent` (payload `playable_stop_reason`: `Explicit` or `Finished`). `SetSeconds(S)`
+jumps the timer. Use `StopEvent` (reason `Finished`) as "time's up" instead of a polling
+loop. **Publishing island:** keep the `GetSimulationElapsedTime()` deadline loop below
+until `timer` leaves Experimental.
 
 ### Countdown loop (no drift, no per-frame HUD)
 
@@ -126,6 +156,28 @@ RunTimer()<suspends> : void =
 - `Sleep(0.1)` is plenty for a seconds display; `Sleep(0.0)` (every frame) only
   for logic that must react within a frame, and never with UI work inside.
 - A per-player countdown also races the player's stop event (`async`).
+
+### Per-agent interaction cooldowns (43.00)
+
+`basic_interactable_component.CooldownPerAgent` (`interactable_cooldown_per_agent`,
+`/Verse.org/SceneGraph`) has read/write per agent: `SetRemainingDurationForAgent(Agent,
+Seconds)<transacts>` (cancels that agent's interaction in progress when a cooldown
+starts) and `GetRemainingDurationForAgent(Agent)<transacts>:float` (`0.0` = none). The old
+`RemainingDuration:[agent]float` map is deprecated. (It lives on the cooldown class, not on
+`timeline_element`.)
+
+```verse
+using { /Verse.org/SceneGraph }
+using { /Verse.org/Simulation }
+
+cooldown_tools := class:
+    ResetFor(Cooldown:interactable_cooldown_per_agent, Agent:agent)<transacts>:float =
+        Cooldown.SetRemainingDurationForAgent(Agent, 0.0)
+        Cooldown.GetRemainingDurationForAgent(Agent)
+```
+
+Compiled 0 errors on 43.00. The shared `interactable_cooldown` still uses
+`var RemainingDuration:float`.
 
 ### Countdowns you don't need to hand-roll
 

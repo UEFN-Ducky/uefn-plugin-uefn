@@ -6,7 +6,7 @@
 # (list_verse_types digest=assets) and uncomment the WIDGET lines.
 # Fields: IsIntroActive is a bool (add_verse_field logic). OnCloseClicked is an event field: Await it
 # (add_verse_field type event, then bind_widget_event OnButtonClicked; see umg_verse_field_events).
-# Event fields have no Subscribe until 43.00; never add your own Subscribe extension (events_subscriptions).
+# 43.00: event fields are subscribable (OnCloseClicked.Subscribe(Handler)); never add your own Subscribe extension (events_subscriptions).
 # Buttons on the widget are custom ones (kit buttons or CustomButton), never Loud/Quiet/Regular.
 using { /Fortnite.com/Devices }
 using { /Fortnite.com/UI }

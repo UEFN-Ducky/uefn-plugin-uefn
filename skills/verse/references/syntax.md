@@ -1,5 +1,5 @@
 ---
-description: "Verse language reference — types, effects, control flow, classes, concurrency"
+description: "Verse language reference — types, effects, control flow, classes, concurrency, the 43.00 dot forms (if. / spawn. / array. / option.), `of` with an archetype block, the indented array: block, the first(X : Xs){X} macro"
 metadata:
   order: 2
   label: "Verse syntax reference"
@@ -45,7 +45,7 @@ inside `if (…)`, `if:`, `for` filters, `[]` or a `<decides>` body (E3512). Acc
 - Never name a binding `Distance`, `Dot`, `Cross`, `Normalize`, `Lerp`, `Floor`, `Min`, `Max`, `Print`, `Sleep` (ambiguity E3588).
 - Tuples index with `T(0)`; arrays/maps with failable `A[0]`.
 - `int / int` is failable and yields `rational`; convert with `* 1.0` and `Floor[]`.
-- Array literal is `array{…}`; `array:` block form makes tuples.
+- Array literal is `array{…}`. On 43.00 an indented `array:` block with one element per line is also an array (`Many:[]int = array:` + `1` / `2` / `3` lines compiles); on 42.x it built tuples (3509). One line per element; never `array: 1, 2`.
 - Field initialisers are literals/archetypes only — never a call (E3582).
 - An empty body is `if (set M[K] = V) {}` on **one line**; `if (…):` followed by `{}` on the next line is parse error 3100 "Expected expression, got {".
 - A field or local may not share a name with a module (folder) in the project: `var Progression : ?xp_awarder` next to a `Verse/Progression/` folder is E3532 ambiguous.
@@ -71,6 +71,25 @@ loop:
 ```
 - `case (X):` with `Pattern => expr` branches and `_ =>` default.
 - `return X` exits a function; string interpolation is `"{Expr}"`.
+
+### Short forms that compile on 43.00 (verified Nov 1 2026)
+
+They appear in no release note. They work and are fine to read in tutorials, but our
+house style (`code_style`) keeps the long forms in new code.
+
+| Form | Means | Long form |
+|------|-------|-----------|
+| `if. A.Length = 1 then Print("one")` | one-line `if` (statement) | `if (A.Length = 1) then Print("one")` |
+| `V:int = if. O? > 5 then 1 else 0` | one-line `if` as a value | `if (O? > 5) then 1 else 0` |
+| `spawn. Later()` | start a task | `spawn{ Later() }` |
+| `A:[]int = array. 7` | one-element array | `array{7}` |
+| `O:?int = option. 7` | an option | `option{7}` |
+| `Area := TakeBox of vp_box:` + indented `W := 2.0` / `H := 3.0` | call with one archetype argument built from the indented block (`Entity.SetLocalTransform of transform:` + `Translation := …`) | `TakeBox(vp_box{W := 2.0, H := 3.0})` |
+| `first(X : Xs) { X }` | first element of an **array** that passes the filters (`first(X : Xs, X > 2) { X }`); `<decides>`, fails when none match, so call it in a failure context | `Xs[0]` or a `for` |
+| `first(C : Gen) { C }` | first element of a **generator** (`FindDescendantComponents`); **not failable** (alone in an `if` it is 3513). Tutorials write `if (true?, C := first(C : Gen) { C }):` | `for (C : Gen) { …; break }` |
+
+`first` must have a body: `first(X : Xs)` with no `{ … }` is 3502 "Can't use built-in macros
+other than to invoke them".
 
 ### Classes / structs / enums / interfaces
 ```verse
