@@ -23,6 +23,8 @@ metadata:
 | `STALE REFLECTION` / field in source but not readable | The compiled class lacks the field: (a) build not landed, (b) not `@editable`, (c) stale Python wrapper. **Do not hammer `wire_verse_*`.** Compile once, wait (`WinError 10054` = started), poll `list_verse_types`, `get_verse_editables` on the **same** device, wire once. **Never place a second copy. Never remove or retype the `@editable`.** |
 | New `@editable` missing on device Script | `workspace_list_verse_errors` until Problems is clean → `workspace_compile_verse` once (wait; 10054 = started) → re-inspect the same device → wire. Still not readable = build did not land (errors / still linking) — fix and wait; placing another device never adds a hash. |
 | MCP bridge dies: `Request already responded to` | Cancel race — restart Ducky/MCP bridge (launcher patches idempotent respond); do not parallel long tools |
+| Launch fails at Downloading, "Waiting for client to be ready", **"Failed to connect to beacon"** (BeaconNetDriver ConnectionTimeout 30.00) while other islands launch | Not the network: generated Verse data too big for the server to load in 30 s. Measure `.verse` sizes, shrink to flat `[]int` ≤ ~250 KB, compile, close stale FortniteClient, relaunch. `skill_read_subskill("uefn", "launch_beacon_failure")` |
+| Validator **"Vertex count of LOD0 of this Static Mesh's render data is too high (30,000)"** on a Nanite mesh | The Nanite fallback is counted. `ObjectTools.set_properties` NaniteSettings `fallbackTarget: PercentTriangles`, 0.4–0.7 → ≤ 27k. `skill_read_subskill("uefn", "nanite_fallback_vertex_count")` |
 | ToyOptions error on Verse device | Wrong path — use Verse tools |
 | @editable ref won't set on granter | Wrong path — use Creative tools |
 

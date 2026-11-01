@@ -30,6 +30,8 @@ metadata:
 
 **Fortnite client:** after a session launch, `fortnite_client_wait` → `fortnite_client_capture` → `fortnite_client_move`; never touch a loading client → `fortnite_client`.
 
+**Launch blockers:** "Failed to connect to beacon" at Downloading while other islands launch = generated Verse data too big (≤ ~250 KB, flat `[]int`) → `launch_beacon_failure`. Validator "Vertex count of LOD0 ... too high (30,000)" on a Nanite mesh = the fallback is counted → `nanite_fallback_vertex_count`.
+
 **UEFN 42.40 (Oct 15 2026, current):** what changed and where it is covered → `skill_read_subskill("uefn", "patch_42_40")` (42.30 → `patch_42_30`). Discover artwork is required to publish from Oct 22 2026 → `creator_portal`. Every Epic toolset/tool name → `epic_toolsets`. Moderation flags during cook → `content_prechecks`. Benchmarks, offer errors, memory in MB, Rocket Racing, Fab → `creator_portal`.
 
 **Place like Content Drawer (HARD):** search `/Game/Creative/**` → keep only
