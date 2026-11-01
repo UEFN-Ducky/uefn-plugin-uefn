@@ -73,6 +73,7 @@ for (F := 0..Len - 1, L := 0..Width - 1):
     if (Mod[C, SleepMod] = SleepMod - 1). Sleep(0.0)   # yield one frame
 ```
 
+- Compiles on 43.00 (needs `/Verse.org/SceneGraph` and `/Verse.org/Simulation`).
 - `Mod[X, Y]` is `<decides>` (`Verse.digest`), so it goes in `if (...)` with brackets.
 - `Sleep(0.0)` yields one frame. Make `SleepMod` an `@editable` so you can tune
   it without code changes (10 per frame took the spike frame to **18 ms**).
@@ -95,15 +96,18 @@ the next fix.
 
 ## 5. Agent flow (MCP)
 
-- Capture: `InsightsToolset.TimingProfilerToolset` on the **server** target
-  (`ListTargets` → `bIsServer: true` → `CanCapture` → `StartCapture` → person
-  reproduces → `StopCapture`). The full loop and rules are in `profiling_mcp`.
-- Read: in the video, Claude Code read the `.utrace` through a separate
-  **`unreal-insights`** MCP server, next to `unreal-mcp`. It reported the worst
-  frame, the timeline, the time per function and the Verse file behind them.
-  If that server is connected, list its tools and use them; tool names were not
-  shown on screen, so never guess them. If it is not connected, open the trace
-  in Timing Insights with the person (sections 2 and 4).
+- Capture on the **server** target: `InsightsToolset.InsightsTargetToolset.ListTargets`
+  → pick `bIsServer: true` → `InsightsToolset.TimingProfilerToolset.CanCapture` →
+  `StartCapture` → person reproduces → `StopCapture` (returns the `.utrace` path). The full loop and rules are in `profiling_mcp`.
+- Read: in the video, Claude Code read the `.utrace` through a separate MCP
+  server the creator registered as **`unreal-insights`**, next to `unreal-mcp`. It
+  reported the worst frame, the timeline, the time per function and the Verse file
+  behind them. That server is not shipped with UEFN 43.00 and has no public
+  package (see `profiling_mcp` step 5); Epic's `unreal__*` toolsets capture traces
+  but do not read them. If the person has a trace-reader MCP connected, list its
+  tools (`ducky_get_tools`) and use those names; tool names were collapsed on
+  screen, so never guess them. Otherwise open the trace in Timing Insights with
+  the person (sections 2 and 4).
 - Then: read the Verse file it names, propose the fix (section 3), **ask**, edit,
   build, `SessionToolset.PushChanges {bVerseOnly: true}`, capture again with the
   same action, and report the deltas.

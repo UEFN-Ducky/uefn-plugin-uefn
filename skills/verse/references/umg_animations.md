@@ -55,7 +55,10 @@ Sleep(AnimSeconds)
 PlayerUI.RemoveWidget(Popup)
 ```
 
-A new field is missing from Verse until the Assets digest regenerates: build once after making
+`AddWidget` / `set` / `RemoveWidget` and the `Sleep` sequence compile on 43.00 (inside a
+`<suspends>` function, `PlayerUI:player_ui`); `UW_FindShopkeeperPopup` and `PopupState` stand
+for your widget's Assets digest class and its float field. A new field is missing from Verse
+until the Assets digest regenerates: build once after making
 the field, then build Verse again (`umg_verse_fields`).
 
 ### Widgets placed in the level

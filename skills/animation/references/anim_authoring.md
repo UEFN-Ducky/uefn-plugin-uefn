@@ -32,10 +32,13 @@ it: `skill_read_subskill("animation", "runtime_playback")`. Player body clips:
 ## Route 1 — Control Rig in a Level Sequence, then bake
 
 Authoring the rig is editor UI on 42.x. **43.00:** Epic MCP's
-`SequencerControlRigTools` keys controls (`key_controls`, `set_transform`,
-`load_anim_into_rig`, `bake_to_control_rig`) and `SequencerImportExportTools.export_anim_sequence`
-bakes the result, so an agent can author the whole clip (uefn `epic_toolsets`;
-`sequencer_cinematics` § Sequencer through Epic MCP).
+`animation_toolset.toolsets.controlrig_sequencer.SequencerControlRigTools` keys controls
+(`find_or_create_track`, `get_controls_info`, `set_transform` / `set_float` / `set_rotator`,
+`key_controls`, `key_controls_at_frames`, `load_anim_into_rig`, `bake_to_control_rig`) and
+`animation_toolset.toolsets.import_export.SequencerImportExportTools.export_anim_sequence`
+bakes the result (needs an AnimSequence with a Skeleton and a bounded playback range), so an
+agent can author the whole clip (uefn `epic_toolsets`; `sequencer_cinematics` § Sequencer
+through Epic MCP).
 
 **Idle replacement for a bought NPC** (the clip it came with pops at the loop):
 8 s, slight breathing, small arm drift, weight shift leg to leg, head looks left and

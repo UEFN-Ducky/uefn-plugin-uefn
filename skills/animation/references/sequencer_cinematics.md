@@ -133,14 +133,26 @@ PlayIntro(Agent:agent)<suspends>:void =
         Character.ReleaseFromStasis()
 ```
 
+Compiles on 43.00 (`IntroSequence` is an `@editable cinematic_sequence_device`; needs
+`/Fortnite.com/Devices`, `/Fortnite.com/Characters`, `/Verse.org/Simulation`). The Problems
+panel may flag `StoppedEvent.Await()` as "Unknown member `Await`": an LSP false positive, the
+real build accepts it (`listenable` extends `awaitable`).
+
 ### Starting from the player's view (Can Blend)
 
 A cut from the gameplay camera into the cine camera is the **Camera Cut track's Can
 Blend** flag plus an ease-in on the cut section, not a Fade track. Agents that can't
 find a tool for it fall back to a fade-from-black: wrong when the user wants a blend.
-Set it with the Sequencer toolset if `describe_toolset` lists it; otherwise
-`describe_class` the camera cut track and set the `can_blend` editor property. Fade to
-black only at the end, before control returns.
+
+- **Can Blend is UI-only in 43.00.** It is not an editor property: `MovieSceneCameraCutTrack`
+  exposes only `display_name`, `eval_options`, `display_options`, `condition_container`,
+  `decorations`, `track_row_display_names`, `track_tint` (Python stub and
+  `EditorToolset.ObjectToolset.GetProperties` both fail on `bCanBlend` / `can_blend`).
+  Ask the person: Sequencer → right-click the **Camera Cuts** track → **Can Blend**.
+- **The ease-in is scriptable:** `MovieSceneCameraCutSection.set_ease_in_duration(frames)`
+  (inherited from `MovieSceneSection`; `easing` is also an editor property).
+
+Fade to black only at the end, before control returns.
 
 ### Check the camera path for clipping
 
@@ -180,7 +192,7 @@ Import → MetaSound → device, all by MCP:
 | Nothing plays in game | Device not wired / Auto Start off with no trigger |
 | Double playback | Two triggers overlapping |
 | Stuck camera | Pause-at-end; restore player control explicitly |
-| Shot fades in from black instead of blending from the player | Camera Cut track **Can Blend** not set; a Fade track was used instead |
+| Shot fades in from black instead of blending from the player | Camera Cut track **Can Blend** not set (track right-click menu, no script path); a Fade track was used instead |
 | Camera passes through a wall / tree | Orbit radius contains geometry; check every key, shrink the radius |
 | `Play()` does nothing for one player | Device not set to *Everyone*: use `Play(Agent)` |
 | Keys missing | Outside section range; re-add keys via tool |
