@@ -107,14 +107,14 @@ mover_component := class<final_super>(component):
     @editable Speed:float = 200.0
 
     OnSimulate<override>()<suspends>:void =
-        var Last:float = GetSimulationElapsedTime()
+        var PrevTime:float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last' (43.00)
         loop:
             Sleep(0.0)                      # yields exactly one frame
             if (not IsSimulating[]):
                 break                       # entity left the scene / experience reset
             Now := GetSimulationElapsedTime()
-            Advance(Now - Last)
-            set Last = Now
+            Advance(Now - PrevTime)
+            set PrevTime = Now
 
     Advance(DeltaTime:float):void =
         T := Entity.GetLocalTransform()

@@ -93,14 +93,14 @@ function". The hook you do have is `OnSimulate` plus your own delta clock:
 
 ```verse
 OnSimulate<override>()<suspends> : void =
-    var Last : float = GetSimulationElapsedTime()
+    var PrevTime : float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last' (43.00)
     loop:
         Sleep(0.0)                      # exactly one frame
         if (not IsSimulating[]):
             break
         Now := GetSimulationElapsedTime()
-        Step(Now - Last)
-        set Last = Now
+        Step(Now - PrevTime)
+        set PrevTime = Now
 ```
 
 Then move the entity with `Entity.GetGlobalTransform()` /

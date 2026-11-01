@@ -52,14 +52,15 @@ player_movement_component<public> := class<final_super>(component):
         set JumpQueued = true
 
     OnSimulate<override>()<suspends> : void =
-        var Last : float = GetSimulationElapsedTime()
+        # Not `Last`: 43.00 Verse has operator'.Last' and the local becomes ambiguous (3588).
+        var PrevTime : float = GetSimulationElapsedTime()
         loop:
             Sleep(0.0)                                  # one frame
             if (not IsSimulating[]):
                 break
             Now := GetSimulationElapsedTime()
-            Step(Now - Last)
-            set Last = Now
+            Step(Now - PrevTime)
+            set PrevTime = Now
 
     Step(DeltaTime : float) : void =
         T := Entity.GetGlobalTransform()

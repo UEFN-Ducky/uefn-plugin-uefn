@@ -39,7 +39,7 @@ generator_purchaseable <public> := class<concrete>(purchaseable):
         if (AppliedOffline = false):
             ApplyOffline()
             set AppliedOffline = true
-        var Last : float = GetSimulationElapsedTime()
+        var PrevTime : float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last' (43.00)
         Gen := RunId
         loop:
             Sleep(0.25)
@@ -48,8 +48,8 @@ generator_purchaseable <public> := class<concrete>(purchaseable):
             if (IsOwned = false):
                 break
             Now := GetSimulationElapsedTime()
-            Accrue(Now - Last)
-            set Last = Now
+            Accrue(Now - PrevTime)
+            set PrevTime = Now
 
     ApplyOffline<public>() : void =
         if (Plot := OwnerPlot?):
