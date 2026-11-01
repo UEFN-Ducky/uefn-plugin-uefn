@@ -34,7 +34,7 @@ wrong, publish to the Creator Portal for the full review.
 
 ## For Ducky
 
-- Read flags from the editor log: `get_editor_log` / Epic `EditorToolset.LogsToolset.GetLogEntries`
+- Read flags from the editor log: `get_editor_log` / Epic `ConsoleToolset.LogsToolset.GetLogEntries` (43.00; was `EditorToolset.LogsToolset`)
   (pattern on the asset name or "violation"). Report which assets and why; do not
   delete user assets without asking.
 - Never try to hide or work around a flag (Developer Rules — includes the 1.22

@@ -71,7 +71,7 @@ Epic does **not** expose flat `unreal__<tool>` names. Every editor Epic call is:
 | Materials | `EditorToolset.MaterialToolset` (+ `MaterialInstanceToolset`, `CurveAtlasToolset`) | Epic material graph when preferred |
 | PCG (43.00) | `PCGToolset.PCGToolset`, `PCGToolset.PCGSpatialToolset` | `CreateGraph`, `AddNode`, `ConnectNodePins`, `SpawnGraphInstance`, `ExecuteGraphInstance`; `RunPCGInstantGraph` must be called directly, not from `execute_tool_script` |
 | Sequencer (43.00) | `animation_toolset.toolsets.*` (7 toolsets) | cinematics, keyframes, control rig, outliner, conditions, custom bindings, FBX import/export |
-| Audio (43.00) | `EditorToolset.SoundWaveToolset`, `MetaSoundToolset.MetaSoundAuthoringToolset` | `ImportFile` → preset builders → `BuildToAsset` |
+| Audio (43.00) | `EditorToolset.SoundWaveToolset`, `MetaSoundToolset.MetaSoundAuthoringToolset` | `ImportFile` → preset builders → `BuildToAsset` (fails in 43.00: set the SoundWave on the Audio Player device instead; `audio_metasound`) |
 | Profiling (43.00) | `SpatialProfilerToolset.ProfilerToolset`, `InsightsToolset.*` | needs a running session; see `profiling` |
 | Niagara | `NiagaraToolsets.NiagaraToolset_System` (+ Component / Assets / Info) | Epic Niagara assembly |
 | UMG | `UMGToolSet.UMGToolSet`, `MVVMToolset.MVVMToolset`, `VerseFieldsToolset.VerseFieldsToolset`, `WidgetAnimationToolset.WidgetAnimationToolset`, `WidgetStaticAnalysisToolset` (`DescribeWidget`, `GetWidgetTreeDepth`), `UMGToolSet.UMGDebugToolSet` | widget tree + MVVM; 42.30 Verse `event` fields (verse `umg_verse_field_events`). What to build: Epic's Verse UI Kit rules — verse `verse_ui_kit` (custom kit buttons only; `AssetToolset.SaveAsset(assetPath)` per asset) |

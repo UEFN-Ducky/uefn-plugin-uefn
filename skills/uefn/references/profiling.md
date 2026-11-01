@@ -57,6 +57,7 @@ budget with `ListMetrics` / `GetMetricStats` (`thresholdValue`, in the metric's
    timer itself is the cost. Big inclusive + small exclusive = look at what it calls.
 4. **Callees panel**: follow the hot path (flame icon), the most expensive call at
    each level (also called top-down).
+5. **Quick Find** (43.00): search the Timing Profiler for a timer or event by name.
 
 What a capture holds (`GetRecordedChannels`):
 - **Client:** `csv` CPU scopes on the game and render threads + `frame`. Shipping
@@ -72,8 +73,8 @@ What a capture holds (`GetRecordedChannels`):
 - Capture the **server** target (`bIsServer = true` in `ListTargets`), whose trace
   has the `verse` channel. Server capture needs secure tracing on both ends:
   check `CanCapture` first, since a fresh server may not have reported yet.
-- Turn on the **Use Verse VM** launch option for the session when you need Verse
-  VM timing (VerseVM session toggle, 42.40).
+- Verse Insights needs the **Use Verse VM** launch option: turn it on in Launch
+  Options **before** you launch the session (VerseVM session toggle, 42.40).
 - Hot Verse function → see verse `runtime_pitfalls` (work every tick, polling
   loops, a `for` over every player or prop each frame).
 
@@ -86,7 +87,6 @@ What a capture holds (`GetRecordedChannels`):
 - Streaming matters. A snapshot shows what is loaded **now**: textures far
   away are mipped down. Stand next to the suspect area (Spatial Profiler:
   right-click a cell → teleport) before you snapshot.
-- **Quick Find**: search the snapshot by asset name.
 - After changing an asset: **Push Changes**, then take a new snapshot to confirm.
 
 ## Mobile

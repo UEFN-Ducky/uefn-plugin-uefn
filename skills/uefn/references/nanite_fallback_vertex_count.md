@@ -1,5 +1,5 @@
 ---
-description: "ValkyrieValidator_StaticMesh 'Vertex count of LOD0 of this Static Mesh's render data is too high (30,000)' blocks launch even with Nanite on — the Nanite fallback mesh is counted; set fallbackTarget PercentTriangles with ObjectTools.set_properties, find every offender with one execute_tool_script"
+description: "ValkyrieValidator_StaticMesh 'Vertex count of LOD0 of this Static Mesh's render data is too high (30,000)' blocks launch even with Nanite on — the Nanite fallback mesh is counted; set fallbackTarget PercentTriangles with EditorToolset.ObjectToolset.SetProperties (43.00; was ObjectTools.set_properties), find every offender with one execute_tool_script"
 metadata:
   order: 22
   label: "Validator: Vertex count of LOD0 too high (Nanite)"
@@ -22,14 +22,15 @@ heavy as the source.
 
 ## Fix: shrink the fallback
 
-No visual change: Nanite still renders the full mesh. Epic MCP, per offending StaticMesh:
+No visual change: Nanite still renders the full mesh. Epic MCP (43.00 names; 42.40 used
+`ObjectTools.set_properties` / `StaticMeshTools.get_vertex_count` / `AssetTools.*`), per offending StaticMesh:
 
-1. `ObjectTools.set_properties` on the StaticMesh with
+1. `EditorToolset.ObjectToolset.SetProperties` on the StaticMesh (`instance` = its ref) with
    `values = {"NaniteSettings":{"bEnabled":true,"fallbackTarget":"PercentTriangles","fallbackPercentTriangles":0.5,"generateFallback":"Enabled"}}`
    (0.4–0.7; lower for denser meshes).
-2. `StaticMeshTools.get_vertex_count` — it rebuilds immediately. Aim for **≤ 27,000** for margin;
+2. `EditorToolset.StaticMeshToolset.GetVertexCount(mesh, lodIndex=0)` — it rebuilds immediately. Aim for **≤ 27,000** for margin;
    still too high → lower the percent and repeat.
-3. `AssetTools.save_assets`, then `validate_uefn_asset` → VALID.
+3. `EditorToolset.AssetToolset.SaveAsset(assetPath)`, then `validate_uefn_asset` → VALID.
 
 Never decimate or re-import the source, and never turn Nanite off for this.
 
@@ -37,9 +38,9 @@ Never decimate or re-import the source, and never turn Nanite off for this.
 
 One `ProgrammaticToolset.execute_tool_script`:
 
-- `AssetTools.find_assets(folder_path="/<project mount guid>", asset_type="StaticMesh")`. The mount
+- `EditorToolset.AssetToolset.FindAssets(filter={"folderPath": "/<project mount guid>", "assetType": "StaticMesh"})`. The mount
   is the **project GUID path** (e.g. `/2d01d3f6-.../`), not `/Game` or `/<ProjectName>`; take it
   from `get_project_info().content_root`.
-- `StaticMeshTools.get_vertex_count` on each; fix those **> 27,000** as above, then save.
+- `StaticMeshToolset.GetVertexCount` on each; fix those **> 27,000** as above, then save.
 
 LimoRide: 63,862 → 24,749 and 43,951 → 24,366 vertices, all VALID.
