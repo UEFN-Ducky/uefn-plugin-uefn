@@ -89,6 +89,9 @@ snippet on the linked pages compiled in UEFN 43.00 (Nov 1 2026).
 - **Language**: a field initializer may read a preceding `<final>` field (the offline
   LSP still flags it; the UEFN build accepts it); `Array.Last[]` / `Array.Last[N]`.
   → `classes`, `datatypes`
+- **Name clash (3588):** a local named `Last` (or another new extension name) is ambiguous
+  with `operator'.Last'` inside a class (fields and method locals); rename it (`PrevTime`,
+  `LastLogin`). → `compile_errors`
 - **Short forms** (not in the release notes; compiled on 43.00): `if. C then X`,
   `spawn. F()`, `array. X`, `option. X`, `F of type:` + an indented archetype block, an
   indented `array:` block = an array, and the `first(X : Xs) { X }` macro (`<decides>` on

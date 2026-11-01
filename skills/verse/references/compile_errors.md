@@ -134,6 +134,11 @@ Cause: you named a field, local or parameter the same as a module function
 the island can clash with your bindings and types. Rename yours, or qualify the asset
 (`(/YourIsland/Materials:)M_Glow`), or narrow the `using` path (`modules`).
 
+43.00: a field or local named `Last` (or another new extension name) is ambiguous with
+`operator'.Last'` (the new `Array.Last[]`); rename it. Verified on 43.00: `var Last:float`
+on a class and `Last := …` inside a method both fail ("could be (…:)Last, (/Verse.org/Verse:)operator'.Last'");
+the same local in a module-level function still compiles. Use `PrevTime`, `LastLogin`, `LastSeen`.
+
 Fix: rename the binding (`Dist`, `DistToTarget`). Never use these names for your
 own bindings: `Distance DistanceSquared Dot Cross Normalize Lerp Sqrt Sin Cos Tan
 Floor Ceil Round Int Min Max Clamp Print Sleep Exp Log Pow Err`. (`Err` is a Verse function:

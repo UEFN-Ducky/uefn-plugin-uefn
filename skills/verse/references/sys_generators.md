@@ -112,8 +112,8 @@ index; `spawn` the new building's generation loop when it unlocks.
 ```verse
 ProcessOfflineOnJoin(GP : game_player) : void =
     Now := GetSecondsSinceEpoch()
-    Last := GP.Services.TimeTracker.GetLastLoginTime()
-    ElapsedRaw := Now - Last
+    LastLogin := GP.Services.TimeTracker.GetLastLoginTime()   # not `Last`: 43.00 3588 vs Array.Last[]
+    ElapsedRaw := Now - LastLogin
     Elapsed := Min(Max(0.0, ElapsedRaw), MaxOfflineSeconds)
     if (Whole := Floor[RatePerSecond * Elapsed]):
         if (Whole > 0):
