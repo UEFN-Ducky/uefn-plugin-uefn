@@ -12,7 +12,28 @@ metadata:
 Verse cannot create materials. Everything visible at runtime must exist as an
 editor asset first; Verse swaps between pre-made materials/instances.
 
-### Swap a prop's material
+### Swap an entity's material (Scene Graph — use this first)
+
+Entities have no `SetMaterial`. Each mesh's generated class in
+`Assets.digest.verse` has one `@editable var` per material slot, named after the
+slot — for example `SM_Card := class<final>(mesh_component)` with
+`var MAT_Card : material`. Set that slot on the entity's mesh component; the
+materials are classes in the same digest, so build one with `{}`:
+
+```verse
+using { /Verse.org/SceneGraph }
+
+PaintBrass(Card : entity) : void =
+    if (Mesh := Card.GetComponent[SM_Card]):
+        set Mesh.MAT_Card = MAT_Brass{}
+```
+
+Slot and material names differ per mesh: read them from the project's Assets
+digest (`search_verse_digest` with the Assets `digest_path`) and build once to
+confirm. Two looks that never mix can also be two child mesh entities, one shown
+(`SetShown`, scenegraph `verse_authoring`).
+
+### Swap a `creative_prop`'s material (physics props only)
 
 ```verse
 using { /Fortnite.com/Devices }
@@ -24,6 +45,7 @@ if (Prop := MyPropRef?):
 ```
 
 - Works on `creative_prop` (spawned or placed props that allow manipulation).
+  Anything else Verse changes at runtime is an entity — use the slot above.
 - The material asset is referenced through **asset reflection** — it shows up in
   the `Assets.digest.verse` after building Verse code; no @editable needed, but an
   `@editable` material field also works for designer-facing setups.

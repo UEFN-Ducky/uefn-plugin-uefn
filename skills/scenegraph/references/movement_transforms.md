@@ -13,8 +13,8 @@ metadata:
 Scene Graph entity is a keyframe** (`keyframed_movement_component`). Doors,
 lifts, platforms, spinners, bobbing pickups, projectiles, a single glide and
 chasers are all keyframes. A transform is written **once**, to place something;
-origins follow; a moved `chair_device` carries a player. Never animate by
-writing a transform, `TeleportTo` or `MoveTo` in a loop.
+origins follow; players ride keyframed platforms. `MoveTo` is never used, and
+nothing is animated by writing a transform or `TeleportTo` in a loop.
 
 Why: KFM plays natively in the Pre-Physics phase, outside your Verse, and the
 client interpolates it. Epic's keyframed movement page says it avoids the
@@ -48,14 +48,14 @@ using { /Fortnite.com/Characters }   # fort_character / GetFortCharacter[] in th
 | Place once (spawn, reset, put a thing on a spot) | `SetGlobalTransform` / `SetLocalTransform`, **once** | a loop |
 | Door, lift, platform, any authored path | KFM keys in an `@editable` array (`keyframed_path_component` below) | per-frame transform writes |
 | Spin, bob, sway forever | KFM `loop` (four 90° keys) / `pingpong` (`StartSpin`, `StartBob`) | a ~10 Hz Verse loop |
-| One glide to a point | `GlideTo` / `GlideBy`: one `oneshot` delta, then `FinishedEvent` | `MoveTo`, a lerp loop |
+| One glide to a point | `GlideTo` / `GlideBy`: one `oneshot` delta, wait its duration | `MoveTo`, a lerp loop |
 | Thrown or flying object | one `oneshot` delta over the flight time (npc-ai `projectiles`) | a per-frame position |
 | Chasing, homing, steering | `ChaseSegments`: a short KFM segment re-aimed ~10 times a second; steering maths may tick as pure state | per-frame `SetGlobalTransform` |
 | A custom player controller reading Move input | `custom_player_controller` — the **only** per-frame transform writer | — |
 | Follow / attach to a player, vehicle or other entity | **origin** (`SetOrigin`) | copying the target transform every frame |
 | Reparent permanently | `Parent.AddEntities(array{Child})` | `SetOrigin` |
-| Carry a player | a `chair_device` moved with one `MoveTo` per move (verse `runtime_pitfalls`) | `TeleportTo` each tick |
-| Hide and show again | `Disable()` / `Enable()` its `mesh_component`s (`SetShown` in `verse_authoring`) | `RemoveFromParent` then re-adding |
+| Carry a player (lift, train, ride) | they stand on a keyframed platform entity; collidable child meshes with `Visible` off keep them on (verse `runtime_pitfalls`) | `TeleportTo` each tick, a moving `chair_device` (`MoveTo`) |
+| Hide and show again | `Disable()` / `Enable()` its `mesh_component`s **and** set `Collidable` / `Queryable` (`Disable()` only stops rendering) — `SetShown` in `verse_authoring` | `RemoveFromParent` then re-adding; teleporting it away |
 
 ### `transform_component`
 
@@ -323,7 +323,7 @@ GlideBy(KFM : keyframed_movement_component, Offset : vector3, Seconds : float)<s
         Easing := ease_in_out_cubic_bezier_easing_function{}
     KFM.SetKeyframes(array{Glide}, oneshot_keyframed_movement_playback_mode{})
     KFM.Play()
-    KFM.FinishedEvent.Await()    # the Problems panel may flag Await on a listenable: LSP false positive
+    Sleep(Seconds)               # a oneshot lasts Seconds (FinishedEvent.Await() works too, but the LSP flags it)
 
 # Glides to a point in the parent's space (world space under the simulation entity).
 GlideTo(Mover : entity, KFM : keyframed_movement_component, Destination : vector3, Seconds : float)<suspends> : void =

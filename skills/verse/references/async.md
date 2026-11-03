@@ -173,17 +173,17 @@ is gone keeps every object it references alive — a leak that grows each sessio
 when a `race` cancels it. It cannot call `<suspends>` functions (it can `spawn`).
 
 ```verse
-using { /UnrealEngine.com/Temporary/SpatialMath }
+using { /Verse.org/SceneGraph }
 
-SpawnTempProp(Asset : creative_prop_asset, Duration : float)<suspends> : void =
-    SpawnResult := SpawnProp(Asset, transform{})   # tuple(?creative_prop, spawn_prop_result)
-    if (Prop := SpawnResult(0)?):
-        defer:
-            Prop.Dispose()                       # runs on return and on cancel
-        Sleep(Duration)
+SpawnTempEntity(Parent : entity, Duration : float)<suspends> : void =
+    Temp := entity{}                             # a prefab class (EP_*{}) in a real island
+    Parent.AddEntities(array{Temp})
+    defer:
+        Temp.RemoveFromParent()                  # runs on return and on cancel
+    Sleep(Duration)
 ```
 
-Without the `defer`, a prop spawned inside a race arm that loses is never disposed.
+Without the `defer`, an entity spawned inside a race arm that loses is never removed.
 
 ### Loops
 

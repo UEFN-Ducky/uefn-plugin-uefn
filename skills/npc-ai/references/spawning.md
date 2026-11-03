@@ -144,7 +144,7 @@ Also set spawners **DisabledAtGameStart** in Creative Details.
 
 ## Dungeon level spawner (optional runtime rooms)
 
-`dungeon_level_spawner` builds floors from **SG cubes** (Visible + Collidable + Queryable) so players walk on them **and** archer `FindSweepHits` blocks. Optional SpawnProp visuals (`AlsoSpawnPropVisuals`).
+`dungeon_level_spawner` builds floors from **SG cubes** (Visible + Collidable + Queryable) so players walk on them **and** archer `FindSweepHits` blocks. The Roguelike source also has `AlsoSpawnPropVisuals` — leave it off; Scene Graph meshes only.
 
 | Field | Default |
 |-------|---------|

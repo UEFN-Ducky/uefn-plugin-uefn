@@ -144,7 +144,7 @@ Editor-time generation is the main route. For per-match variety:
 
 | Way | How | Cost |
 |---|---|---|
-| Fixed network, varied lots | Paths and ground placed once; at round start a Verse device fills lots from a seeded kit table with Scene Graph prefabs or `SpawnProp` (`verse` → `sys_spawning`) | prop budget per round; pool and reuse |
+| Fixed network, varied lots | Paths and ground placed once; at round start a Verse device fills lots from a seeded kit table with Scene Graph prefabs, never `SpawnProp` (`verse` → `sys_spawning`) | prop budget per round; pool and reuse |
 | District chunk swap | Pre-built chunks per district slot; show one per slot each round | memory for every chunk |
 | Room / cell grids | Roguelike Game Designer plugin `rgd_*` (templates → `rgd_build_level_in_uefn`) | grid-of-rooms layouts |
 

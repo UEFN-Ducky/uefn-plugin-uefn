@@ -5,7 +5,7 @@ description: "Niagara VFX in UEFN — assemble systems from stock modules via MC
 license: MIT
 metadata:
   label: "UEFN Niagara"
-  version: 14
+  version: 15
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -16,8 +16,8 @@ metadata:
 ## Hard rules (every UEFN skill)
 
 1. **Our architecture is the spine** — systems are our packs on `player_manager`; never a second registry, wallet or save table (verse `sys_architecture`).
-2. **Scene Graph first** for anything created, moved or animated at runtime; Creative devices for features Fortnite provides; `creative_prop` only as a fallback (scenegraph SKILL.md).
-3. **Motion is keyframed, always** — every runtime move of an entity (door, lift, platform, spin, bob, projectile, one glide, a chaser) is `keyframed_movement_component`: `SetKeyframes`, then `Play()`. Never a transform, `TeleportTo` or `MoveTo` written in a loop. Place once with `SetGlobalTransform`; follow with `SetOrigin`; carry a player in a `chair_device`; characters use animation assets (scenegraph `movement_transforms`).
+2. **Scene Graph, always** — anything created, moved, shown, hidden or animated at runtime is an entity / Entity Prefab; Creative devices only for features Fortnite provides; `creative_prop` only for Fortnite physics props (`physics` skill), never moved or hidden from Verse (scenegraph SKILL.md).
+3. **Motion is keyframed, always — no `MoveTo`, ever** — every runtime move of an entity (door, lift, platform, spin, bob, projectile, one glide, a chaser, a pet) is `keyframed_movement_component`: `SetKeyframes`, then `Play()`. Never a transform or `TeleportTo` written in a loop. Place once with `SetGlobalTransform`; follow with `SetOrigin`; carry a player on a keyframed platform they stand on; characters use animation assets (scenegraph `movement_transforms`).
 4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
 5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
 6. **One house code style** (verse `code_style`).

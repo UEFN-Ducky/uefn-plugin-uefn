@@ -1,7 +1,7 @@
 {
   "id": "uefn",
   "kind": "plugin",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "label": "UEFN",
   "description": "Everything for the UEFN editor in one plugin: actors, assets, data tables, editor control, level design and worldgen, materials, modeling, Niagara VFX, Scene Graph, Verse (digests, compile, UMG, New-file templates), animation and retargeting, MetaHuman, physics, Virtual Pointer, testing, UEFN Logs and NPC AI recipes. Bundles every UEFN skill. Serial editor ops (one MCP call per turn).",
   "min_app_version": "1.2.412",
@@ -1610,6 +1610,10 @@
           {
             "path": "pet_purchaseable.verse",
             "file": "templates/tycoon/pet_purchaseable.verse"
+          },
+          {
+            "path": "tycoon_reveal_component.verse",
+            "file": "templates/tycoon/tycoon_reveal_component.verse"
           },
           {
             "path": "dancefloor_purchaseable.verse",

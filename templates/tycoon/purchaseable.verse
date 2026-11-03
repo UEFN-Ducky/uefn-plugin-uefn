@@ -1,8 +1,9 @@
 # SETUP: Apply player_core → economy → progression → time_tracker → tycoon.
 # NEVER own a wallet / XP table here. Pay and grant via PlayerManager slots.
+# What a purchase shows = entities with a tycoon_reveal_component (TypeIndex / ItemIndex =
+# this item's array and index on the plot); buying switches their meshes on.
 using { /Verse.org/Simulation }
 using { /Fortnite.com/Devices }
-using { /UnrealEngine.com/Temporary/SpatialMath }
 using { PlayerCore }
 
 activatable <public> := interface:
@@ -41,7 +42,6 @@ purchaseable <public> := class<abstract>(activatable, rebirthable, gated):
     var IsLocked <public> : logic = false
     var RunId <public> : int = 0
     var BuyHook <public> : ?buy_wrapper = false
-    var PropAnchors <public> : [int]transform = map{}
 
     @editable DisplayName <public> : string = "Item"
     @editable Price <public> : float = 100.0
@@ -57,8 +57,6 @@ purchaseable <public> := class<abstract>(activatable, rebirthable, gated):
     @editable SuccessHud <public> : hud_message_device = hud_message_device{}
     @editable ErrorHud <public> : hud_message_device = hud_message_device{}
     @editable SFX <public> : audio_player_device = audio_player_device{}
-    @editable RevealProps <public> : []creative_prop = array{}
-    @editable UndergroundOffset <public> : float = -5000.0
 
     Message<localizes>(String : string) : message = "{String}"
 
@@ -70,7 +68,7 @@ purchaseable <public> := class<abstract>(activatable, rebirthable, gated):
         set ItemIndex = NewIndex
         set IsOwned = false
         set IsLocked = StartsLocked
-        CacheAndParkProps()
+        HideReveals()
         Hook := buy_wrapper{Item := Self}
         set BuyHook = option{Hook}
         BuyButton.InteractedWithEvent.Subscribe(Hook.OnAgent)
@@ -120,14 +118,14 @@ purchaseable <public> := class<abstract>(activatable, rebirthable, gated):
         SFX.Play(Agent)
         SuccessHud.SetText(Message("Unlocked {DisplayName}"))
         SuccessHud.Show(Agent)
-        ShowRevealProps()
+        ShowReveals()
         UnlockDependents(Plot)
         spawn{ Activate() }
 
     ApplyLoadedUnlock<public>(Agent : agent) : void =
         set IsOwned = true
         set IsLocked = false
-        ShowRevealProps()
+        ShowReveals()
         spawn{ Activate() }
 
     UnlockDependents<public>(Plot : plot_manager) : void =
@@ -168,7 +166,7 @@ purchaseable <public> := class<abstract>(activatable, rebirthable, gated):
     OnRebirth<override>() : void =
         set RunId = RunId + 1
         set IsOwned = false
-        CacheAndParkProps()
+        HideReveals()
         if (StartsLocked = true):
             Lock()
         else:
@@ -180,21 +178,10 @@ purchaseable <public> := class<abstract>(activatable, rebirthable, gated):
     Unlock<override>() : void =
         set IsLocked = false
 
-    CacheAndParkProps<public>() : void =
-        for (PIndex -> Prop : RevealProps):
-            if (set PropAnchors[PIndex] = Prop.GetTransform()) {}
-            ParkProp(PIndex)
+    HideReveals<public>() : void =
+        if (Plot := OwnerPlot?):
+            Plot.SetRevealShown(PackedKey(), false)
 
-    ShowRevealProps<public>() : void =
-        for (PIndex -> Prop : RevealProps):
-            if (Anchor := PropAnchors[PIndex]):
-                if (Prop.TeleportTo[Anchor.Translation, Anchor.Rotation]) {}
-
-    ParkProp<public>(PIndex : int) : void =
-        if (Prop := RevealProps[PIndex], Anchor := PropAnchors[PIndex]):
-            Underground := vector3{
-                X := Anchor.Translation.X,
-                Y := Anchor.Translation.Y,
-                Z := Anchor.Translation.Z + UndergroundOffset
-            }
-            if (Prop.TeleportTo[Underground, Anchor.Rotation]) {}
+    ShowReveals<public>() : void =
+        if (Plot := OwnerPlot?):
+            Plot.SetRevealShown(PackedKey(), true)

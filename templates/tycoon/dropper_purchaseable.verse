@@ -4,14 +4,13 @@ using { /Fortnite.com/Devices }
 
 dropper_purchaseable <public> := class<concrete>(purchaseable):
     @editable ConveyorIndex <public> : int = 0
-    @editable WaypointIndex <public> : int = 0
     @editable DropInterval <public> : float = 2.0
     var LinkedConveyor <public> : int = -1
 
     Activate<override>()<suspends> : void =
         if (Plot := OwnerPlot?):
             if (Belt := Plot.FindConveyor(ConveyorIndex)?):
-                Belt.LinkDropper(Self, WaypointIndex)
+                Belt.LinkDropper(Self)
                 set LinkedConveyor = ConveyorIndex
         Interval := if (DropInterval > 0.0) then DropInterval else 2.0
         Gen := RunId

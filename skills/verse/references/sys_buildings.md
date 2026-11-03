@@ -1,10 +1,10 @@
 ---
-description: "Building unlock & reveal — prop_purchaseable on a plot, underground Z-teleport, Hide/Show alternative"
+description: "Building unlock & reveal — prop_purchaseable on a plot, reveal entities (Scene Graph, tycoon_reveal_component) shown and hidden by switching their meshes, never teleported underground or moved with MoveTo"
 metadata:
   order: 39
   label: "Game systems — building unlock & plot reveal"
   default_enabled: false
-  load_condition: "Unlocking or upgrading buildings/plots, teleporting props to reveal tiers, coupling unlocks to delivery paths"
+  load_condition: "Unlocking or upgrading buildings/plots, revealing tiers, showing or hiding plot pieces, coupling unlocks to delivery paths"
 ---
 
 ## Building unlock & reveal — `prop_purchaseable`
@@ -17,37 +17,44 @@ tycoon-local wallet). Full kit map: `sys_tycoon`. Generators: `sys_generators`.
 ### Unlock flow
 
 `purchaseable.TryBuy` charges `Price` / `CurrencyIndex`, writes `PlotUnlocks`,
-then `ShowRevealProps()` (underground teleport back to cached anchors). Locked
-rows wait on `Dependents` from a parent buy.
+then `ShowReveals()`. Locked rows wait on `Dependents` from a parent buy.
 
 ```verse
 # After buy (already charged in purchaseable.FinishBuy):
 Activate<override>()<suspends> : void =
-    ShowRevealProps()
+    ShowReveals()
     StartGrantLoop()
 ```
 
 Persist owned keys in `game_player_table.PlotUnlocks` via `AddPlotUnlock`.
 Rejoin: `plot_manager.ApplySavedUnlocks`.
 
-### Underground Z-teleport reveal (default in the pack)
+### Reveal entities (the only reveal in the pack)
 
-1. `Initialize` caches each `RevealProps` transform, then parks at
-   `Translation.Z + UndergroundOffset`.
-2. On buy / loaded unlock: teleport each prop back to its anchor.
-3. `OnRebirth` parks again.
+What a buy shows is built as Scene Graph entities, placed once in the level (or
+in a plot prefab):
 
-No `Hide`/`Show` required — props stay loaded, just moved.
+1. Give each entity a `tycoon_reveal_component`: `Plot` = its `plot_manager`,
+   `TypeIndex` = the purchaseable's array on the plot (0 Props … 9 Shootables,
+   10 Collectables), `ItemIndex` = its index there. Several entities can share
+   one key (a building made of parts).
+2. At simulation start each one registers with its plot
+   (`plot_manager.RegisterReveal`) and takes the current state — hidden until
+   bought, whichever starts first.
+3. Buy / loaded unlock: `ShowReveals()` → `plot_manager.SetRevealShown(Key,
+   true)` → every entity with that key `Enable()`s its meshes.
+4. `OnRebirth` / unclaim: `HideReveals()` disables them again.
 
-### Simple Hide/Show reveal
-
-For a one-off prop you can `Prop.Show()` / `Hide()` instead of teleport. Do not
-mix both patterns on the same prop without a clear reason.
+Never teleport a reveal underground, never `MoveTo` it, and never
+`RemoveFromParent` + re-add it (it returns invisible with its collision still
+there). A reveal that should animate when it appears (rise from the ground, pop
+in) plays a `oneshot` keyframe on its own `keyframed_movement_component`
+(scenegraph `movement_transforms`).
 
 ### Nav / delivery coupling
 
-When plot index N unlocks, enable end-nav set N so delivered props can finish
-at that building (`sys_spawning`). Filter ends by storage fullness if
+When plot index N unlocks, enable end-nav set N so delivered entities can
+finish at that building (`sys_spawning`). Filter ends by storage fullness if
 capacity-gated.
 
 ### UI
@@ -57,6 +64,8 @@ Economy (`sys_hud_template` / `sys_canvas_cookbook` for custom canvases).
 
 ### Gotchas
 
-- Cache origins before the first park underground or you lose the anchor.
-- Teleport reveal ≠ material swap; pick one visual strategy.
+- A reveal entity with no `Plot` set never registers and stays visible.
+- `TypeIndex` / `ItemIndex` must match the purchaseable's array and index on that
+  plot; a wrong pair shows the wrong building.
+- Mesh reveal ≠ material swap; pick one visual strategy per entity.
 - Never own currency in `Verse/Tycoon/`.

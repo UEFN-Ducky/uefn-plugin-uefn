@@ -277,8 +277,12 @@ platform), keep it in the scene and switch its meshes, or pool it
 (verse `sys_spawning`):
 
 ```verse
+# Disable() only stops rendering — switch collision and queries too, or the hidden
+# thing is an invisible wall.
 SetShown(Root : entity, Shown : logic) : void =
     for (Mesh : Root.FindDescendantComponents(mesh_component)):
+        set Mesh.Collidable = Shown
+        set Mesh.Queryable = Shown
         if (Shown?):
             Mesh.Enable()
         else:

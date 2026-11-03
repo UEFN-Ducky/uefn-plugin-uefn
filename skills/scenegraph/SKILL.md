@@ -5,7 +5,7 @@ description: "UEFN Scene Graph — use when the task is entities, components, or
 license: MIT
 metadata:
   label: "UEFN Scene Graph"
-  version: 30
+  version: 31
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -17,8 +17,8 @@ metadata:
 ## Hard rules (every UEFN skill)
 
 1. **Our architecture is the spine** — systems are our packs on `player_manager`; never a second registry, wallet or save table (verse `sys_architecture`).
-2. **Scene Graph first** for anything created, moved or animated at runtime; Creative devices for features Fortnite provides; `creative_prop` only as a fallback (scenegraph SKILL.md).
-3. **Motion is keyframed, always** — every runtime move of an entity (door, lift, platform, spin, bob, projectile, one glide, a chaser) is `keyframed_movement_component`: `SetKeyframes`, then `Play()`. Never a transform, `TeleportTo` or `MoveTo` written in a loop. Place once with `SetGlobalTransform`; follow with `SetOrigin`; carry a player in a `chair_device`; characters use animation assets (scenegraph `movement_transforms`).
+2. **Scene Graph, always** — anything created, moved, shown, hidden or animated at runtime is an entity / Entity Prefab; Creative devices only for features Fortnite provides; `creative_prop` only for Fortnite physics props (`physics` skill), never moved or hidden from Verse (scenegraph SKILL.md).
+3. **Motion is keyframed, always — no `MoveTo`, ever** — every runtime move of an entity (door, lift, platform, spin, bob, projectile, one glide, a chaser, a pet) is `keyframed_movement_component`: `SetKeyframes`, then `Play()`. Never a transform or `TeleportTo` written in a loop. Place once with `SetGlobalTransform`; follow with `SetOrigin`; carry a player on a keyframed platform they stand on; characters use animation assets (scenegraph `movement_transforms`).
 4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
 5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
 6. **One house code style** (verse `code_style`).
@@ -69,7 +69,7 @@ metadata:
 | Characters and enemies | NPC character definition + `npc_behavior` | the `npc-ai` skill |
 | Any UI | Verse UI Kit UMG widgets | verse `verse_ui_kit` |
 | Static set dressing | A placed mesh or prefab instance, no Verse | — |
-| Runtime props (`creative_prop`, `SpawnProp`) | Only when no entity path exists (an existing prop-based template) | verse `sys_spawning` fallback section |
+| Runtime props (`creative_prop`, `SpawnProp`) | Never for anything Verse moves, shows or hides — that is an entity. Only Fortnite physics props (`physics` skill) | — |
 
 Spawn at runtime by constructing the prefab class and parenting it
 (`Parent.AddEntities(array{EP_Crate{}})`). Many pieces that move together → one
@@ -329,8 +329,9 @@ free-text hunts, `list_verse_modules` for the module map.
   `Sim.AddEntities` / `RemoveFromParent` after Verse rebuild (see
   `verse_authoring`). **Never re-add an entity you removed** — it comes back
   invisible with its collision still there. To blink something out and back,
-  `Disable()` / `Enable()` its `mesh_component`s (`SetShown`); `RemoveFromParent`
-  is final.
+  `Disable()` / `Enable()` its `mesh_component`s and switch their `Collidable` /
+  `Queryable` (`Disable()` only stops rendering) — `SetShown`; `RemoveFromParent`
+  is final. Never hide anything by teleporting it away.
 - **Custom Verse components cannot be attached from the editor tools until the
   project's Verse has built** — write the `.verse` file, push changes, then the
   class exists to add in the editor (or add it in the Details panel). Project

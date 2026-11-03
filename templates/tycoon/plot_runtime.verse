@@ -1,7 +1,8 @@
 # SETUP: Runtime plot extras (not in GetPurchaseArray) — collect, timed gift, money wheel.
+# A pickup's mesh is an entity with a tycoon_reveal_component: TypeIndex 10
+# (CollectableRevealType), ItemIndex = its index in the plot's Collectables.
 using { /Verse.org/Simulation }
 using { /Fortnite.com/Devices }
-using { /UnrealEngine.com/Temporary/SpatialMath }
 using { /Verse.org/Random }
 using { PlayerCore }
 
@@ -24,29 +25,29 @@ plot_collectable <public> := class<concrete>:
     var OwnerPlot <public> : ?plot_manager = false
     var Taken <public> : logic = false
     var Hook <public> : ?collect_wrapper = false
-    var Anchor <public> : ?transform = false
+    var ItemIndex <public> : int = 0
 
     @editable PickupTrigger <public> : trigger_device = trigger_device{}
-    @editable PickupProp <public> : creative_prop = creative_prop{}
     @editable GrantAmount <public> : float = 10.0
     @editable CurrencyIndex <public> : int = 0
     @editable XPOnCollect <public> : int = 0
     @editable SuccessHud <public> : hud_message_device = hud_message_device{}
-    @editable UndergroundOffset <public> : float = -5000.0
 
     Initialize<public>(Plot : plot_manager, Index : int) : void =
         set OwnerPlot = option{Plot}
+        set ItemIndex = Index
         set Taken = false
-        set Anchor = option{PickupProp.GetTransform()}
         W := collect_wrapper{Item := Self}
         set Hook = option{W}
         PickupTrigger.TriggeredEvent.Subscribe(W.OnMaybeAgent)
         Park()
 
+    RevealKey<public>()<transacts> : int = PackPlotUnlock(CollectableRevealType, ItemIndex)
+
     ShowFor<public>(Agent : agent) : void =
         set Taken = false
-        if (T := Anchor?):
-            if (PickupProp.TeleportTo[T.Translation, T.Rotation]) {}
+        if (Plot := OwnerPlot?):
+            Plot.SetRevealShown(RevealKey(), true)
 
     TryCollect<public>(Agent : agent) : void =
         if (Plot := OwnerPlot?):
@@ -62,9 +63,8 @@ plot_collectable <public> := class<concrete>:
                     Park()
 
     Park<public>() : void =
-        if (T := Anchor?):
-            Underground := vector3{X := T.Translation.X, Y := T.Translation.Y, Z := T.Translation.Z + UndergroundOffset}
-            if (PickupProp.TeleportTo[Underground, T.Rotation]) {}
+        if (Plot := OwnerPlot?):
+            Plot.SetRevealShown(RevealKey(), false)
 
     OnRebirth<public>() : void =
         set Taken = false

@@ -13,5 +13,5 @@ hitable_purchaseable <public> := class<concrete>(purchaseable):
         HitTrigger.TriggeredEvent.Subscribe(Hook.OnMaybeAgent)
 
     Activate<override>()<suspends> : void =
-        ShowRevealProps()
+        ShowReveals()
         StartGrantLoop()

@@ -37,7 +37,6 @@ generator_tier := class<concrete>():
     @editable UpgradeCost : int = 100
 
 idle_generator := class<unique>():          # not `generator`: that is a reserved word in Verse
-    @editable Prop : creative_prop = creative_prop{}
     @editable Tiers : []generator_tier = array{}
     var Level <private> : int = 0
     var Accrued <private> : float = 0.0        # earned but not yet collected

@@ -1,5 +1,5 @@
 ---
-description: "Runtime traps that compile clean but break play — the performance budget (what runs on events, ~10 Hz, per frame), server-only Verse and per-tick network cost, moving players (chair/MoveTo, never per-tick teleport), the computation limit, shared materials, pooling, cached maths, handler debounce, key reuse between gameplay and menus, elimination mid-flow, per-player vs shared state, and the done checklist"
+description: "Runtime traps that compile clean but break play — the performance budget (what runs on events, ~10 Hz, per frame), server-only Verse and per-tick network cost, moving players (keyframed platforms, never MoveTo or per-tick teleport), the computation limit, shared materials, pooling, cached maths, handler debounce, key reuse between gameplay and menus, elimination mid-flow, per-player vs shared state, and the done checklist"
 metadata:
   order: 4
   label: "Runtime pitfalls — compiles clean, plays wrong"
@@ -39,22 +39,27 @@ clients and costs network for each moved object.
 
 - Every entity move → `keyframed_movement_component`: it plays natively in
   Pre-Physics and the client interpolates it (Epic: it avoids the per-update cost
-  of `TeleportTo()` / `MoveTo()`). Devices that can't be entities (a
-  `chair_device` carrying a player) take one `MoveTo(Pos, Rot, Seconds)` per move.
+  of `TeleportTo()` / `MoveTo()`). `MoveTo` is never used — not on props, not
+  on devices.
 - Gameplay that must tick fast (physics-like state, collision checks) can still
   tick fast — keep it **pure state** and re-aim a KFM segment ~10 times a second,
   each segment 1.5 steps long so the next one starts before the last ends (no
   stop-start stutter): `ChaseSegments` in scenegraph `movement_transforms`.
 - Never move dozens of separate visual pieces each tick; move one parent.
 
-### 2. Moving a player: seat them, never teleport each tick
+### 2. Moving a player: they ride a keyframed platform, never teleport each tick
 
 - Per-tick `TeleportTo` on a `fort_character` jitters the camera, fights
-  stasis, and can drop the player out of the intended spot.
-- To carry a player with something moving: seat them in a `chair_device`
-  (`Seat(Agent)`, optionally `DisableExit`) and move the **chair** with
-  `MoveTo(Pos, Rot, Seconds)` (inherited from `creative_device_base`). The
-  camera follows smoothly.
+  stasis, and can drop the player out of the intended spot. `TeleportTo` is for
+  placing a player **once** (round start, hub return).
+- To carry players (lift, train, ride, moving floor): they stand on a Scene
+  Graph platform entity moved by `keyframed_movement_component`. Keep them on
+  it with collidable child meshes that have `Visible` off (rails, walls) in the
+  same entity tree, so everything moves as one parent with one KFM. Play-test a
+  new ride once: speed and slopes decide whether players keep their footing.
+- No moving `chair_device`: devices have no Scene Graph entity in 43.00 (only
+  characters and NPC behaviours expose `GetEntity[]`), so a chair can't ride
+  keyframes, and `MoveTo` is never used. Chairs are seats that stay put.
 - A seated player **cannot** be teleported — `Eject` (after `EnableExit`) first,
   then teleport. Every exit path (finish, quit, elimination, hub return) must
   eject.

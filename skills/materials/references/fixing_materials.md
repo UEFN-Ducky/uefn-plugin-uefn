@@ -22,7 +22,7 @@ metadata:
 | Wanted a Custom/HLSL node | UEFN's editor has no Custom node | Rebuild with standard nodes (Time, Sine, Panner, Lerp, ConstantBiasScale) |
 | Wrong mesh slot changed | Multi-slot mesh | Try `slot_index` 0..n with `assign_material_to_mesh`; inspect actor via `get_actor_properties` |
 | UEFN crashes compiling shaders / DDC errors | Corrupt DerivedDataCache or broken install | User action: close UEFN, delete the project's `Saved/` + local DerivedDataCache, verify UEFN in the Epic launcher |
-| Verse `SetMaterial` does nothing at runtime | Prop not manipulable, or the post-v33.00 instanced-material regression | Ensure the target is a `creative_prop` that allows manipulation; test with a plain (non-instance) material; see runtime reference |
+| Verse `SetMaterial` does nothing at runtime | Prop not manipulable, or the post-v33.00 instanced-material regression | Ensure the target is a `creative_prop` that allows manipulation (an entity has no `SetMaterial` — set its mesh's material slot var, `runtime_materials_verse`); test with a plain (non-instance) material; see runtime reference |
 | **`(Node Normalize) Missing Normalize input`** | Normalize with no vector wired | Wire a float3 (or delete the node). Confirm with `get_material_expression_info` → `recompile_material` → `validate_uefn_asset` |
 | **`(Node AppendVector) Missing AppendVector input A`** (or B) | AppendVector half-wired | Wire **A and B**. Common when building RGB from Sines — both AppendVector stages need both pins. Delete unused Appends |
 | **Failed to translate Material for platform(s) … SM5/SM6/ES3_1** | Same as missing pins — cook translation fails on all targets | Fix missing inputs first; do not “ship anyway.” Prefer `duplicate_material` of a known-good water/PBR master |

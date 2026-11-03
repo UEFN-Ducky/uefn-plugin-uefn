@@ -278,7 +278,7 @@ mesh component + keyframed motion:
 2. Add `keyframed_movement_component`, `Sim.AddEntities`, `SetGlobalTransform` at muzzle.
 3. **Pre-sweep** walls: `FindSweepHits` along the flight path; clamp end position to first hit past a min clearance.
 4. Build one `keyframed_movement_delta` (translation delta, duration = distance/speed, linear easing), `SetKeyframes` + `Play`. `SetKeyframes` rebases onto the entity's **current** transform and does not autoplay — so muzzle placement must happen before it, and `Play()` is mandatory.
-5. Per-frame check via `TickEvents.PrePhysics` on the component that owns the shot: read the transform; if within `HitRadius` of the aim point → `ApplyHitDamage` and stop; optional shoot-down (player holding fire + aim ray near projectile); finish on `FinishedEvent`. Cancel the subscription when the shot ends.
+5. Hit check while it flies: the shot's own task loops with `Sleep(0.0)` and only reads (pure state — KFM does the moving): if within `HitRadius` of the aim point → `ApplyHitDamage` and stop; optional shoot-down (player holding fire + aim ray near projectile); stop when the flight time is up. `TickEvents.PrePhysics.Subscribe` is `epic_internal` and does not compile in creator code (scenegraph `verse_authoring`); full code in npc-ai `projectiles`.
 6. Cleanup: cancel trail VFX handles, `RemoveFromParent()`.
 
 ```verse
@@ -294,7 +294,7 @@ MoveComp := keyframed_movement_component{Entity := ArrowEnt}
 ArrowEnt.AddComponents(array{Xform, Mesh, MoveComp})
 if (Sim := GetSimulationEntity[]):
     Sim.AddEntities(array{ArrowEnt})
-# SetGlobalTransform → FindSweepHits pre-sweep → SetKeyframes → Play → PrePhysics hit check → RemoveFromParent
+# SetGlobalTransform → FindSweepHits pre-sweep → SetKeyframes → Play → Sleep(0.0) hit-check loop → RemoveFromParent
 ```
 
 Lifecycle, `TickEvents` and transform rules:
@@ -304,10 +304,12 @@ Lifecycle, `TickEvents` and transform rules:
 via an `input_trigger_device` (see `sys_input_devices`) into a `weak_map(player, logic)`,
 then each frame: if fire held AND aim ray within `ShootDownRadius` of the projectile → destroy + VFX.
 
-**Do not drive the flight with `loop` + `Sleep(0.0)`.** That is not a frame hook
-— it stutters and can read a transform the physics step has not applied yet.
-Keyframed movement plays in the Pre-Physics phase, so check hits from
-`TickEvents.PrePhysics` and cancel the subscription in `OnEndSimulation`.
+**Never drive the flight with `loop` + `Sleep(0.0)` transform writes** — it
+stutters on clients. The keyframe moves the shot; the `Sleep(0.0)` loop only
+reads its position for the hit check (it can lag the drawn position by a frame,
+so keep `HitRadius` generous). `TickEvents.PrePhysics.Subscribe` would be the
+exact hook, but `execution_listenable` is still `class<epic_internal>` on 43.00
+and does not compile in creator code.
 
 **Walls:** dungeon / cover colliders must be Scene Graph entities with Queryable
 collision, or every shot flies through.

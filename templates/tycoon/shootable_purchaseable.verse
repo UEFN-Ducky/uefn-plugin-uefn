@@ -13,5 +13,5 @@ shootable_purchaseable <public> := class<concrete>(purchaseable):
         ShotTrigger.TriggeredEvent.Subscribe(Hook.OnMaybeAgent)
 
     Activate<override>()<suspends> : void =
-        ShowRevealProps()
+        ShowReveals()
         StartGrantLoop()

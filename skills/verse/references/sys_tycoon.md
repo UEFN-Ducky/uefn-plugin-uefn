@@ -40,12 +40,29 @@ plot on join), `Teleport` (Fill + `ClaimTeleporter.Teleport`).
 ```verse
 my_thing_purchaseable <public> := class<concrete>(purchaseable):
     Activate<override>()<suspends> : void =
-        ShowRevealProps()
+        ShowReveals()
         StartGrantLoop()
 ```
 
 Type indices in the shipped pack: 0 prop, 1 generator, 2 dropper, 3 conveyor,
-4 upgrader, 5 npc, 6 pet, 7 dancefloor, 8 hitable, 9 shootable.
+4 upgrader, 5 npc, 6 pet, 7 dancefloor, 8 hitable, 9 shootable, 10 collectable
+(`CollectableRevealType`, runtime pickups).
+
+### What a purchase shows: reveal entities (Scene Graph)
+
+Every mesh a buy reveals — a building, belt pieces, a pet, a pickup — is a Scene
+Graph entity with a `tycoon_reveal_component`: `Plot` (its `plot_manager`),
+`TypeIndex` and `ItemIndex` (the purchaseable's array and index). It registers
+with the plot when it starts and begins hidden; `ShowReveals()` /
+`HideReveals()` switch its meshes with `Enable()` / `Disable()`
+(`plot_manager.SetRevealShown`). Nothing is teleported underground and nothing
+uses `MoveTo`. Details: `sys_buildings`.
+
+- Pet: the pet entity also carries a `keyframed_movement_component`;
+  `pet_purchaseable` re-aims a short keyframe segment at the owner every
+  `FollowSeconds` (`FollowSpeed`, `FollowGap`), flat on the plot.
+- Belt: belt pieces that move are keyframed on their own (KFM `loop`), and show
+  with the conveyor's reveal key.
 
 Dependents: `@editable Dependents : []plot_link` (TypeIndex + ItemIndex). Buy
 unlocks those rows. `StartsLocked := true` until a parent buys.
@@ -60,14 +77,16 @@ Economy, drain known currency indices, `AddPlotRebirth` (clears unlocks/levels),
 ### Belt
 
 Droppers `Activate` call `FindConveyor(ConveyorIndex).LinkDropper`. Upgraders
-multiply `plot_manager.BeltMultiplier`. Use Creative devices / props — no custom
-physics classes. Audio = `audio_player_device` only.
+multiply `plot_manager.BeltMultiplier`. Buttons, triggers and HUD are Creative
+devices; everything visible that appears or moves is a reveal entity. Audio =
+`audio_player_device` only.
 
 ### Runtime (not purchaseables)
 
 `plot_collectable`, `timed_gift`, `money_wheel` init on claim via `ShowRuntime`.
+A pickup's mesh is a reveal entity with TypeIndex 10 and its index in `Collectables`.
 They grant through `GrantToAgent` (same rebirth scale).
 
 HUD: Economy owns the wallet canvas. Plot feedback is `hud_message_device` on
-the purchaseable / plot. Prop reveal is underground `TeleportTo` (see
-`sys_buildings`). Generators: `sys_generators`.
+the purchaseable / plot. Reveals are entities with `tycoon_reveal_component`
+(see `sys_buildings`). Generators: `sys_generators`.

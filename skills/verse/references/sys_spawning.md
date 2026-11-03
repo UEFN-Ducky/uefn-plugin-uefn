@@ -1,5 +1,5 @@
 ---
-description: "Spawning at runtime, Scene Graph first — what to spawn with (Entity Prefab vs NPC spawner vs player spawner vs prop), spawning and despawning prefab instances with GetSimulationEntity/AddEntities/RemoveFromParent, pools of prefab instances (hide with mesh_component Disable, reuse), motion for spawned things, wave managers built with for-expressions, NPC spawner events and elimination payloads, reliable player teleport, and creative_prop SpawnProp/MoveTo as the fallback"
+description: "Spawning at runtime, Scene Graph first — what to spawn with (Entity Prefab vs NPC spawner vs player spawner vs prop), spawning and despawning prefab instances with GetSimulationEntity/AddEntities/RemoveFromParent, pools of prefab instances (hide with mesh_component Disable, reuse), motion for spawned things, wave managers built with for-expressions, NPC spawner events and elimination payloads, reliable player teleport, and why there is no creative_prop fallback (a prop becomes an Entity Prefab; never MoveTo)"
 metadata:
   order: 26
   label: "Game systems — spawning, pools & waves"
@@ -20,7 +20,7 @@ metadata:
 | Projectiles, pickups, debris, platforms, streamed pieces, enemies built as objects | **Entity Prefab** instances (`EP_*` / `P_*` from Assets.digest) — this page |
 | Fortnite NPCs, guards, creatures, wildlife | `npc_spawner_device` & co — "NPC spawners" below, `sys_npc_ai` |
 | Players | `player_spawner_device` (`sys_damage_health`) |
-| A prop with no prefab and no entity path | `creative_prop` — "Fallback" at the end |
+| A prop asset | an Entity Prefab with that mesh — never `SpawnProp` + `MoveTo` ("No prop fallback" at the end); only Fortnite physics props stay props (`physics` skill) |
 
 Always-on scenery is placed once in the editor (`instantiate_prefab`), not spawned
 every match. Anything spawned more than a few times a minute comes from a **pool**.
@@ -33,6 +33,7 @@ The prefab's class exists after the next Verse build (scenegraph
 ```verse
 using { /Fortnite.com/Devices }
 using { /Verse.org/SceneGraph }
+using { /Verse.org/SceneGraph/KeyframedMovement }
 using { /Verse.org/SpatialMath }
 using { /Verse.org/Simulation }
 
@@ -80,8 +81,11 @@ crate_dropper_device := class(creative_device):
             set Free += array{Crate}            # one append per release, not in a loop
 
     # Enable / Disable have no effect specifier: straight-line code only.
+    # Disable() only stops rendering: switch collision and queries too.
     SetShown(Crate : entity, Shown : logic) : void =
         for (Mesh : Crate.FindDescendantComponents(mesh_component)):
+            set Mesh.Collidable = Shown
+            set Mesh.Queryable = Shown
             if (Shown?):
                 Mesh.Enable()
             else:
@@ -100,7 +104,7 @@ scenegraph `movement_transforms`:
 - A thrown, dropped or flying object: one `oneshot` delta over its flight time.
 - A platform or door loop: keyframed `loop` / `pingpong` playback; a pickup's
   bob and spin are KFM too (`StartBob`, `StartSpin`).
-- Moving to a point: `GlideTo` (one delta, then `FinishedEvent`).
+- Moving to a point: `GlideTo` (one keyframed delta, waits until it arrives).
 - Chasing or steering: one manager loop for all instances, pure state, each
   instance re-aims a KFM segment ~10 times a second (`ChaseSegments`).
 - `SetGlobalTransform` places a pooled instance **once** (as in `DropAt`); never
@@ -165,34 +169,43 @@ TeleportWithRetry(Agent : agent, Position : vector3)<suspends> : void =
         Sleep(0.1)
 ```
 
-A teleport is for placing a player, never for moving one over time — carry a
-player in a moved `chair_device` (`runtime_pitfalls`).
+A teleport is for placing a player, never for moving one over time — players
+ride a keyframed platform (`runtime_pitfalls`).
 
-`fort_character` and `creative_prop` take the `/UnrealEngine.com/Temporary/SpatialMath`
+`fort_character` takes the `/UnrealEngine.com/Temporary/SpatialMath`
 `vector3` / `rotation`; Scene Graph entities take `/Verse.org/SpatialMath`. A file
 that imports both qualifies the shared names, or the call is ambiguous (3518):
 `(/UnrealEngine.com/Temporary/SpatialMath:)IdentityRotation()`.
 
-### Fallback: `creative_prop`
+### No prop fallback
 
-Only when there is no prefab and no entity path. `SpawnProp` returns
-`tuple(?creative_prop, spawn_prop_result)` and is not failable;
-`MoveTo(Position, Rotation, Seconds)<suspends>` glides it:
+Anything Verse spawns, moves, shows or hides is an entity. A prop asset you need
+at runtime becomes an Entity Prefab (a `mesh_component` with that mesh); the only
+props Verse still touches are Fortnite physics props (`physics` skill). `MoveTo`
+is never used — not on a prop, not on a device.
+
+The old "spawn a prop, glide it, pay" as an entity — spawn, place once, one
+keyframed glide (`GlideTo` from scenegraph `movement_transforms`), remove at the end:
 
 ```verse
-SpawnAndDeliver(Agent : agent)<suspends> : void =
-    if (Prop := SpawnProp(PropAsset, StartTransform)(0)?):
+DeliverCrate(Agent : agent, Destination : vector3, TravelSeconds : float)<suspends> : void =
+    if (Sim := GetSimulationEntity[]):
+        Crate := EP_Crate{}
+        Sim.AddEntities(array{Crate})
         defer:
-            Prop.Dispose()                      # runs even if the task is cancelled
-        Prop.MoveTo(EndPosition, IdentityRotation(), TravelSeconds)
+            Crate.RemoveFromParent()            # runs even if the task is cancelled
+        KFM := keyframed_movement_component{Entity := Crate}
+        Crate.AddComponents(array{KFM})
+        GlideTo(Crate, KFM, Destination, TravelSeconds)
         if (GamePlayer := PlayerManager.GetGamePlayer(Agent)?):
             GamePlayer.Services.EconomyManager.AddCurrency("Coins", Payout)
 ```
 
-- Pool props the same way as entities (hide, move away, reuse) when they spawn
-  often; `Dispose` every prop you spawn or it leaks.
-- A pre-placed `@editable creative_prop` moved along nav points: `MoveTo` to each
-  point in turn (the call waits for the glide), `break` at the end or on death.
+- Deliveries that happen often come from the pool above (show, glide, hide), not
+  a fresh entity each time.
+- Something that walks a route of points: one KFM key per leg, `oneshot` (or
+  `loop` for a patrol) — the keys chain, so each leg is the offset to the next
+  point.
 
 ### Gotchas
 

@@ -1,5 +1,8 @@
 # SETUP: Place one plot_manager per pad. Wire PlayerManager + purchaseable arrays.
 # Apply player_core → economy → progression → time_tracker → tycoon first.
+# Everything a purchase shows is a Scene Graph entity with a tycoon_reveal_component
+# pointing at this plot; it registers itself here at simulation start.
+using { /Verse.org/SceneGraph }
 using { /Verse.org/Simulation }
 using { /Fortnite.com/Devices }
 using { PlayerCore }
@@ -34,6 +37,27 @@ plot_manager <public> := class(creative_device, rebirthable):
     var ClaimedBy <public> : ?agent = false
     var BeltMultiplier <public> : float = 1.0
     var ActivePetIndex <public> : int = -1
+    var Reveals <public> : []tycoon_reveal_component = array{}
+    var ShownReveals <public> : [int]logic = map{}
+
+    # Called by each reveal entity as it starts; it takes the state its key already has.
+    RegisterReveal<public>(Reveal : tycoon_reveal_component) : void =
+        set Reveals += array{Reveal}            # one append per entity, not in a loop
+        Reveal.SetShown(IsRevealShown(Reveal.RevealKey()))
+
+    IsRevealShown<public>(Key : int)<transacts> : logic =
+        if (Shown := ShownReveals[Key]):
+            return Shown
+        return false
+
+    SetRevealShown<public>(Key : int, Shown : logic) : void =
+        if (set ShownReveals[Key] = Shown) {}
+        for (Reveal : Reveals, Reveal.RevealKey() = Key):
+            Reveal.SetShown(Shown)
+
+    RevealEntities<public>(Key : int)<transacts> : []entity =
+        for (Reveal : Reveals, Reveal.RevealKey() = Key):
+            Reveal.Entity
 
     OnBegin<override>()<suspends> : void =
         ClaimButton.InteractedWithEvent.Subscribe(OnClaimPressed)
