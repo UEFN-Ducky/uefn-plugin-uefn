@@ -91,19 +91,23 @@ type lives on the **player**. Grant queries it from the player.
 1. `workspace_write_file("Verse/Abilities/template_ability_example.verse", …)`
    — never dump at `Content/Verse/` root.
 2. `workspace_list_verse_errors`. Clean + UEFN open → `workspace_compile_verse`.
-3. `create_empty_prefab` (`PF_SpicySprintItem` under project Prefabs). MCP
-   cannot see EntityPrefab tabs — add comps in UEFN Prefab Editor, **Save**.
+3. `PrefabToolset` `CreatePrefab` (`PF_SpicySprintItem` under project
+   Prefabs), then EntityToolset `AddComponent` / `SetComponentProperty` on its
+   `rootEntity` (the comps in **Prefab Details** below; class paths from
+   `ListComponentClasses`), `ApplyPrefabEdits`, `save_asset` — same flow as
+   `custom_items` **Build it over MCP**.
 4. `instantiate_prefab` the item into the level + `save_current_level`.
 5. Place the compiled Verse granter device (Content Browser after Verse build).
    Details → `TemplateAbilityItemEntity` = the **placed instance**.
 6. Launch Session. Sprint → burn + speed.
 
-Prefab-owned edits: Save the EntityPrefab (`prefab_only`). Serial MCP: one
-heavy call per turn.
+Prefab-owned edits: on the asset over MCP, then save it (`prefab_only`).
+Serial MCP: one heavy call per turn.
 
 ## Prefab Details (Spicy Sprint)
 
-Content Browser → Entity Prefab → `PF_SpicySprintItem` → Prefab Editor:
+On `PF_SpicySprintItem` (over MCP: EntityToolset on its `rootEntity`, category
+via the `custom_items` Python step; by hand: Prefab Editor):
 
 1. Add `item_component`. Categories → add `FortniteItemCategories.WeaponMelee`.
 2. Add `fort_item_ability_component`.

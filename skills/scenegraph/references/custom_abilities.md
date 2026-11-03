@@ -74,8 +74,9 @@ effect and component = until the effect ends.
 - Override `var ActiveEffects<override> : []ability_effect = array{}`.
 - `MakeAbility` returns your effect prefab: `Prefab := PF_HealEffect{}` then
   `if (E := ability_effect[Prefab]): return E`, else `return ability_effect{}`. In the
-  prefab, delete the stock `ability_effect_component` and add yours (Prefab Editor →
-  Save; MCP can't see prefab tabs — `prefab_only`).
+  prefab, delete the stock `ability_effect_component` and add yours (EntityToolset
+  `RemoveComponent` / `AddComponent` on the prefab's `rootEntity`, `ApplyPrefabEdits`,
+  save — `prefab_only`).
 
 ## Example — heal over time, cancelled by a jump
 

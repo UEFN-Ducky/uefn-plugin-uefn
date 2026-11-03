@@ -46,8 +46,15 @@ on the player table and grants a fresh prefab each session.
 
 ## Author the prefab
 
-Content Drawer → right-click → **Entity Prefab** → in the template picker
-search **template** → pick one of four Armory templates. Name it with the `EP_`
+Over MCP (43.00): `ValkyrieToolset.PrefabToolset` `CreatePrefab`
+`{"folderPath": "SceneGraph/CustomWeapons", "assetName": "EP_CustomAR",
+"parentClass": {"refPath": "/Armory/_Verse/VNI/ArmoryRuntime.assault_rifle_template"}}`
+(`pistol_template`, `shotgun_template`, `sub_machine_gun_template` the same
+way). The prefab arrives with the template's components; change values and the
+mesh with EntityToolset on its `rootEntity`, then `ApplyPrefabEdits` +
+`save_asset` (`custom_items` **Build it over MCP** has the calls; text,
+category and rarity work the same). By hand: Content Drawer → right-click →
+**Entity Prefab** → template picker → **template**. Name it with the `EP_`
 prefix (`EP_CustomAR`) in **one** prefab folder (`Content/Verse/ArmoryWeapons/`
 or `Content/SceneGraph/CustomWeapons/`):
 

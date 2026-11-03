@@ -57,17 +57,21 @@ EntityToolset `AddComponent` with `asset_path` wires a mesh/particle/sound asset
   infrastructure — do not destroy or reparent them.
 - the EntityToolset destroy tool soft-deletes (the object becomes `TRASH_*` until save); the
   tools filter trash out of listings automatically.
-- Prefab-editor windows run in transient worlds; the tools only report the
-  open level's world.
+- A prefab asset's own entities are not in the level listing — reach them with
+  `FindEntities` `{"rootEntity": <prefab rootEntity>}` (`prefab_only`).
 
 ### Prefabs (prefab asset first)
 
 Hard rules and orbit pitfalls: `skill_read_subskill("scenegraph", "prefab_only")`.
 
-- `create_empty_prefab` creates a blank `EntityPrefab` asset under the project
-  mount (e.g. `/MyProject/SolarSystem/EP_Thing`) and saves it. Nothing is
-  placed in the level. Prefer this + edit/Save in the UEFN prefab UI for
-  prefab-owned structure.
+- **43.00: Epic `ValkyrieToolset.PrefabToolset` `CreatePrefab`** makes the
+  asset and returns its `rootEntity`; edit its contents with EntityToolset
+  (`AddComponent`, `SetComponentProperty`, …), then `ApplyPrefabEdits` and
+  `save_asset`. Prefer this over the Ducky helpers below.
+- `create_empty_prefab` (Ducky fallback) creates a blank `EntityPrefab` asset
+  under the project mount (e.g. `/MyProject/SolarSystem/EP_Thing`) and saves
+  it. Nothing is placed in the level. Edit its contents the same way
+  (`PrefabToolset.GetPrefab` → `rootEntity`).
 - `create_prefab_from_entities` packages **loose** named entities and REPLACES
   them in the level with an instance of the **new** prefab. The asset saves
   immediately; its Verse class appears in Assets.digest.verse only after the
@@ -80,16 +84,18 @@ Hard rules and orbit pitfalls: `skill_read_subskill("scenegraph", "prefab_only")
   One editor mutator per assistant message; `save_directory` every 5–10 prefabs.
 - **NEVER** `create_prefab_from_entities` on an already-placed `EP_*` instance
   (or its children) to “save overrides back” — that can collapse the hierarchy
-  into an empty shell. Destroy broken instances, re-`instantiate_prefab` the
-  original asset, and edit the prefab in UEFN UI instead.
+  into an empty shell. Destroy broken instances (or `PrefabToolset`
+  `ResetPrefabInstance`), re-place the original asset, and edit the prefab
+  asset over MCP instead (`prefab_only`).
 - `instantiate_prefab` places via `EditorActorSubsystem.spawn_actor_from_object`
   on the EntityPrefab (same as Content Browser drag). Result: an
   `EntityProxyActor` wrapping the prefab entity under `LevelEntity`. Optional
   SpatialMath `translation` `[forward, left, up]`. Do not spawn
   `EntityProxyActor` by class with `spawn_actor`.
-- Prefab-editor windows run in transient worlds; the tools only report the
-  open level's world. For prefab-owned content: open the `.EntityPrefab` in
-  UEFN and Save. Do not treat level-instance edits as the source of truth.
+- Placing: EntityToolset `CreateEntity` with the prefab's `generatedClass`
+  works without proxy actors (43.00). For prefab-owned content edit the
+  `.EntityPrefab` asset over MCP (`prefab_only`). Do not treat level-instance
+  edits as the source of truth.
 - Prefab overrides (per-instance property tweaks) are NOT a separate scripting
   API — prefer editing the prefab asset; level tweaks diverge other instances.
 - EntityToolset `FindEntities` filters `TRASH_*`, `REINST_*`, and EntityProxyActor shadow

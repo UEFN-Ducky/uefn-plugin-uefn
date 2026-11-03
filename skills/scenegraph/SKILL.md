@@ -5,7 +5,7 @@ description: "UEFN Scene Graph — use when the task is entities, components, or
 license: MIT
 metadata:
   label: "UEFN Scene Graph"
-  version: 29
+  version: 30
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -113,7 +113,8 @@ mutating a placed level instance as the primary workflow — see
 | Kind | Tools |
 |------|-------|
 | **PROBE** | `scene_graph_capabilities` (prefab helpers); entity CRUD via Epic `ValkyrieToolset.EntityToolset` (`skill_read_subskill("uefn", "epic_mcp")`) |
-| **PREFAB** | `create_empty_prefab`, `create_prefab_from_entities`, `instantiate_prefab`, `convert_actors_to_entities` |
+| **PREFAB (Epic, 43.00)** | `ValkyrieToolset.PrefabToolset`: `CreatePrefab` (optional `parentClass` template), `GetPrefab`, `ApplyPrefabEdits`, `CreatePrefabFromEntities`, `GetPrefabForEntity`; prefab **contents** are edited with the EntityToolset tools on the prefab's `rootEntity` |
+| **PREFAB (Ducky fallback)** | `create_empty_prefab`, `create_prefab_from_entities`, `instantiate_prefab`, `convert_actors_to_entities` |
 | **VERSE API** | `get_verse_api`, `search_verse_digest`, `list_verse_modules` |
 
 Always `scene_graph_capabilities({})` first for prefab helper availability. Entity
@@ -145,26 +146,44 @@ unreal__call_tool({
 
 ## Golden path (Entity Prefab — asset first, then place)
 
+Build the prefab and everything on it over MCP (verified 43.00). Never stop at
+an empty prefab and hand the user Details-panel steps.
+
 ```
-# Prefer blank asset + edit in UEFN prefab UI (Save the prefab):
-create_empty_prefab({"prefab_name": "EP_Lamp", "folder": "/MyProject/Prefabs"})
+# 1. Create the asset. Returns rootEntity + generatedClass. parentClass is optional
+#    (e.g. /Armory/_Verse/VNI/ArmoryRuntime.held_item_template).
+unreal__call_tool({"toolset_name": "ValkyrieToolset.PrefabToolset", "tool_name": "CreatePrefab",
+  "arguments": {"folderPath": "Prefabs", "assetName": "EP_Lamp"}})
+
+# 2. Edit its contents with EntityToolset on rootEntity
+#    (/<Proj>/Prefabs/EP_Lamp.Default__EP_Lamp_C): AddComponent, SetComponentProperty,
+#    CreateEntity with parentEntity = rootEntity for children (transforms relative to the root).
+#    Class paths: ListComponentClasses {"nameFilter": "..."}.
+
+# 3. Push edits to placed copies, then save the asset.
+unreal__call_tool({"toolset_name": "ValkyrieToolset.PrefabToolset", "tool_name": "ApplyPrefabEdits",
+  "arguments": {"prefab": {"refPath": "/<Proj>/Prefabs/EP_Lamp.EP_Lamp"}}})
+save_asset(...)
+
+# 4. Place: EntityToolset CreateEntity with entityClass = generatedClass, then save_current_level().
 
 # Or package LOOSE level entities into a NEW prefab (sources become an instance).
 # NEVER call this on an already-placed EP_* instance — it can collapse the tree.
 create_prefab_from_entities({
   "entity_names": ["Lamp"], "prefab_name": "EP_Lamp", "folder": "/MyProject/Prefabs"})
 
-# Place always-on copies in the level (Content Browser drag equivalent):
+# Ducky fallback for placing (Content Browser drag equivalent):
 instantiate_prefab({
   "prefab_path": "/MyProject/Prefabs/EP_Lamp",
   "translation": [800, 0, 0]})
 save_current_level()
 ```
 
-Static / always-on: prefab asset + `instantiate_prefab` + `save_current_level`.
-Use Verse `P_*` spawn **only** for runtime spawn/despawn. For prefab-owned
-structure/components after the asset exists: edit the `.EntityPrefab` in UEFN
-and Save — MCP cannot see EntityPrefab editor tabs (transient worlds).
+Static / always-on: prefab asset + placed copy + `save_current_level`.
+Use Verse `P_*` spawn **only** for runtime spawn/despawn. Prefab-owned
+structure/components after the asset exists: EntityToolset on the prefab's
+`rootEntity` (`PrefabToolset.GetPrefab` returns it), `ApplyPrefabEdits`, save.
+Custom items step by step: `custom_items`.
 
 ## Golden path (write Verse against Scene Graph)
 
@@ -189,9 +208,13 @@ free-text hunts, `list_verse_modules` for the module map.
   (Save the prefab). Do not move bodies, add meshes, or attach comps on the
   placed level copy as the primary workflow — those become instance overrides
   (or destroy hierarchy). Details: `prefab_only`.
-- **MCP cannot see EntityPrefab editor tabs** (transient worlds). Tools only
-  list the open **level**. For prefab-owned edits: open the asset in UEFN UI
-  and Save. Do not “fix it on the level instance instead.”
+- **Prefab contents are editable over MCP (43.00).** `PrefabToolset.GetPrefab`
+  / `CreatePrefab` return the prefab's `rootEntity`; every EntityToolset tool
+  (`AddComponent`, `SetComponentProperty`, `CreateEntity` with `parentEntity`,
+  `FindEntities` with `rootEntity`) works on it. Then `ApplyPrefabEdits` and
+  save the asset. The old "MCP cannot see EntityPrefab tabs, use the UI" limit
+  is gone — do the edit yourself. Do not “fix it on the level instance
+  instead.”
 - **Never `create_prefab_from_entities` on an already-placed prefab instance** —
   packaging `EP_*` children into a new shell can collapse the tree. Only package
   *loose* level entities into a *new* prefab name.
@@ -257,7 +280,9 @@ free-text hunts, `list_verse_modules` for the module map.
   **Custom non-weapon items** are blank Entity Prefabs with an itemization
   shell (`item_component` + pickup/description/icon/mesh) plus **your Verse
   components** for any equipped/dropped behavior (categories/stack/rarity,
-  KFM, grant/equip) — no Creative granter path yet: `custom_items`.
+  KFM, grant/equip) — no Creative granter path yet. **You build them** over
+  MCP end to end (`CreatePrefab` → `AddComponent` × 5 → text / category /
+  icon → save → place → Verse grant): `custom_items`.
   **Template abilities** (Spicy Sprint, status-effect AbilityElements,
   `fort_item_ability_component` + `fort_template_ability`) — `template_abilities`.
   **42.30:** `fort_template_ability` is not parametric (`x := class(fort_template_ability):`,
@@ -317,7 +342,8 @@ free-text hunts, `list_verse_modules` for the module map.
 ## After ANY scene graph change
 
 `save_current_level()` for level/instance edits. Prefab-owned asset edits:
-**Save the EntityPrefab** in UEFN. Nothing auto-saves.
+`PrefabToolset.ApplyPrefabEdits`, then `save_asset` on the EntityPrefab.
+Nothing auto-saves.
 
 ## Reference files
 
@@ -330,7 +356,7 @@ Load with `skill_read_subskill("scenegraph", "<id>")`:
 - `movement_transforms` — THE motion page: KFM for every move (editable keyframe path component, bob, spin, one glide, chasing with keyframe segments), full KFM API, local vs global, origins/attach, LUF axes, why it isn't moving, known transform bugs
 - `itemization` — items and inventories, granting stock weapons from `/Fortnite.com/Weapons`, pickups, equipping
 - `custom_weapons` — custom Armory Entity Prefabs (AR/pistol/shotgun/SMG), mesh/pivot/collision, `fort_trace_weapon_component`, Verse grant: poll until `GetFirstInventory[Agent]` succeeds (a `Sleep(0.1)` loop you write — not an API) + AddItemDistribute then GetParentInventory/PickUp/Equip (not AddResult.Ok); stat ranges, infinite ammo, rarity, skins, upgrades from base values, find held guns by prefab type. Owned collectible + canvas shop + persist + load on join → verse `sys_owned_weapons`
-- `custom_items` — fully custom non-weapon Entity Prefabs: itemization shell + Verse components for any behavior, categories/stack/rarity, KFM, equipped logic, Verse grant (no Creative granter yet)
+- `custom_items` — make a custom item yourself over MCP (CreatePrefab, component class paths, message text from Verse, category/rarity via Python, icon, place, grant); itemization shell + Verse components for any behavior, categories/stack/rarity, KFM spin component, equipped logic, Verse grant/has/clear by prefab type (no Creative granter yet)
 - `cameras` — Scene Graph camera components (perspective/orthographic/physical), `camera_director_component.AddCamera[...]`, the `camera_modifier` stack (`AddModifier(...)` has NO `<decides>`), `fort_orbit` / `fort_fixed_angle` / `fort_fixed_point` modifiers with full field tables, enter/exit transitions + blends, why `camera_state` and `mesh_component` are `epic_internal`. All Experimental.
 - `custom_player_controller` — fully custom locomotion on an entity: 42.10 `Move`/`Jump` on `TraversalMapping`, `OnSimulate` + `Sleep(0.0)` delta loop (tick subscribe is `epic_internal`), editable speed/accel/friction/gravity/jump, orbit camera install, stock character in stasis; compiled templates via `verse_template_apply("custom_movement")`
 - `template_abilities` — Fortnite template abilities (publishable since 42.40): `fort_template_ability` (not parametric), `fort_item_ability_component` on an item prefab, `Targets` arrays (open enum), `fort_self_ability_target_query`, wedge `Angle` in radians, AbilityElements (burn/pepper/removal), attribute modifier point/span (in Verse since 42.40), animation spans, IA_Sprint, hotbar grant device

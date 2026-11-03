@@ -1,5 +1,5 @@
 ---
-description: "Prefab-only hard rules — never mutate level instances; MCP cannot see EntityPrefab tabs; banned create_prefab_from_entities on instances; transform+KFM orbits; Verse module collisions"
+description: "Prefab-only hard rules — never mutate level instances; edit prefab contents over MCP (PrefabToolset rootEntity + EntityToolset, ApplyPrefabEdits); banned create_prefab_from_entities on instances; transform+KFM orbits; Verse module collisions"
 metadata:
   order: 4
   label: "Prefab-only editing"
@@ -30,17 +30,29 @@ on the level copy as the primary workflow for prefab-owned content.
   prefab-spawn sample uses an `@editable` entity for the spawn point. Nest reusable parts as
   their own prefabs the same way.
 
-### MCP vs prefab asset tabs
+### Editing the prefab asset over MCP (43.00)
 
-- Prefab-editor windows are **transient worlds**. Scene Graph MCP tools only see
-  the open **level**.
-- For prefab-owned structure/components: open the `.EntityPrefab` in the UEFN
-  Content Browser → edit the asset (Details → Add Component, hierarchy) → **Save
-  the prefab**.
+The prefab asset is editable directly — no prefab editor tab, no UI:
+
+1. `ValkyrieToolset.PrefabToolset` `GetPrefab` `{"prefab": {"refPath":
+   "/<Proj>/Prefabs/EP_X.EP_X"}}` (or `CreatePrefab`) → `rootEntity`
+   (`/<Proj>/Prefabs/EP_X.Default__EP_X_C`).
+2. `ValkyrieToolset.EntityToolset` on that root: `FindEntities` with
+   `rootEntity` (children), `GetComponents`, `AddComponent`,
+   `RemoveComponent`, `SetComponentProperty`, `CreateEntity` with
+   `parentEntity` (required inside a prefab), `SetEntityTransform` (relative
+   to the prefab root).
+3. `PrefabToolset` `ApplyPrefabEdits` (placed copies update only after this;
+   not undoable), then `save_asset` on the prefab yourself.
+
+- A prefab made from a template (`CreatePrefab` `parentClass`, e.g.
+  `held_item_template`) already carries the template's components — set
+  values, don't re-add them.
 - Do **not** “fix it on the level instance instead” when the user asked for
-  prefab-only edits. Call `save_asset` on the EntityPrefab yourself.
-- `open_asset_in_uefn` can reveal/open the prefab; tools still will not list that
-  transient world’s entities.
+  prefab-only edits. Instance drift: `PrefabToolset` `GetPrefabOverrides` /
+  `ResetPrefabInstance`.
+- Never tell the user to open the prefab and edit it in the Details panel
+  unless an MCP call above failed twice — then name the call and its error.
 
 ### Banned / dangerous ops
 
@@ -104,9 +116,10 @@ Rules:
    `transform_component` on demand). Position the entity **before**
    `SetKeyframes` — it rebases onto the current transform — and remember
    `SetKeyframes` does not autoplay, so call `Play()`.
-5. Attach custom Verse comps to the **prefab asset** after Verse build — or add
-   in the prefab Details panel. Runtime AddComponents from a root component is
-   OK if the root component lives on the prefab definition.
+5. Attach custom Verse comps to the **prefab asset** after a Verse build —
+   EntityToolset `AddComponent` on the prefab's entity
+   (`/<Proj>/_Verse.Verse-<Module>-<class_name>`). Runtime AddComponents from a
+   root component is OK if the root component lives on the prefab definition.
 6. Components simulate in the editor as well as in play. If the orbit is still,
    walk the checklist in
    `skill_read_subskill("scenegraph", "movement_transforms")` and confirm in
@@ -133,7 +146,7 @@ Project component object path after compile often looks like:
 
 1. Changes are on the EntityPrefab asset (or explicitly applied to source), not
    only a level override.
-2. Prefab saved in UEFN.
+2. `ApplyPrefabEdits` ran and the prefab asset is saved (`save_asset`).
 3. If Verse comps were added: Verse build succeeded; class visible to attach.
 4. Pivots that move have `transform_component`, and KFM had `Play()` called.
 5. User verified in **PIE / Launch Session** for runtime motion.

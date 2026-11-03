@@ -40,28 +40,32 @@ empty — `islandsettings` `recipes`).
 
 ## Author the prefab
 
-1. Content Drawer → right-click → **Entity Prefab** → switch **template** →
-   **Held Item** (`held_item_template`). Name it (e.g. `Lantern`).
-2. In the prefab editor swap the mesh (child mesh entity — keep pivot/axis fixes
-   on the child, `movement_transforms`) and the icon on the item's description /
-   icon components. Keep `item_component` and the pickup component.
-3. Save. After a Verse build the prefab is a class in the Assets digest —
-   `list_verse_types(digest="assets", name_filter="Lantern")` — use that name in Verse.
+1. `ValkyrieToolset.PrefabToolset` `CreatePrefab` `{"folderPath": "Prefabs",
+   "assetName": "Lantern", "parentClass": {"refPath":
+   "/Armory/_Verse/VNI/ArmoryRuntime.held_item_template"}}`. Verified 43.00: the
+   new prefab already has `item_component`, the pickup, description, icon,
+   rarity, `torch_mesh`, `fort_item_owner_pose_modifier_component` and
+   `fort_held_item_component` on its `rootEntity` — nothing to add.
+2. Swap the mesh and set icon / text with EntityToolset on that `rootEntity`
+   (`RemoveComponent` `torch_mesh` → `AddComponent` your mesh class; pivot/axis
+   fixes on a child mesh entity, `movement_transforms`). Text, icon, rarity:
+   same calls as `custom_items` **Build it over MCP**. Keep `item_component`
+   and the pickup component.
+3. `ApplyPrefabEdits` + `save_asset`. After a Verse build the prefab is a class
+   in the Assets digest — `list_verse_types(digest="assets",
+   name_filter="Lantern")` — use that name in Verse.
 
 `create_empty_prefab` / `create_prefab_from_entities` cannot make a template prefab (they
-lose the template's components). Once the project has **one** Held Item prefab, make every
-other held item from it with `duplicate_prefab(source_prefab="/MyIsland/Prefabs/Lantern.Lantern",
-prefab_name="Flashlight")`: the copy keeps all the template's components. Find the source
-with `search_assets`, then swap the copy's mesh and icon in the prefab editor
-(`open_asset_in_uefn`). Only the very first one needs the Content Drawer step above; ask the
-person for that one click instead of saying it can't be done.
+lose the template's components) — use `CreatePrefab` with `parentClass`. Copies of an
+existing one: `duplicate_prefab(source_prefab="/MyIsland/Prefabs/Lantern.Lantern",
+prefab_name="Flashlight")` keeps all the template's components.
 
 ## Hold pose (43.00)
 
 `held_item_template` now ships a **`fort_item_owner_pose_modifier_component`**
 (`/Fortnite.com/Itemization`, `class<final>`, not experimental). It sets the stance
 the character uses while the item is equipped. Default: **fire torch**. Pick the pose
-in the prefab editor (component → `EquippedPose`) or change it at runtime:
+on the prefab's pose component (`EquippedPose`) or change it at runtime:
 
 | Pose class (`/Fortnite.com/Itemization`) | Hold like |
 | --- | --- |
