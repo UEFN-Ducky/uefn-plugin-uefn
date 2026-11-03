@@ -1,18 +1,26 @@
 ---
-description: "Why Scene Graph entities do not move — transform_component local vs global, origins for attaching to players, full keyframed_movement_component API, TickEvents vs KFM, LUF axes, deep-hierarchy transform bug"
+description: "The one motion page: every runtime move of a Scene Graph entity is keyframed_movement_component — editable keyframe path component, bob, spin, one glide (replaces MoveTo), chasing with keyframe segments, the rules that bite (additive scale, chained deltas, 360° keys), full KFM API and easings, local vs global, origins for attaching, LUF axes, why it isn't moving, deep-hierarchy transform bug"
 metadata:
   order: 5
-  label: "Movement & transforms (why it isn't moving)"
+  label: "Movement & transforms (keyframes for every move)"
   default_enabled: false
-  load_condition: "An entity will not move, rotate, animate or follow something; attaching entities to players/vehicles; orbits and movers; keyframed movement; transforms applying to the wrong axis or not at all"
+  load_condition: "Anything moves, rotates, bobs, spins, glides, chases or animates at runtime (always keyframes); an entity will not move, rotate, animate or follow something; attaching entities to players/vehicles; orbits and movers; keyframed movement; transforms applying to the wrong axis or not at all"
 ---
 
 ## Movement & transforms
 
-**This is the one motion page.** Every skill that moves, animates, attaches or
-carries anything at runtime links here: keyframed movement for timed motion,
-`MoveTo` for one glide, origins for following, a moved `chair_device` for
-carrying a player. Never animate by writing a transform every tick.
+**This is the one motion page, and its rule is hard: every runtime move of a
+Scene Graph entity is a keyframe** (`keyframed_movement_component`). Doors,
+lifts, platforms, spinners, bobbing pickups, projectiles, a single glide and
+chasers are all keyframes. A transform is written **once**, to place something;
+origins follow; a moved `chair_device` carries a player. Never animate by
+writing a transform, `TeleportTo` or `MoveTo` in a loop.
+
+Why: KFM plays natively in the Pre-Physics phase, outside your Verse, and the
+client interpolates it. Epic's keyframed movement page says it avoids the
+per-update cost of `TeleportTo()` / `MoveTo()`. One `SetKeyframes` + `Play()`
+replaces a loop that would run every frame, so hundreds of movers stay cheap,
+and from 43.00 the server also skips entities that aren't moving.
 
 `SetEntityTransform` / `SetLocalTransform` here are **Scene Graph entities**, not
 Fortnite Creative devices. Never actor-scale buttons, triggers, or volumes —
@@ -28,6 +36,7 @@ Every signature here is from this build's digests. Re-check with
 ```verse
 using { /Verse.org/SceneGraph }
 using { /Verse.org/SceneGraph/KeyframedMovement }
+using { /Verse.org/Simulation }
 using { /Verse.org/SpatialMath }
 using { /Fortnite.com/Characters }   # fort_character / GetFortCharacter[] in the origin recipe below
 ```
@@ -36,11 +45,17 @@ using { /Fortnite.com/Characters }   # fort_character / GetFortCharacter[] in th
 
 | Goal | Use | Not |
 |------|-----|-----|
-| Teleport / place once | `SetLocalTransform` / `SetGlobalTransform` | a tick loop |
-| Timed or looping animation (doors, lifts, orbits, projectile flight) | `keyframed_movement_component` | per-frame transform writes |
-| Per-frame steering, chasing, physics-reactive motion | `OnSimulate` + `Sleep(0.0)` + measured delta (see `verse_authoring`) — `TickEvents.Subscribe` is `epic_internal` on 42.10 and will not compile | a fixed-constant delta |
+| Place once (spawn, reset, put a thing on a spot) | `SetGlobalTransform` / `SetLocalTransform`, **once** | a loop |
+| Door, lift, platform, any authored path | KFM keys in an `@editable` array (`keyframed_path_component` below) | per-frame transform writes |
+| Spin, bob, sway forever | KFM `loop` (four 90° keys) / `pingpong` (`StartSpin`, `StartBob`) | a ~10 Hz Verse loop |
+| One glide to a point | `GlideTo` / `GlideBy`: one `oneshot` delta, then `FinishedEvent` | `MoveTo`, a lerp loop |
+| Thrown or flying object | one `oneshot` delta over the flight time (npc-ai `projectiles`) | a per-frame position |
+| Chasing, homing, steering | `ChaseSegments`: a short KFM segment re-aimed ~10 times a second; steering maths may tick as pure state | per-frame `SetGlobalTransform` |
+| A custom player controller reading Move input | `custom_player_controller` — the **only** per-frame transform writer | — |
 | Follow / attach to a player, vehicle or other entity | **origin** (`SetOrigin`) | copying the target transform every frame |
 | Reparent permanently | `Parent.AddEntities(array{Child})` | `SetOrigin` |
+| Carry a player | a `chair_device` moved with one `MoveTo` per move (verse `runtime_pitfalls`) | `TeleportTo` each tick |
+| Hide and show again | `Disable()` / `Enable()` its `mesh_component`s (`SetShown` in `verse_authoring`) | `RemoveFromParent` then re-adding |
 
 ### `transform_component`
 
@@ -181,17 +196,170 @@ KFM.SetKeyframes(array{KF}, oneshot_keyframed_movement_playback_mode{})
 KFM.Play()                              # nothing moves without this
 ```
 
-Playback modes: `oneshot_`, `loop_`, `pingpong_keyframed_movement_playback_mode`.
+Playback modes: `oneshot_` (play once, stay at the end), `loop_` (repeat from the
+start), `pingpong_keyframed_movement_playback_mode` (forward, then back, forever).
 Translation and Scale on a delta are **additive**; Rotation is relative.
 
-Easing (`/Verse.org/SceneGraph/KeyframedMovement`, all `<concrete>` so `{}` works):
-`linear_easing_function`, `ease_cubic_bezier_easing_function`,
-`ease_in_cubic_bezier_easing_function`, `ease_out_cubic_bezier_easing_function`
-(starts fast, slows at the end — re-exposed as **Experimental** in v42.10), or a
-custom `cubic_bezier_easing_function{X1, Y1, X2, Y2}`. Experimental easing blocks
-publishing; prefer `linear_easing_function{}` for shipped islands.
+Easing (`/Verse.org/SceneGraph/KeyframedMovement`, 43.00 digest — all five are
+`<concrete>`, so `{}` works, and none is Experimental, so all publish):
+
+| Class | Motion |
+|---|---|
+| `linear_easing_function` | constant speed |
+| `ease_cubic_bezier_easing_function` | slow start, faster middle, slow end (end a bit slower) |
+| `ease_in_cubic_bezier_easing_function` | slow start, speeds up |
+| `ease_out_cubic_bezier_easing_function` | fast start, slows down |
+| `ease_in_out_cubic_bezier_easing_function` | like `ease_`, symmetric start and end |
+
+The base `cubic_bezier_easing_function` is `<epic_internal>`: you can't build a
+custom curve from Verse — pick one of the five.
 Never drive Scene Graph entities with `creative_prop` / `animation_controller`
 keyframes — different system, different API.
+
+#### Rules that bite
+
+- **Each delta starts where the previous one ended.** Up 500, then Forward 500,
+  then Up -500 is an arch that lands 500 forward of the start.
+- **Scale is added.** Write `Scale := vector3{}` in **every** delta: `0` keeps the
+  size, `1` adds 1 (a scale-1 mesh doubles). Never a negative scale. This is the
+  opposite of `SetGlobalTransform`, where Scale is absolute and `vector3{}` makes
+  the mesh invisible — write `Scale := vector3{Left := 1.0, Up := 1.0, Forward := 1.0}`
+  (or keep the current scale) when you place something.
+- **A 360° key is no rotation** (a quaternion can't tell 0° from 360°). A full
+  turn is four 90° keys; any single key over 180° turns the short way.
+- **Position first.** `SetKeyframes` rebases onto the current transform and
+  stops anything playing; move the entity, then `SetKeyframes`, then `Play()`.
+- **Keep the mover's root unrotated** when you aim deltas at world points
+  (`GlideTo`, `ChaseSegments`): the digest doesn't say whether a rotated
+  entity's delta follows its facing. Turn a **child** mesh entity to show the
+  heading, as with FBX axis fixes below.
+- **Many copies, different timing:** give each instance its own `StartDelay`
+  or keys instead of one loop that offsets them.
+
+#### Recipes (type-checked on the 43.00 digests)
+
+**Designer-authored path** — the keys are an `@editable` array, so they are
+typed into the Details panel of the prefab (Transform, Duration, Easing per key)
+and every prefab copy can differ. Put a `keyframed_movement_component` and this
+component on the same entity:
+
+```verse
+mover_playback := enum:
+    Loop
+    PingPong
+    OneShot
+
+ToPlaybackMode(Playback : mover_playback) : keyframed_movement_playback_mode =
+    case (Playback):
+        mover_playback.Loop => loop_keyframed_movement_playback_mode{}
+        mover_playback.PingPong => pingpong_keyframed_movement_playback_mode{}
+        mover_playback.OneShot => oneshot_keyframed_movement_playback_mode{}
+
+# Plays the keyframes typed into the Details panel. Needs a keyframed_movement_component
+# on the same entity (add it in the prefab next to this component).
+keyframed_path_component := class<final_super>(component):
+    @editable
+    Keyframes : []keyframed_movement_delta = array{}
+
+    @editable
+    Playback : mover_playback = mover_playback.Loop
+
+    # Different delays on copies of the same prefab so they don't move in lockstep.
+    @editable
+    StartDelay : float = 0.0
+
+    OnSimulate<override>()<suspends> : void =
+        if (KFM := Entity.GetComponent[keyframed_movement_component]):
+            KFM.SetKeyframes(Keyframes, ToPlaybackMode(Playback))
+            if (StartDelay > 0.0):
+                Sleep(StartDelay)
+            KFM.Play()
+
+    OnEndSimulation<override>() : void =
+        if (KFM := Entity.GetComponent[keyframed_movement_component]):
+            KFM.Stop()
+        (super:)OnEndSimulation()
+```
+
+**Bob and spin** — no Verse runs after `Play()`:
+
+```verse
+# Up and down forever: one key, pingpong.
+StartBob(KFM : keyframed_movement_component, Height : float, Seconds : float) : void =
+    Bob := keyframed_movement_delta:
+        Transform := transform:
+            Translation := vector3{Up := Height}
+            Rotation := IdentityRotation()
+            Scale := vector3{}
+        Duration := Seconds
+        Easing := ease_in_out_cubic_bezier_easing_function{}
+    KFM.SetKeyframes(array{Bob}, pingpong_keyframed_movement_playback_mode{})
+    KFM.Play()
+
+# Full turns forever: four 90-degree keys, loop (one 360-degree key is no rotation at all).
+StartSpin(KFM : keyframed_movement_component, SecondsPerTurn : float) : void =
+    Quarter := keyframed_movement_delta:
+        Transform := transform:
+            Translation := vector3{}
+            Rotation := MakeRotationFromYawPitchRollDegrees(90.0, 0.0, 0.0)
+            Scale := vector3{}
+        Duration := SecondsPerTurn / 4.0
+        Easing := linear_easing_function{}
+    KFM.SetKeyframes(array{Quarter, Quarter, Quarter, Quarter}, loop_keyframed_movement_playback_mode{})
+    KFM.Play()
+```
+
+**One glide** — this replaces `MoveTo` for entities:
+
+```verse
+# Glides by Offset over Seconds and returns when it arrives.
+GlideBy(KFM : keyframed_movement_component, Offset : vector3, Seconds : float)<suspends> : void =
+    Glide := keyframed_movement_delta:
+        Transform := transform:
+            Translation := Offset
+            Rotation := IdentityRotation()
+            Scale := vector3{}
+        Duration := Seconds
+        Easing := ease_in_out_cubic_bezier_easing_function{}
+    KFM.SetKeyframes(array{Glide}, oneshot_keyframed_movement_playback_mode{})
+    KFM.Play()
+    KFM.FinishedEvent.Await()    # the Problems panel may flag Await on a listenable: LSP false positive
+
+# Glides to a point in the parent's space (world space under the simulation entity).
+GlideTo(Mover : entity, KFM : keyframed_movement_component, Destination : vector3, Seconds : float)<suspends> : void =
+    GlideBy(KFM, Destination - Mover.GetLocalTransform().Translation, Seconds)
+```
+
+**Chasing** — Verse re-aims ~10 times a second, KFM draws every frame in between.
+Run it from the mover's own component `OnSimulate` (cancelled when the mover
+leaves the scene) or race it against the round's stop event (verse `async`).
+One manager loop can re-aim every chaser in the same pass:
+
+```verse
+# Re-aims a short keyframe at the target ten times a second. Each segment covers
+# 1.5 steps, so the next one starts before the last ends (no stop-start stutter).
+ChaseSegments(Mover : entity, KFM : keyframed_movement_component, Target : entity, Speed : float)<suspends> : void =
+    StepSeconds : float = 0.1
+    SegmentSeconds : float = StepSeconds * 1.5
+    loop:
+        Offset := Target.GetGlobalTransform().Translation - Mover.GetGlobalTransform().Translation
+        Gap := Offset.Length()
+        if (Gap > 1.0):
+            Travel := Min(Speed * SegmentSeconds, Gap)
+            Segment := keyframed_movement_delta:
+                Transform := transform:
+                    Translation := Offset * (Travel / Gap)
+                    Rotation := IdentityRotation()
+                    Scale := vector3{}
+                Duration := SegmentSeconds
+                Easing := linear_easing_function{}
+            KFM.SetKeyframes(array{Segment}, oneshot_keyframed_movement_playback_mode{})
+            KFM.Play()
+        Sleep(StepSeconds)
+```
+
+Never name a local `Distance` in a file that imports `/Verse.org/SpatialMath` —
+it clashes with `SpatialMath.Distance` (3532); that's why the snippet says `Gap`.
 
 ### Axes and coordinate systems
 
@@ -223,10 +391,14 @@ this list, then confirm in PIE / Launch Session before declaring it broken:
    per-frame in `OnSimulate` (runs **once** — wrap it in `loop` with
    `Sleep(0.0)`); `TickEvents.Subscribe` is Epic-internal on 42.10.
 4. KFM: did you call `Play()` after `SetKeyframes`? Are the deltas non-zero
-   (they are additive, `0` means no change)?
-5. Are you moving the right entity? Orbit radius belongs on the **body**'s local
+   (they are additive, `0` means no change)? Is the `keyframed_movement_component`
+   on the **same** entity your component reads it from? Keys set in the Details
+   panel but no `SetKeyframes` + `Play()` in Verse = nothing moves.
+5. It moves but grows: a delta without `Scale := vector3{}`. It vanished after a
+   `SetGlobalTransform`: Scale `vector3{}` there is size zero.
+6. Are you moving the right entity? Orbit radius belongs on the **body**'s local
    translation; the **pivot** is what rotates.
-6. Did a `<decides>` call fail silently inside an `if`? `GetFortCharacter[]`,
+7. Did a `<decides>` call fail silently inside an `if`? `GetFortCharacter[]`,
    `GetEntity[]`, `GetSimulationEntity[]` and `GetComponent[]` all fail rather
    than error.
 

@@ -98,45 +98,86 @@ from control scope .../mover_component/OnBeginSimulation
 `get_verse_api("execution_listenable")` — if Epic drops `epic_internal`, the
 subscribe form below becomes usable again.)
 
-The per-frame hook creator code *can* use is `OnSimulate` with a one-frame
-`Sleep(0.0)` and your own delta clock:
+**A component that moves its entity is keyframed — never a per-frame
+transform.** Set the keys once and let KFM play them; no Verse runs while it
+moves:
 
 ```verse
-using { /Verse.org/SpatialMath }
-mover_component := class<final_super>(component):
-    @editable Speed:float = 200.0
+using { /Verse.org/SceneGraph/KeyframedMovement }
 
-    OnSimulate<override>()<suspends>:void =
-        var PrevTime:float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last' (43.00)
+# The entity's keyframed_movement_component, added if the prefab has none.
+GetOrAddKFM(Ent : entity) : keyframed_movement_component =
+    if (Existing := Ent.GetComponent[keyframed_movement_component]):
+        Existing
+    else:
+        KFM := keyframed_movement_component{Entity := Ent}
+        Ent.AddComponents(array{KFM})
+        KFM
+
+# Slides forward at Speed for Seconds, then back, forever. No per-frame Verse.
+slider_component := class<final_super>(component):
+    @editable
+    Speed : float = 200.0
+
+    @editable
+    Seconds : float = 2.0
+
+    OnBeginSimulation<override>() : void =
+        (super:)OnBeginSimulation()
+        KFM := GetOrAddKFM(Entity)
+        Slide := keyframed_movement_delta:
+            Transform := transform:
+                Translation := vector3{Forward := Speed * Seconds}
+                Rotation := IdentityRotation()
+                Scale := vector3{}
+            Duration := Seconds
+            Easing := linear_easing_function{}
+        KFM.SetKeyframes(array{Slide}, pingpong_keyframed_movement_playback_mode{})
+        KFM.Play()
+
+    OnEndSimulation<override>() : void =
+        if (KFM := Entity.GetComponent[keyframed_movement_component]):
+            KFM.Stop()
+        (super:)OnEndSimulation()
+```
+
+Paths a designer tunes (`@editable` keys), bob, spin, one glide and chasing:
+`movement_transforms` recipes.
+
+The per-frame hook creator code *can* use is `OnSimulate` with a one-frame
+`Sleep(0.0)` and your own delta clock. It is for **pure state** (steering
+maths, a charge meter); the one place it writes a transform is a custom player
+controller reading Move input (`custom_player_controller`):
+
+```verse
+# Pure state per frame: the heading a 10 Hz keyframe planner reads. No transform writes.
+steering_component := class<final_super>(component):
+    @editable
+    TurnRate : float = 90.0
+
+    var Heading : float = 0.0
+
+    OnSimulate<override>()<suspends> : void =
+        var PrevTime : float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last' (43.00)
         loop:
             Sleep(0.0)                      # yields exactly one frame
             if (not IsSimulating[]):
                 break                       # entity left the scene / experience reset
             Now := GetSimulationElapsedTime()
-            Advance(Now - PrevTime)
+            set Heading += TurnRate * (Now - PrevTime)
             set PrevTime = Now
-
-    Advance(DeltaTime:float):void =
-        T := Entity.GetLocalTransform()
-        Entity.SetLocalTransform(transform{
-            Translation := T.Translation + vector3{Forward := Speed * DeltaTime}
-            Rotation := T.Rotation
-            Scale := T.Scale})
 ```
 
 - Use a **measured** delta (`GetSimulationElapsedTime` difference), never a fixed
   constant — `Sleep(0.0)` resumes next frame, not on a fixed cadence.
 - `OnSimulate` is cancelled before `OnEndSimulation`, so this loop needs no manual
   cancel; the `IsSimulating[]` break is belt-and-braces for editor resets.
-- For timed, repeatable motion (doors, lifts, orbits) prefer
-  `keyframed_movement_component` over any hand-rolled loop — see
-  `movement_transforms`.
 - `TickEvents` still exists on `component` and PrePhysics/PostPhysics remain the
   right *concepts* (affect this frame's physics vs react to its result); only the
   `Subscribe` call is gated.
-- Scale motion by `DeltaTime`; never assume a fixed frame rate.
-- For timed or looping animation prefer `keyframed_movement_component` over
-  ticking a transform yourself — see `movement_transforms`.
+- Writing `SetGlobalTransform` / `SetLocalTransform` in this loop to animate is
+  the anti-pattern — it costs Verse and network every frame and looks choppy on
+  clients. Keyframes (`movement_transforms`).
 
 ### Stopping component work
 
@@ -222,10 +263,28 @@ Spawn an instance by instantiating the class and parenting it into the scene:
 if (Sim := Entity.GetSimulationEntity[]):
     LightPost := P_LightPost{}
     Sim.AddEntities(array{LightPost})
-    LightPost.SetGlobalTransform(transform{Translation := vector3{Forward := 500.0, Left := 0.0, Up := 0.0}})
+    Spot := transform:
+        Translation := vector3{Forward := 500.0, Left := 0.0, Up := 0.0}
+        Rotation := IdentityRotation()
+        Scale := vector3{Left := 1.0, Up := 1.0, Forward := 1.0}   # absolute: vector3{} = invisible
+    LightPost.SetGlobalTransform(Spot)
 ```
 
-Despawn with `LightPost.RemoveFromParent()`. Re-add later with `AddEntities`.
+Despawn for good with `LightPost.RemoveFromParent()`. **Do not re-add a removed
+entity with `AddEntities`** — it comes back invisible with its collision still in
+place. To blink something out and back (a pickup that respawns, a disappearing
+platform), keep it in the scene and switch its meshes, or pool it
+(verse `sys_spawning`):
+
+```verse
+SetShown(Root : entity, Shown : logic) : void =
+    for (Mesh : Root.FindDescendantComponents(mesh_component)):
+        if (Shown?):
+            Mesh.Enable()
+        else:
+            Mesh.Disable()
+```
+
 If the prefab class is not found, the project has not rebuilt Verse since the
 prefab was created — build/push Verse changes first, then check
 `get_verse_api({"name": "P_<name>"})`.
@@ -249,9 +308,9 @@ importing both families **qualify the type** exactly like the digests do:
 - Rotations: `MakeRotationFromYawPitchRollDegrees(Yaw, Pitch, Roll)`,
   `MakeRotationDegrees(Axis, Angle)`, `Slerp`, `.GetForwardAxis()`,
   `.Invert()`; combine with `*`.
-- Movement over time: prefer `keyframed_movement_component`
-  (`SceneGraph.KeyframedMovement` module) over per-tick `SetGlobalTransform` —
-  it interpolates client-side.
+- Movement over time: **always** `keyframed_movement_component`
+  (`SceneGraph.KeyframedMovement` module), never per-tick `SetGlobalTransform` —
+  it plays natively and the client interpolates it.
 
 ### Ensure transform before KFM
 
@@ -363,6 +422,7 @@ queries: `FindOverlapHits` / `FindSweepHits` with
   `SendDown` from the simulation root.
 - One loop driving many entities beats one loop per entity; cancel every
   subscription in `OnEndSimulation`.
-- Visual-only updates (bobbing, colour pulses, HUD-like readouts) run ~10 times a
-  second (`Sleep(0.1)`); per-frame `Sleep(0.0)` only for steering that must react
-  every frame. Timed motion is keyframed (`movement_transforms`).
+- Every move is keyframed (`movement_transforms`): bobbing and spinning are KFM
+  `pingpong` / `loop` with no Verse loop at all; chasers re-aim a KFM segment ~10
+  times a second. Non-motion visuals (colour pulses, HUD-like readouts) run ~10
+  times a second (`Sleep(0.1)`); per-frame `Sleep(0.0)` only for pure state.

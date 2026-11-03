@@ -4,7 +4,7 @@ description: "UEFN Physics Beta — enable project physics, FortPhysics props, c
 license: MIT
 metadata:
   label: UEFN Physics
-  version: 11
+  version: 12
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -17,7 +17,7 @@ metadata:
 
 1. **Our architecture is the spine** — systems are our packs on `player_manager`; never a second registry, wallet or save table (verse `sys_architecture`).
 2. **Scene Graph first** for anything created, moved or animated at runtime; Creative devices for features Fortnite provides; `creative_prop` only as a fallback (scenegraph SKILL.md).
-3. **Never animate by teleporting** — keyframed movement, `MoveTo` glides, `SetOrigin`, chairs for carried players, animation assets for characters (scenegraph `movement_transforms`).
+3. **Motion is keyframed, always** — every runtime move of an entity (door, lift, platform, spin, bob, projectile, one glide, a chaser) is `keyframed_movement_component`: `SetKeyframes`, then `Play()`. Never a transform, `TeleportTo` or `MoveTo` written in a loop. Place once with `SetGlobalTransform`; follow with `SetOrigin`; carry a player in a `chair_device`; characters use animation assets (scenegraph `movement_transforms`).
 4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
 5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
 6. **One house code style** (verse `code_style`).

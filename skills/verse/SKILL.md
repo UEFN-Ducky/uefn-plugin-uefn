@@ -5,7 +5,7 @@ description: "Writing Verse source — syntax, effects (no_rollback/transacts/de
 license: MIT
 metadata:
   label: UEFN Verse
-  version: 57
+  version: 58
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -23,7 +23,7 @@ message, never `_v2` copies of a device (`skill_read_subskill("uefn", "verse_dev
 
 1. **Our architecture is the spine.** Every system is its own folder and pack; players, currency, XP, playtime, inventory and saves come from our packs, and game modes consume `player_manager` `?option` slots — never a second registry, wallet or save table. → `sys_architecture`
 2. **Scene Graph first.** Anything the code creates, moves or animates at runtime is an entity / Entity Prefab; devices for features Fortnite provides; `creative_prop` only where no entity path exists. → scenegraph SKILL.md
-3. **Never animate by teleporting.** Timed motion → `keyframed_movement_component`; one glide → `MoveTo(Pos, Rot, Seconds)`; follow → `SetOrigin`; carry a player → `chair_device` moved by `MoveTo`; characters → animation assets. → scenegraph `movement_transforms`
+3. **Motion is keyframed, always.** Every runtime move of an entity — door, lift, platform, spin, bob, projectile, one glide, a chaser — is `keyframed_movement_component`: `SetKeyframes`, then `Play()`. Never `SetGlobalTransform` / `TeleportTo` / `MoveTo` in a loop. Place once → `SetGlobalTransform`; follow → `SetOrigin`; carry a player → `chair_device` (a device: one `MoveTo` per move); characters → animation assets. → scenegraph `movement_transforms`
 4. **No lag.** Events over polling; every loop waits; per-tick work is pure state, visuals ~10 Hz; pool entities, share materials; build arrays with `for`, never `+=` in a loop; HUD updates on change; saves on change. → `runtime_pitfalls`
 5. **Everything stops when its owner goes.** Per-player loops race a stop event signalled on leave and elimination; cleanup in `defer`; never `branch` at the end of `OnBegin`. → `async`
 6. **One house code style** — our templates' style. → `code_style`
@@ -111,7 +111,8 @@ compile although no digest lists them. Details: `digests`.
 | Guessed device / asset / function names | A loaded skill, else `search_verse_digest` once |
 | No-effect helper inside `if (…)` | `<transacts>` on the helper, or bind it first |
 | Wiring `@editable` refs before a build | `workspace_compile_verse`, then wire |
-| `TeleportTo` / `SetGlobalTransform` every tick | Keyframed glide / `MoveTo`; carried player in a moved chair |
+| `TeleportTo` / `SetGlobalTransform` / `MoveTo` in a loop; a bob or spin loop | `keyframed_movement_component` for every entity move (`SetKeyframes` + `Play()`); carried player in a moved chair |
+| `RemoveFromParent`, then `AddEntities` the same entity back | `Disable()` / `Enable()` its meshes; removal is final |
 | Spawn/dispose effects in bursts; one material per mesh | Pools; one cached material per colour |
 | Whole level built in one `OnBegin` pass | Split across ticks |
 | `branch{ Loop() }` at the end of `OnBegin`; per-player loop with no stop | `spawn` + stop event on leave and elimination |

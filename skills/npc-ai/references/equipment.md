@@ -172,7 +172,7 @@ But editor `attach_actor` only affects **actors placed in the level**. For spawn
 
 | **Costume / mesh part** on the NPC definition if your pipeline supports it | Prefer over tick-follow |
 
-| **Verse follow prop** | Last resort: `SpawnProp` + per-tick `MoveTo`/teleport to hand — one-frame lag; confirm APIs with `search_verse_digest({"query":"attach"})` / `get_verse_api` — **do not invent** attach APIs |
+| **Verse attached entity** | Last resort: a Scene Graph entity with the item mesh, `SetOrigin(entity_origin{Entity := CharacterEntity})` + one `SetLocalTransform` offset (scenegraph `movement_transforms`) — never `SpawnProp` + per-tick `MoveTo`/teleport; confirm APIs with `search_verse_digest({"query":"attach"})` / `get_verse_api` — **do not invent** attach APIs |
 
 
 

@@ -5,7 +5,7 @@ description: "UEFN Scene Graph — use when the task is entities, components, or
 license: MIT
 metadata:
   label: "UEFN Scene Graph"
-  version: 28
+  version: 29
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -18,7 +18,7 @@ metadata:
 
 1. **Our architecture is the spine** — systems are our packs on `player_manager`; never a second registry, wallet or save table (verse `sys_architecture`).
 2. **Scene Graph first** for anything created, moved or animated at runtime; Creative devices for features Fortnite provides; `creative_prop` only as a fallback (scenegraph SKILL.md).
-3. **Never animate by teleporting** — keyframed movement, `MoveTo` glides, `SetOrigin`, chairs for carried players, animation assets for characters (scenegraph `movement_transforms`).
+3. **Motion is keyframed, always** — every runtime move of an entity (door, lift, platform, spin, bob, projectile, one glide, a chaser) is `keyframed_movement_component`: `SetKeyframes`, then `Play()`. Never a transform, `TeleportTo` or `MoveTo` written in a loop. Place once with `SetGlobalTransform`; follow with `SetOrigin`; carry a player in a `chair_device`; characters use animation assets (scenegraph `movement_transforms`).
 4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
 5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
 6. **One house code style** (verse `code_style`).
@@ -197,22 +197,38 @@ free-text hunts, `list_verse_modules` for the module map.
   *loose* level entities into a *new* prefab name.
 - **ALWAYS digest-check before Scene Graph Verse** — `get_verse_api` /
   `search_verse_digest` for every unfamiliar type. Never invent APIs.
-- **Motion over time = `keyframed_movement_component`**
-  (`using { /Verse.org/SceneGraph/KeyframedMovement }`). Call
-  `SetKeyframes([]keyframed_movement_delta, oneshot_/loop_/pingpong_…)` then
-  `Play()` — `SetKeyframes` rebases onto the current transform and does **not**
-  autoplay. Translation/Scale on deltas are **additive**. Prefer
-  `linear_easing_function{}`. The class is `<final>`: compose, never subclass.
-  Empty pivots need `transform_component` before KFM (`SetLocalTransform`
-  creates one). **Never** use `creative_prop` / `animation_controller`
-  keyframes for Scene Graph entities — different API.
-- **Per-frame work = `OnSimulate` + `loop` + `Sleep(0.0)` + a measured delta**
-  (`GetSimulationElapsedTime` difference), breaking on `not IsSimulating[]`.
+- **ALL motion = `keyframed_movement_component`. No exceptions for "simple"
+  moves.** Doors, lifts, platforms, spinners, bobbing pickups, projectiles, a
+  single glide and chasers are all keyframes
+  (`using { /Verse.org/SceneGraph/KeyframedMovement }`): `SetKeyframes(
+  []keyframed_movement_delta, oneshot_/loop_/pingpong_…)`, then `Play()`.
+  KFM plays natively in the Pre-Physics phase, not in your Verse — Epic's own
+  page says it avoids the per-update cost of `TeleportTo` / `MoveTo` — so
+  hundreds of movers stay cheap. **Never** write `SetGlobalTransform` /
+  `SetLocalTransform` / `TeleportTo` / `MoveTo` in a loop to animate anything.
+  The rules that bite (`movement_transforms` has the recipes):
+  - `SetKeyframes` rebases onto the **current** transform and does **not**
+    autoplay — place first, then `SetKeyframes`, then `Play()`.
+  - Each delta starts where the previous one ended; Translation and Scale are
+    **added**. Write `Scale := vector3{}` in every delta (`0` = same size;
+    `1` adds 1, so a scale-1 mesh doubles); never a negative scale.
+  - Keys a designer tunes go in an `@editable []keyframed_movement_delta` on
+    your component (`keyframed_path_component`), not hard-coded.
+  - A full turn is four 90° keys (one 360° key is no rotation).
+  - Chasing = a short keyframe re-aimed ~10 times a second
+    (`ChaseSegments`), never a per-frame transform.
+  - Five easings, all concrete and publishable on 43.00: `linear_`, `ease_`,
+    `ease_in_`, `ease_out_`, `ease_in_out_cubic_bezier_easing_function{}`.
+  - `<final>`: compose, never subclass. Empty pivots need `transform_component`
+    first (`SetLocalTransform` creates one). **Never** `creative_prop` /
+    `animation_controller` keyframes for Scene Graph entities — different API.
+- **Per-frame `OnSimulate` + `loop` + `Sleep(0.0)` + a measured delta is for
+  pure state, never for writing a transform.** The one place it drives motion
+  is reading player input in a custom controller (`custom_player_controller`).
+  Break on `not IsSimulating[]`; `OnSimulate` runs **once** — wrap it in `loop`.
   **`TickEvents.PrePhysics.Subscribe(...)` does NOT compile in creator code** —
-  `execution_listenable` is `class<epic_internal>` on FN 42.10 (verified by
-  build: "Invalid access of internal function … Subscribe"). Timed/looping
-  motion should use `keyframed_movement_component` instead of any hand loop.
-  `OnSimulate` runs **once** — wrap it in `loop`. Details: `verse_authoring`.
+  `execution_listenable` is `class<epic_internal>` (verified by build: "Invalid
+  access of internal function … Subscribe"). Details: `verse_authoring`.
 - **Follow/attach = origin, not per-tick copying.** `SetOrigin(entity_origin{
   Entity := Target})` / `ResetOrigin()` re-base an entity onto another without
   reparenting. Do not change origin and move in the same frame. Details:
@@ -286,7 +302,10 @@ free-text hunts, `list_verse_modules` for the module map.
 - **Static vs dynamic:** always-on → prefab asset + `instantiate_prefab` +
   `save_current_level`. Runtime spawn/despawn → Verse `P_*{}` +
   `Sim.AddEntities` / `RemoveFromParent` after Verse rebuild (see
-  `verse_authoring`).
+  `verse_authoring`). **Never re-add an entity you removed** — it comes back
+  invisible with its collision still there. To blink something out and back,
+  `Disable()` / `Enable()` its `mesh_component`s (`SetShown`); `RemoveFromParent`
+  is final.
 - **Custom Verse components cannot be attached from the editor tools until the
   project's Verse has built** — write the `.verse` file, push changes, then the
   class exists to add in the editor (or add it in the Details panel). Project
@@ -308,7 +327,7 @@ Load with `skill_read_subskill("scenegraph", "<id>")`:
 - `editor_tools` — class resolution, asset comps, prefab packaging wrinkles, troubleshooting
 - `components` — full builtin catalog, asset vs plain, `BasicShapes`, itemization comps, no `button_component`
 - `prefab_only` — prefab-asset-first hard rules, MCP level-vs-tab limit, banned repackage, orbit recipe
-- `movement_transforms` — why it isn't moving: local vs global, origins/attach, full KFM API, LUF axes, known transform bugs
+- `movement_transforms` — THE motion page: KFM for every move (editable keyframe path component, bob, spin, one glide, chasing with keyframe segments), full KFM API, local vs global, origins/attach, LUF axes, why it isn't moving, known transform bugs
 - `itemization` — items and inventories, granting stock weapons from `/Fortnite.com/Weapons`, pickups, equipping
 - `custom_weapons` — custom Armory Entity Prefabs (AR/pistol/shotgun/SMG), mesh/pivot/collision, `fort_trace_weapon_component`, Verse grant: poll until `GetFirstInventory[Agent]` succeeds (a `Sleep(0.1)` loop you write — not an API) + AddItemDistribute then GetParentInventory/PickUp/Equip (not AddResult.Ok); stat ranges, infinite ammo, rarity, skins, upgrades from base values, find held guns by prefab type. Owned collectible + canvas shop + persist + load on join → verse `sys_owned_weapons`
 - `custom_items` — fully custom non-weapon Entity Prefabs: itemization shell + Verse components for any behavior, categories/stack/rarity, KFM, equipped logic, Verse grant (no Creative granter yet)

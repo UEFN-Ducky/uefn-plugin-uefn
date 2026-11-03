@@ -44,9 +44,10 @@ SpawnCrate(Position : vector3) : void =
         Crate.SetGlobalTransform(transform{Translation := Position, Rotation := T.Rotation, Scale := T.Scale})
 ```
 
-`Crate.RemoveFromParent()` takes it out of the scene (its components run
-`OnEndSimulation`); `AddEntities` can add it back later. Removing and re-adding
-in bursts is what a pool avoids.
+`Crate.RemoveFromParent()` takes it out of the scene for good (its components run
+`OnEndSimulation`). **Never `AddEntities` a removed entity back** — it returns
+invisible with its collision still in place. Anything that disappears and comes
+back stays in the scene and switches its meshes (`SetShown` in the pool below).
 
 ### Pool of prefab instances
 
@@ -93,12 +94,17 @@ crate_dropper_device := class(creative_device):
 
 ### Moving what you spawned
 
-- A thrown, dropped or flying object: one `keyframed_movement_component` delta
-  over its flight time (scenegraph `movement_transforms`).
-- A platform or door loop: keyframed `loop` / `pingpong` playback.
-- Chasing or steering: one manager loop for all instances, pure state per frame,
-  visuals pushed ~10 times a second (`runtime_pitfalls`).
-- Never `SetGlobalTransform` each tick to animate.
+Everything you spawn moves with `keyframed_movement_component` — recipes in
+scenegraph `movement_transforms`:
+
+- A thrown, dropped or flying object: one `oneshot` delta over its flight time.
+- A platform or door loop: keyframed `loop` / `pingpong` playback; a pickup's
+  bob and spin are KFM too (`StartBob`, `StartSpin`).
+- Moving to a point: `GlideTo` (one delta, then `FinishedEvent`).
+- Chasing or steering: one manager loop for all instances, pure state, each
+  instance re-aims a KFM segment ~10 times a second (`ChaseSegments`).
+- `SetGlobalTransform` places a pooled instance **once** (as in `DropAt`); never
+  each tick to animate.
 
 ### Wave manager
 

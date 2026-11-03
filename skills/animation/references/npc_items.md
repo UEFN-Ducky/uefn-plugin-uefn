@@ -67,9 +67,11 @@ runtime NPCs:
   (merged mesh or costume part), that beats runtime attachment.
 - **Verse**: query the digests for the real API before writing anything —
   `search_verse_digest({"query": "attach"})` / `get_verse_api`. Do not invent
-  attach APIs; if the digest has none, the known fallback is a
-  `creative_prop` that follows the character (spawn + `MoveTo`/teleport on a
-  tick loop) — accept the one-frame lag or reconsider content setup.
+  attach APIs; if the digest has none, the fallback is a Scene Graph entity
+  (the item's mesh) attached to the character's entity with
+  `SetOrigin(entity_origin{Entity := CharacterEntity})` plus one
+  `SetLocalTransform` offset (scenegraph `movement_transforms`, origin recipe).
+  Never a `creative_prop` moved with `MoveTo` / teleports on a tick loop.
 
 ## Attach vs grant — different asks
 

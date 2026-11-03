@@ -19,9 +19,10 @@ rounds of "it lags" / "it's stuck" / "it doesn't show" after a clean build.
 | Reacting to players, devices, damage | event handlers (`Subscribe`, `Await`) | when it happens |
 | Score, currency, XP, saves | the handler of the event that changed them | on change |
 | HUD | `set Widget.Field` / `SetText` | on change; a countdown only when the shown number changes |
-| Timed motion, doors, lifts, flight | keyframed movement / one `MoveTo` glide | one call per motion |
-| Visual-only polish (pulse, bob, spin readouts) | one loop for all objects | ~10 Hz (`Sleep(0.1)`) |
-| Steering, chasing, physics-like state | one loop, pure state | per frame (`Sleep(0.0)`); visuals ~10 Hz |
+| Any entity motion: doors, lifts, platforms, flight, one glide | `keyframed_movement_component` (`SetKeyframes` + `Play()`) | one call per motion; zero Verse while it plays |
+| Bob, spin, sway | KFM `pingpong` / `loop` (scenegraph `movement_transforms`) | once — no loop at all |
+| Non-motion polish (colour pulse, readouts) | one loop for all objects | ~10 Hz (`Sleep(0.1)`) |
+| Steering, chasing, physics-like state | one loop, pure state; the visual is a KFM segment re-aimed (`ChaseSegments`) | state per frame (`Sleep(0.0)`) if it must; keyframe re-aim ~10 Hz |
 | Periodic checks (zone scoring, waves, regen) | one loop per system | 1 Hz or slower |
 | Building arrays | a for-expression, once | never `+=` in a loop — each `+=` copies the array |
 | Big builds (level, grid, list), mass entity spawns | split across ticks | a few dozen items per `Sleep(0.0)`; one `AddEntities` per batch. Find them with uefn `verse_insights` |
@@ -36,12 +37,14 @@ Every transform you write from Verse is sent to every client. A per-tick
 `SetGlobalTransform` / `TeleportTo` / `MoveTo` loop at 30+ Hz looks choppy on
 clients and costs network for each moved object.
 
-- Timed or continuous motion → `keyframed_movement_component` (Scene Graph) or a
-  device's `MoveTo(Pos, Rot, Seconds)`: the client interpolates the glide.
+- Every entity move → `keyframed_movement_component`: it plays natively in
+  Pre-Physics and the client interpolates it (Epic: it avoids the per-update cost
+  of `TeleportTo()` / `MoveTo()`). Devices that can't be entities (a
+  `chair_device` carrying a player) take one `MoveTo(Pos, Rot, Seconds)` per move.
 - Gameplay that must tick fast (physics-like state, collision checks) can still
-  tick fast — keep it **pure state** and push visuals on a slower clock
-  (~10 Hz), each glide aimed one visual step **ahead** so the next one starts
-  before the last ends (no stop-start stutter).
+  tick fast — keep it **pure state** and re-aim a KFM segment ~10 times a second,
+  each segment 1.5 steps long so the next one starts before the last ends (no
+  stop-start stutter): `ChaseSegments` in scenegraph `movement_transforms`.
 - Never move dozens of separate visual pieces each tick; move one parent.
 
 ### 2. Moving a player: seat them, never teleport each tick

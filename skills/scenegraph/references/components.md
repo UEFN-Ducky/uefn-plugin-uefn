@@ -121,7 +121,7 @@ subclass — `Ent.AddComponents(array{sphere{Entity := Ent}})`.
 
 | Alias | Role |
 |-------|------|
-| `keyframed_movement_component` | Timed transform animation (orbits, doors, movers). `using { /Verse.org/SceneGraph/KeyframedMovement }`. `SetKeyframes` **rebases onto the current transform and does not autoplay** — then `Play()`. Translation/Scale on deltas are **additive** (`0` = no change). Modes: `oneshot_` / `loop_` / `pingpong_keyframed_movement_playback_mode`. `<final>` — compose, never subclass. Prefer over per-tick `SetGlobalTransform`. **Never** `creative_prop` `animation_controller` for entities. Full API: `movement_transforms`. |
+| `keyframed_movement_component` | **Every** runtime move of an entity (orbits, doors, movers, bob, spin, glides, chasers, projectiles). `using { /Verse.org/SceneGraph/KeyframedMovement }`. `SetKeyframes` **rebases onto the current transform and does not autoplay** — then `Play()`. Translation/Scale on deltas are **additive** (`0` = no change; write `Scale := vector3{}`). Modes: `oneshot_` / `loop_` / `pingpong_keyframed_movement_playback_mode`. `<final>` — compose, never subclass. Never per-tick `SetGlobalTransform` instead. **Never** `creative_prop` `animation_controller` for entities. Full API + recipes: `movement_transforms`. |
 
 #### Lights
 

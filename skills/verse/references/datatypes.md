@@ -198,8 +198,10 @@ line**, which is E3509 when assigned to `[]int`.
 
 ### Math/spatial types (from the digests)
 
-`vector3{X:=, Y:=, Z:=}`, `rotation`, `transform`, `vector2` for UI sizes. Read
-world position via `Prop.GetTransform().Translation`; move with
-`PropObject.MoveTo(TargetPos, Rotation, Time)` / `MoveTo(...)` inside a
-`<suspends>` loop. Exact members live in `UnrealEngine.digest.verse` — search
-before using.
+`vector3{X:=, Y:=, Z:=}`, `rotation`, `transform`, `vector2` for UI sizes — the
+legacy `/UnrealEngine.com/Temporary/SpatialMath` types that devices and
+`creative_prop` use. Read a prop's position via `Prop.GetTransform().Translation`;
+a prop fallback glides with one `MoveTo(TargetPos, Rotation, Time)` per move.
+Scene Graph entities use `/Verse.org/SpatialMath` (`vector3{Forward, Left, Up}`)
+and move **only** with keyframes (scenegraph `movement_transforms`). Exact
+members live in `UnrealEngine.digest.verse` — search before using.
