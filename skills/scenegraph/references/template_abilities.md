@@ -79,12 +79,31 @@ Entity Prefab (ability item)
 
 Level
 ├── PF_* item prefab INSTANCE         (drag / instantiate_prefab)
-└── template_ability_item_granter_device
-    └── @editable TemplateAbilityItemEntity → that INSTANCE (not the asset)
+└── ability_item_granter_device
+    └── @editable AbilityItem → that INSTANCE (not the asset)
 ```
 
 **Do not** put `fort_inventory_weapon_hotbar_component` on the **item**. That
 type lives on the **player**. Grant queries it from the player.
+
+## Scene Graph + inventory rules (checked on 43.x)
+
+- **Template abilities go on the prefab, in Details. Verse cannot add one.**
+  `AddItemAbility` / `AddItemEquippedAbility` take `ability(ability_context, ability_effect)`;
+  `fort_template_ability` is `ability(ability_context, fort_template_ability_effect)` and the
+  type is invariant, so passing one fails ("incompatible value of type fort_template_ability").
+  Verse **can** retune it: read `ItemAbilities`, cast `fort_template_ability[A]`, and
+  `set T.AbilityElements = …` (compiles; see `TuneAbilities` below).
+- The player's hotbar may not exist on the first frame: wait for it before granting.
+- `AddItem` can report success while the item is still unparented: check
+  `GetParentInventory[]`, fall back to `PickUp[Hotbar]`, then `Equip()` (same rule as
+  `verse/sys_owned_weapons` → The grant).
+- **One entity is in one inventory.** Granting the placed instance to a second player moves
+  it off the first. Multiplayer: build a fresh copy per player from the prefab's generated
+  Verse class (`get_verse_api` on it in Assets.digest after a Verse build), bound at
+  statement level, never inside an `if` (constructing a prefab is no_rollback, E3512).
+- A `<suspends>` call can't sit in an `if (...)` condition: bind it first
+  (`Ready := WaitForHotbar(Agent)`, then `if (not Ready?)`).
 
 ## Agent workflow
 
@@ -98,7 +117,7 @@ type lives on the **player**. Grant queries it from the player.
    `custom_items` **Build it over MCP**.
 4. `instantiate_prefab` the item into the level + `save_current_level`.
 5. Place the compiled Verse granter device (Content Browser after Verse build).
-   Details → `TemplateAbilityItemEntity` = the **placed instance**.
+   Details → `AbilityItem` = the **placed instance** (`get_verse_editables` to confirm).
 6. Launch Session. Sprint → burn + speed.
 
 Prefab-owned edits: on the asset over MCP, then save it (`prefab_only`).
@@ -113,7 +132,7 @@ via the `custom_items` Python step; by hand: Prefab Editor):
 2. Add `fort_item_ability_component`.
 3. **ItemAbilities** (always available) — or **ItemEquippedAbilities** if the
    ability should fire only while the item is equipped.
-4. Index[0] type = `template_ability` (your compiled class). Expand it:
+4. Index[0] type = `spicy_sprint_ability` (your compiled class) or `fort_template_ability`. Expand it:
    - **InputTrigger** → `Assets_input_action` → `IA_Sprint`
    - **TargetQuery** → `fort_self_ability_target_query` (Epic's quickstart still says
      `self_ability_target_query` — 42.40 renamed it)
@@ -129,7 +148,7 @@ Other `TargetQuery` options exist (reticle / AoE) — `get_verse_api` /
 
 ## Verse — complete Spicy Sprint + granter
 
-Path: `Verse/Abilities/template_ability_example.verse`
+Path: `Verse/Abilities/ability_item_granter.verse`
 
 ```verse
 using { /Fortnite.com/Abilities }
@@ -141,35 +160,71 @@ using { /Verse.org/SceneGraph }
 using { /Verse.org/Simulation }
 
 # First fort_inventory_weapon_hotbar_component on the PLAYER (not the item).
-(Player : player).GetWeaponHotbarComponent()<decides><transacts> : fort_inventory_weapon_hotbar_component =
-    (for (Hotbar : Player.FindDescendantComponents(fort_inventory_weapon_hotbar_component)) do Hotbar)[0]   # Verse has no `first`
+# `first` is valid Verse (Epic's quickstart form); `(for … do Hotbar)[0]` also works.
+(Agent : agent).GetWeaponHotbar()<decides><transacts> : fort_inventory_weapon_hotbar_component =
+    first (Hotbar : Agent.FindDescendantComponents(fort_inventory_weapon_hotbar_component)) {Hotbar}
 
-# 42.30: not parametric; MakeContext / MakeAbility / ActiveEffects are built in.
+WaitForHotbar(Agent : agent)<suspends> : logic =
+    var Tries : int = 0
+    loop:
+        if (Agent.GetWeaponHotbar[]):
+            return true
+        if (Tries >= 50):
+            return false
+        set Tries += 1
+        Sleep(0.1)
+
+# Not parametric since 42.30; MakeContext / MakeAbility / ActiveEffects are built in.
 # Subclass only to give the prefab its own type name (or pick fort_template_ability itself).
-template_ability := class(fort_template_ability):
+spicy_sprint_ability := class(fort_template_ability):
 
-template_ability_item_granter_device := class(creative_device):
+ability_item_granter_device := class(creative_device):
 
     @editable
-    TemplateAbilityItemEntity : entity = entity{}
+    AbilityItem : entity = entity{}          # the PLACED PF_SpicySprintItem instance
 
-    GrantItemTo(Player : player) : void =
+    @editable_number(float) {MinValue := option{0.0}}
+    BurnDamagePerSecond : float = 2.0
+
+    @editable_number(float) {MinValue := option{0.0}}
+    EffectSeconds : float = 3.0
+
+    # Optional: overwrite the prefab's AbilityElements from the Details numbers.
+    # Retune only: adding a template ability from Verse does not compile.
+    TuneAbilities() : void =
+        if (AbilityComp := AbilityItem.GetComponent[fort_item_ability_component]):
+            for (Maybe : AbilityComp.ItemAbilities, A := Maybe?, T := fort_template_ability[A]):
+                set T.AbilityElements = array:
+                    fort_ability_status_effect_burn_point:
+                        DamagePerSecond := BurnDamagePerSecond
+                        StatusEffectDuration := EffectSeconds
+                    fort_ability_status_effect_pepper_point:
+                        StatusEffectDuration := EffectSeconds
+
+    GrantTo(Agent : agent)<suspends> : void =
+        Ready := WaitForHotbar(Agent)
+        if (not Ready?):
+            return
         if:
-            WeaponHotbarComponent := Player.GetWeaponHotbarComponent[]
-            ItemComponent := TemplateAbilityItemEntity.GetComponent[item_component]
+            Hotbar := Agent.GetWeaponHotbar[]
+            Item := AbilityItem.GetComponent[item_component]
         then:
-            WeaponHotbarComponent.AddItem(TemplateAbilityItemEntity)
-            ItemComponent.Equip()
+            Hotbar.AddItem(AbilityItem)
+            if (Item.GetParentInventory[]):
+                Item.Equip()
+            else if (Item.PickUp[Hotbar]):
+                Item.Equip()
 
     OnBegin<override>()<suspends> : void =
+        TuneAbilities()
         if (FirstPlayer := GetPlayspace().GetPlayers()[0]):
-            GrantItemTo(FirstPlayer)
+            GrantTo(FirstPlayer)
 ```
 
-This block compiled in UEFN 42.30 with a 2304 "experimental" warning; in 42.40 the
-ability types are no longer Experimental (no warning) and the island can publish. If
-`workspace_list_verse_errors` disagrees, **digest wins** — `get_verse_api` and
-fix. Do not patch `*.digest.verse`.
+Checked with the Verse checker on a 43.x island: 0 errors. Drop `TuneAbilities()` to keep
+the values set in Prefab Details. The offline checker skips effect checks, so
+`workspace_compile_verse` with UEFN open is still the final word. If they disagree,
+**digest wins** — `get_verse_api` and fix. Do not patch `*.digest.verse`.
 
 ## 42.30 changes (digest-verified)
 
