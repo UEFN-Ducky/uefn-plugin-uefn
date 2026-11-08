@@ -160,6 +160,8 @@ Verify with `get_asset_info` / `get_material_info` / `validate_uefn_asset` — n
   Load when: stars, starfield, night sky, star sky, sky stars, procedural stars
 - `references/runtime_materials_verse.md` — Verse can only swap pre-made materials
   Load when: Runtime material changes from Verse
+- `references/video_flipbook.md` — video file → flipbook sheets, material, screen mesh, Verse playback + audio
+  Load when: User posts a video or asks for a video player / TV / cinema screen
 - `references/texture_import.md` — sRGB, normals, ORM, compression
   Load when: Importing textures or maps look plastic / washed out
 - `references/pbr_master_instances.md` — `M_` master + `MI_` instances, foliage, emissive
