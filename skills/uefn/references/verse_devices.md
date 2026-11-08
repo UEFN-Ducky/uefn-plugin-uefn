@@ -27,6 +27,12 @@ Custom Verse classes placed in the world (`VerseDevice_C` — the label is whate
 **SERIAL:** never multiple wire/spawn/save in the same assistant turn —
 SERIAL: one mutating/editor call per assistant message..
 
+**Always hidden in game (HARD):** every placed Verse device has **Visible in Game off**, so
+the device never shows in the level. `spawn_actor` does it for you. After Epic
+`DeviceToolset.PlaceDevice`, call `SetClassicDeviceOption(devicePath, "VisibleInGame", "False")`,
+then read it back with `ListClassicDeviceOptions`. Before finishing, check every `VerseDevice_C`
+in the level, including ones placed earlier.
+
 **Census first (HARD):** `list_verse_devices` for this class. If a placement
 already exists, **reuse it**. Never spawn `_v2` / `_Test` / a second
 `VerseDevice_C` to get hashes or to rewrite a field.
