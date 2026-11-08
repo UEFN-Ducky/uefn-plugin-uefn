@@ -56,7 +56,10 @@ Emissive Color = TextureSample(Sheet, UV).rgb        Shading Model = Unlit
 ```
 
 Build with `create_material` + `add_material_expression` + `connect_material_nodes`, wire every pin,
-`layout_material_expressions`, `validate_uefn_asset`. Verse sees class `M_VideoFlipbook` with
+`layout_material_expressions`, `validate_uefn_asset`. Single-input nodes (Floor) take `to_input=""`:
+`to_input="Input"` reports success but leaves the pin empty, `recompile_material` still says ok, and
+the island then refuses to launch ("Missing Floor input"). Trust Epic `ValidateAssets` on the material,
+not the recompile status. Verse sees class `M_VideoFlipbook` with
 `var Sheet:texture`, `var Frame:float`, `var Cols:float`, `var Rows:float`.
 
 ### 5. Screen mesh `SM_VideoScreen`
