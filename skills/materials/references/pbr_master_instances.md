@@ -40,6 +40,9 @@ Prefer registry tools (`add_material_expression`, `connect_material_nodes`,
 `set_material_expression_property`). Probe classes:
 `list_uefn_material_expression_classes`.
 
+**Tiling surfaces (HARD):** a master for anything that repeats (ground, walls, brick,
+wood, carpet) must be the Wang tile master from `wang_tiles`, never plain UV tiling.
+
 ## Recommended parameters (master)
 
 | Parameter | Type | Drives |

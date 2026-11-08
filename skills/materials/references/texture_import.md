@@ -12,6 +12,9 @@ metadata:
 Wrong texture settings are the #1 cause of "plastic / washed out / inverted bumps"
 after Blender or Marketplace import. Fix maps before authoring complex graphs.
 
+**Repeating textures (HARD):** do not import a single tiling map and repeat it. Build the
+16-tile Wang atlas first and import that: `wang_tiles`.
+
 ## Naming
 
 | Map | Prefix | Typical file |

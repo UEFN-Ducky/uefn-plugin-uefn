@@ -37,6 +37,9 @@ Water masters + 1:1 defaults: `water_recipes` + `water_exact_defaults`.
 **Stars / night sky (HARD):** `skill_read_subskill("materials", "starfield_recipe")`
 — that Catland ALU graph only. Never a star texture. Never Niagara sprites for a
 sky dome. Never Additive on a UEFN sky (Opaque Unlit Two-Sided).
+**Repeating surfaces (HARD):** every tiling PBR texture (ground, walls, brick, wood,
+carpet, tile) uses a Wang tile atlas and master: `skill_read_subskill("materials",
+"wang_tiles")`. Never ship plain UV tiling on a surface that repeats.
 
 ## Tool ladder (in order)
 
@@ -164,6 +167,8 @@ Verify with `get_asset_info` / `get_material_info` / `validate_uefn_asset` — n
   Load when: User posts a video or asks for a video player / TV / cinema screen
 - `references/texture_import.md` — sRGB, normals, ORM, compression
   Load when: Importing textures or maps look plastic / washed out
+- `references/wang_tiles.md` — default for all repeating textures: 16-tile atlas + hashed-edge master
+  Load when: Any repeating surface, or the user mentions tiling, grids or Wang
 - `references/pbr_master_instances.md` — `M_` master + `MI_` instances, foliage, emissive
   Load when: Reusable PBR setup or parameter variants
 - `references/blender_handoff.md` — rebuild Principled after FBX
