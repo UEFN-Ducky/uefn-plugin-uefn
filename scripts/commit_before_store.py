@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import tempfile
 from pathlib import Path
 
 _SKIP_DIR_NAMES = frozenset(
@@ -112,7 +113,10 @@ def commit_and_push_before_publish(root: Path, changelog: str = "") -> None:
 
     remote = _git(root, "remote", check=False).stdout.split()
     if "origin" in remote:
-        push = _git(root, "push", "-u", "origin", "HEAD", check=False)
+        # Release worktrees are detached: a bare HEAD names no branch on the remote.
+        on_branch = _git(root, "symbolic-ref", "-q", "HEAD", check=False).returncode == 0
+        target = ["-u", "origin", "HEAD"] if on_branch else ["origin", "HEAD:refs/heads/main"]
+        push = _git(root, "push", *target, check=False)
         if push.returncode != 0:
             raise SystemExit(push.stderr or push.stdout or "git push failed")
         print("pushed HEAD to origin before Store publish")
@@ -128,6 +132,21 @@ def _self_check() -> None:
     assert not skip_store_commit_path("plugin.json")
     assert not skip_store_commit_path("scripts/release.py")
     assert not skip_store_commit_path("backend/__init__.py")
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        bare, clone = Path(tmp) / "bare.git", Path(tmp) / "clone"
+        clone.mkdir()
+        _git(Path(tmp), "init", "-q", "--bare", "-b", "main", str(bare))
+        _git(clone, "init", "-q", "-b", "main")
+        _git(clone, "config", "user.email", "check@example.invalid")
+        _git(clone, "config", "user.name", "check")
+        _git(clone, "remote", "add", "origin", str(bare))
+        _git(clone, "commit", "-q", "--allow-empty", "-m", "first")
+        _git(clone, "push", "-q", "origin", "main")
+        _git(clone, "checkout", "-q", "--detach")
+        (clone / "plugin.json").write_text("{}", encoding="utf-8")
+        commit_and_push_before_publish(clone, "detached")
+        head = _git(clone, "rev-parse", "HEAD").stdout
+        assert _git(bare, "rev-parse", "refs/heads/main").stdout == head
     print("commit_before_store self-check ok")
 
 
