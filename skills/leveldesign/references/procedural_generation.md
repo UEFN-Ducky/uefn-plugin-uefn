@@ -14,6 +14,8 @@ metadata:
 PCG (Procedural Content Generation Framework) is in UEFN from 43.00: graph-based,
 deterministic placement (seed + noise, not AI) for forests, cities, POIs, scatter.
 
+- **Drawing by hand in PCG Mode (Shift+7: splines, paint, volumes)?** That's the `pcg` skill:
+  `skill_read_subskill("pcg", "core")`. This route is for authoring and running graphs.
 - **PCG Library (reuse first):** ~95 example graphs live at `/PCGPrimitives/Examples/**`. They include
   `Forest/Forest_Square_200m` (+ edits: road, clearing, texture-driven scale/variety, undergrowth),
   `City/City_Generator_Steps_1..7`, `Road/*`, `Park/Square_Park_100m`, `Industrial/Cable_Generator*` and

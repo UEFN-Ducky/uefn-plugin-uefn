@@ -5,7 +5,7 @@ description: "UEFN level design — spatial awareness, blockout, player flow, co
 license: MIT
 metadata:
   label: UEFN Level Design
-  version: 30
+  version: 31
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -247,7 +247,7 @@ Load with `skill_read_subskill("leveldesign", "<id>")`:
 | `design_styles` | Genre layout sketches |
 | `cinematic_composition` | Vistas, reveals, framing |
 | `lighting` | Sun/sky/local lights, Day Sequence (stars → materials `starfield_recipe`) |
-| `procedural_generation` | PCG in UEFN 43.00 (MCP `PCGToolset`, PCG Library, reusable PCG tools; forests / cities / POIs, seeds) / seeded mass placement |
+| `procedural_generation` | PCG in UEFN 43.00 (MCP `PCGToolset`, PCG Library, reusable PCG tools; forests / cities / POIs, seeds) / seeded mass placement. PCG Mode draw tools (splines, paint, volumes) → `pcg` skill |
 | `landscape_foliage` | Terrain + foliage scatter |
 | `lego_brick_editor` | LEGO islands: Brick Editor mode, Kragle / Separate, brick rules (42.40) |
 | `urban_design` | **Cities start here** — real→uu conversion, Lynch/Jacobs/Gehl, city anti-patterns, router |
