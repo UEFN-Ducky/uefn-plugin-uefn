@@ -44,6 +44,23 @@ The landscape has a base edit layer (usually **Layer**) and a reserved **Splines
 
 Ask the person which one before shaping terrain: it changes the heightmap under every road.
 
+**Bake into the base Layer (tested recipe):**
+
+1. `editor_apply_spline` needs a plain `SplineComponent`. Add one temporary actor with Epic
+   `EditorToolset.LevelToolset.AddToSceneFromClass` (`actorType={refPath:"/Script/Engine.Actor"}`), then
+   `EditorToolset.ActorToolset.AddComponent` (`componentType={refPath:"/Script/Engine.SplineComponent"}`).
+   Python spawning and `SubobjectDataSubsystem` are blocked in Ducky.
+2. Per road: `sc.set_spline_points([Vector(x,y,ground_z)...], WORLD, True)` (closed loops: `set_closed_loop(True)`),
+   then `landscape.editor_apply_spline(sc, half_width+100, half_width+100, falloff, falloff, 0, 0, subdivisions, True, True, None, "Layer")`.
+   Widths are **half** widths. Subdivisions about one per 10 m (4-60). About 1,100 roads bake in under a second.
+3. Bake small roads first and freeways last: a later bake wins where roads cross.
+4. Collision updates one Python call later. Trace the result in a **separate** call; in the same call it still
+   reads the old heights.
+5. Delete the temporary actor, then paste the spline actor with Raise/Lower **off** and the point Z set to the baked heights.
+
+Checked on 60 random roads: the centre matches the spline Z to about 1 cm and the bed is flat across its width.
+The only outliers are crossings at different heights.
+
 Heights: set each control point Z to the ground, not above it. If the terrain is flattened to the road, lift the
 mesh with **Mesh Vertical Offset** (10-20 cm) instead of the point, so grass cannot poke through.
 
@@ -88,6 +105,12 @@ Segments), Ctrl+C over the viewport, read the clipboard.
 
 - The viewport only redraws after UEFN has focus and the mouse moves over it.
 - Do not click the viewport while Landscape **Sculpt** is active: it sculpts.
-- Ground heights from Python: `unreal.SystemLibrary.line_trace_single(world, (x,y,60000), (x,y,-20000), TRACE_TYPE_QUERY1, False, [], NONE, True)`,
-  z = 60000 - hit distance. Traces also hit existing road meshes.
+- Ground heights from Python: `unreal.SystemLibrary.line_trace_single(world, (x,y,60000), (x,y,-20000), TRACE_TYPE_QUERY1, False, ignore, NONE, True)`.
+  Traces hit cars, props, buildings and road meshes too. Keep only the landscape: if the hit actor's class
+  is not a `Landscape*`, add it to `ignore` and trace again. `line_trace_multi` stops at the first blocking
+  hit, so it does not help here.
+- Traced plans often draw roads through a spot the person wants kept (a cinema, a plaza). Clip every polyline
+  at that keep-out box, then join the new dead ends to a ring road with short spokes.
+- At a junction, a shared control point can only face one road, so the other roads bend near it. Leave
+  crossing roads as separate overlapping points unless the roads continue straight through.
 - Junctions: crossing roads overlap; place Cross/T tiles or end both roads on a shared point.
