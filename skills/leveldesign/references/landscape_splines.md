@@ -64,7 +64,43 @@ The only outliers are crossings at different heights.
 Heights: set each control point Z to the ground, not above it. If the terrain is flattened to the road, lift the
 mesh with **Mesh Vertical Offset** (10-20 cm) instead of the point, so grass cannot poke through.
 
-### 3. Road meshes
+### 3. Junctions: one connected network with real T / + pieces (HARD)
+
+Roads that only overlap at a crossing are not connected. Build the network as **one graph**:
+
+1. **Snap ends:** union every road end within ~12 m of another into one node. Split a road where another road
+   ends on its middle. Merge two junctions whose linking road is shorter than their two piece sizes plus 4 m,
+   and drop that road; otherwise the pieces overlap.
+2. **Pick the piece by degree:** 3 arms = `_T`, 4 or more = `_Cross` of the widest arm's family
+   (FourLane / TwoLaneSidewalk / TwoLane). No Y piece exists: a Y uses a T turned to fit. Freeway arms use the
+   FourLane piece with MeshScale 1650/1400.
+3. **Orient it:**
+   - Through road = the two most opposite arms, laid along local X.
+   - The kit T has its stem on local **+Y** (TwoLane_T bounds are y -525..825). Flip yaw by 180° when the stem
+     arm points to -Y.
+   - For a Cross, give each arm the nearest free axis (±X, ±Y).
+4. **Paste:**
+   - The junction control point carries the piece: `Mesh="/Script/Engine.StaticMesh'…_T.…_T'"`, `MeshScale=(…)`,
+     `Width` = half the piece size.
+   - Each arm ends at a **mouth** point (centre + axis × half size), rotated along that axis.
+   - Add a straight **lead-in** point ~9 m out on the same axis, so the road enters square instead of bending at the kerb.
+   - Join each mouth to the junction point with a segment that has **no** `SplineMeshes`. That segment only joins
+     the graph and draws nothing.
+   - Check that a flood fill over points and segments finds exactly **one** connected piece.
+5. **Tangent sign:** per segment, `TangentLen` = +L at the start if the point's forward faces along A→B, else -L.
+   At the end it is -L when forward faces along A→B, else +L. This lets any point face either way.
+
+Baking those roads into the terrain:
+- The temporary `SplineComponent` must use the **same tangents** as the pasted segments:
+  `set_tangents_at_spline_point(j, fwd*L_prev, fwd*L_next)`, where fwd is the point's Rotation vector including pitch.
+  With automatic tangents the bed and the road sag differently on slopes, and dirt shows through the asphalt.
+- Bake the bed **~45 cm below** the road surface, with the flat width equal to the road half width. Landscape grass
+  is taller than a road mesh: if the bed sits right at road height, grass grows through the asphalt.
+- Bake a flat pad under each junction last: two straight splines along its X and Y axes at the node height.
+
+Tested: 1,018 roads and 559 junctions (T 327, Cross 232) in one connected graph, 5,750 points.
+
+### 4. Road meshes
 
 - The tile's **length must run along X**; landscape splines and PCG Spline Mesh both lay a mesh along X by default.
   A tile with its length on Y stands on its edge like a wall. Check every new road from a **low oblique** camera:
@@ -73,7 +109,7 @@ mesh with **Mesh Vertical Offset** (10-20 cm) instead of the point, so grass can
 - Kit FBX in metres import 100× small: convert to cm first (Blender headless, scale 100, export
   axis_forward -Y, up Z, FBX_SCALE_NONE). `EditorToolset.StaticMeshToolset.GetBounds` must show real cm.
 
-### 4. Materials that show
+### 5. Materials that show
 
 - Spline meshes render the grey default unless every material on the mesh has **Used with Spline Meshes** on
   (`material.set_editor_property('used_with_spline_meshes', True)` + recompile). `MaterialEditingLibrary.set_material_usage`
@@ -82,7 +118,7 @@ mesh with **Mesh Vertical Offset** (10-20 cm) instead of the point, so grass can
 - Assign mesh slot materials with `EditorToolset.StaticMeshToolset.SetMaterial` (Python material assignment is
   blocked in Ducky).
 
-### 5. Generate and paste a whole network
+### 6. Generate and paste a whole network
 
 1. Build the road polylines (from a traced plan, a layout, or a graph), thin them by rule 1.
 2. Write the clipboard text:
@@ -111,6 +147,5 @@ Segments), Ctrl+C over the viewport, read the clipboard.
   hit, so it does not help here.
 - Traced plans often draw roads through a spot the person wants kept (a cinema, a plaza). Clip every polyline
   at that keep-out box, then join the new dead ends to a ring road with short spokes.
-- At a junction, a shared control point can only face one road, so the other roads bend near it. Leave
-  crossing roads as separate overlapping points unless the roads continue straight through.
-- Junctions: crossing roads overlap; place Cross/T tiles or end both roads on a shared point.
+- A bare shared control point can only face one road, so the other roads bend near it. Use the junction
+  recipe in section 3 (a piece on the node, a mouth point and a lead-in for each arm), never a bare shared point and never overlapping roads.
