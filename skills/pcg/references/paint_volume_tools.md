@@ -14,7 +14,7 @@ Rail **Paint**. Add a mesh under Spawning, then work in the viewport. **Accept**
 | Tool | Use |
 |---|---|
 | **PlaceTool** | Each click drops one object, hold and drag for a row. With several meshes each click picks one at random. The quickest way to hand-place trees and rocks |
-| **ScatterTool** | Paints a random cluster under the brush. Good for filling around an area |
+| **ScatterTool** | Paints a random cluster under the brush along the stroke. Good for filling around an area. Its panel also has Sampling and Filtering |
 | **LayeredPlaceTool** | Listed in the panel, not covered in the source tutorial. Read it with `GetGraphStructure` on `/PCG/EdMode/Paint/LayeredPlaceTool.LayeredPlaceTool` before relying on it |
 
 | Paint setting | Effect |
@@ -43,6 +43,6 @@ click to lock it → **Accept**. Exact numbers afterwards: Details → Transform
 | Sample Landscape Only | Ignores cubes and props, only the landscape gets points |
 | Sample Complex Collision | Projects onto meshes using complex collision |
 
-The volume spawns on surfaces inside it, including placed meshes. Objects not appearing → make sure the box
+The volume spawns on surfaces inside it, including placed meshes and rooftops. A box drawn by mouse can sit above the ground: check Transform in Details. Objects not appearing → make sure the box
 actually overlaps the ground; move it down if needed. Filtering, Spawning, transforms and Projection work as in
 `spline_tools`.

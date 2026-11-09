@@ -5,7 +5,7 @@ description: "PCG Editor Tools in UEFN 43.00 (PCG Mode, Shift+7): where every bu
 license: MIT
 metadata:
   label: UEFN PCG Editor Tools
-  version: 2
+  version: 3
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -37,8 +37,8 @@ which stage owns it.
 
 | Sub-skill | Load when |
 |---|---|
-| `agent_driving` | **Read first to build by mouse:** the tested click and drag helper, why plain clicks fail on menus |
-| `build_recipes` | Step-by-step roads, rock lines, fences, filled areas, hand placing, volume fills |
+| `agent_driving` | **Read first to build by mouse:** the tested click, type and drag helper, why plain clicks fail on menus and teleported drags draw nothing |
+| `build_recipes` | Run-and-checked steps for roads with width classes, posts and fences, rock lines, filled areas, hand placing, scatter strokes, volume fills |
 | `ui_map` | The location of a menu, tab, tool button, section or Accept/Cancel |
 | `spline_tools` | Spacing, Spline Mesh, Area; spline draw modes, raycast rules, draw target |
 | `paint_volume_tools` | Place, Scatter, Layered Place; Volume Scatter, Biome Volume |

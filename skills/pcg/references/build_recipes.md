@@ -1,94 +1,106 @@
 ---
-description: "Step-by-step recipes to physically build with UEFN PCG Mode by mouse: rock lines, roads, fences and rails, posts and lamps, filled areas, hand-placed trees and rocks, volume fills, Blueprint prop rows, with the exact settings and checks for each"
+description: "Step-by-step recipes to physically build with UEFN PCG Mode by mouse, each run and checked: curved roads with width classes (alley, street, highway), posts and fences, rock lines, filled areas, hand-placed objects, scatter strokes, volume fills, Blueprint prop rows, with the exact settings"
 metadata:
   order: 2
   label: "Build recipes"
   default_enabled: false
-  load_condition: "Building something real with PCG Mode: a road, fence, rail, rock line, row of lamps, forest patch, scatter, or filled volume"
+  load_condition: "Building something real with PCG Mode: a road, highway, alley, fence, rail, rock line, row of lamps, forest patch, scatter, or filled volume"
 ---
 
 ## Build recipes
 
 Use the helper and loop from `agent_driving`. Find every control by its label in a fresh capture.
 
-**Partly tested** names which steps ran by mouse; the rest follow the tutorial. **Same steps, untested** means the tool
-opened and its panel was read but the recipe's result was not produced.
+Each recipe says what was run by mouse on UEFN 43.00. Test meshes were a 10 m road tile and a boulder.
 
 ### Every recipe starts
 
-1. `select_actors(actor_paths=[])`, frame the area with `set_viewport_camera`.
+1. Deselect (`Escape`), frame the area.
 2. Mode dropdown → **PCG**. Rail → category. Top row → the group button (this **already starts** its first tool and
    creates the actor).
-3. Different tool in the group: Cancel first, then press it. Settings return to defaults on every new tool. Draw Mode
-   can carry over between tools in a group: read it, don't assume.
+3. Another tool in the group: press its button. Settings return to defaults on every new tool.
+4. Draw Mode is remembered per group: the Draw Spline tools kept Click Auto Tangent while AreaTool was still on
+   Free Draw. Read it every time.
 
-### Rock line. Partly tested (steps 2, 7 with a Free Draw line; step 1 and 3 drew and were canceled)
-
-Spline → **Draw Spline** → SpacingTool.
-
-1. Draw Mode → **Click Auto Tangent**.
-2. Spawning → tick Static Meshes → **+** → pick mesh.
-3. Click the points along the line.
-4. Sampling → tick the row you change → **Count**, or **Use Distance Sampling Mode** + **Distance**.
-5. Random Transform → tick Random Rotation Max → Z `360`; tick Random Scale Min/Max → e.g. `0.8` / `1.3`.
-6. Projection → tick Snap to Surface and raise its Max Distance if rocks float.
-7. Accept → deselect.
-
-Result in the test, steps 4 to 6 skipped: 8 boulders (default count), one ISM.
-
-### Road. Same steps, untested
+### Road, highway, alley. Run: PASS
 
 Spline → Draw Spline → **SplineMeshTool**.
 
-1. Spawning has **Mesh** (one mesh, no array) and **Mesh Forward Axis**. Tick each one's checkbox.
-2. Mesh → search `road` → pick a straight piece.
-3. Draw Mode → Click Auto Tangent. Click along the route.
-4. Check the preview. Stretched or sideways → Mesh Forward Axis: try X, then Y, then Z.
-5. Sampling → Resample Spline + Distance for smoother corners; Fit to Curve so it ends at the last point.
-6. Projection → Snap to Surface so it follows the ground.
+1. Spawning → tick **Mesh** → dropdown → search the road tile → pick it.
+2. Draw Mode → Click Auto Tangent. Click along the route: the curve passes smoothly through the points.
+3. Sampling → tick **Resample Spline** and its value box; tick **Resample Distance** and type the tile's length
+   (1000 for a 10 m tile). Without this each spline segment is one mesh stretched end to end with sharp corners.
+4. Projection → tick **Snap to Surface** and its value box; tick **Snap to Surface Max Distance** → `5000`. Without
+   this the road runs straight between points, through hills, and whole sections disappear underground.
+5. Width: Global Transform → tick **Global Scale Factor** → second field (Y). `3` gave a highway three times as wide;
+   under 1 for an alley. Keep X at 1 so the tile length still matches Resample Distance.
+6. Sideways or stretched: Spawning → tick **Mesh Forward Axis** and try X, Y, Z. X was right for the test tile.
+7. Accept → `Escape`.
 
-### Fence or rail. Same steps, untested
+Result: 5 clicked points, one continuous curved road over a hill, about 340 m long. Corner, T and cross tiles are
+separate meshes: place those as single objects with PlaceTool where roads meet.
 
-Same as Road with a fence or rail section. For separate upright posts, use the Rock line recipe with Random Transform off
-and **Use Distance Sampling Mode** at the post gap, plus **Fit to Curve**. Tick **Closed Spline** for a full enclosure.
+### Posts, lamps, fence. Run: PASS
 
-### Filled area. Same steps, untested
+Spline → Draw Spline → **SpacingTool**.
+
+1. Spawning → tick Static Meshes → **+** → pick mesh.
+2. Click the line. For an enclosure tick **Closed Spline**: the last point joins the first and objects go all round.
+3. Sampling → tick **Use Distance Sampling Mode** and its value; tick **Distance** → gap in cm. 3000 gave a dense
+   band of large objects, 6000 clear gaps. Count is ignored in this mode.
+4. Tick **Fit to Curve** and its value: the gap stretches so the last object sits on the last point.
+5. Accept → `Escape`.
+
+A continuous fence or rail is the Road recipe with a fence section as the mesh.
+
+### Rock line with variety. Run: PASS
+
+SpacingTool as above, with a count instead of a distance.
+
+1. Sampling → tick **Count** → type the number. 10 became exactly 4.
+2. Random Transform → tick **Random Rotation Max** → third field `360`; tick **Random Scale Min** → `0.3` and
+   **Random Scale Max** → `2` in the first field (Uniform stays on by default, so one field scales all axes).
+3. Global Transform → **Global Scale Factor** for overall size. It multiplies with the random scale: 8 × 2 made
+   house-sized boulders. Check after Accept, which can re-roll the random result.
+
+### Filled area. Run: PASS
 
 Spline → **Draw Spline Surface** → AreaTool.
 
-1. Draw Mode → Click Auto Tangent. Click round the outline, 4+ points. The shape closes itself (no Closed Spline row).
-2. Sampling → **Points Per Squared Meter** `0.1` to start, Uniformity low for natural spread.
-3. Filtering → **Probability Filter** to thin, or **Use Fixed Count Filter** for an exact number. **Edge Falloff** thins borders.
-4. Spawning, Random Transform as above.
-5. Projection → Snap to Surface. Points under the ground need a positive Global Position Offset Z first.
+1. Draw Mode → Click Auto Tangent. Click round the outline: 4 points closed themselves.
+2. Spawning → mesh. Default 0.1 points/m² packed the outline solid.
+3. Sampling → tick **Points Per Squared Meter** → `0.02` gave visible gaps.
+4. Filtering, either: tick **Use Fixed Count Filter** and its value, tick **Fixed Count Filter** → exact number
+   (12 left about a dozen); or tick **Probability Filter** → percent kept (30 kept about a third).
+5. Random Transform and Projection as above.
 
-Watch the count: density is per square metre, and this island is big. Raise it in small steps.
+Density is per square metre and outlines here are big: an 80 m square at 0.1 is over 600 objects. Start low.
 
-### Hand-place trees or rocks. Partly tested (placement ran; Accept not pressed)
+### Hand-place objects. Run: PASS (placement; Accept not pressed)
 
-Paint → **Paint** → PlaceTool.
+Paint → **Paint** → PlaceTool. Spawning → mesh (add more with **+**; each click picks one by Weight). Click where
+each should stand. Three clicks gave three rocks at the clicked spots.
 
-1. Spawning → tick Static Meshes → **+** → pick mesh. Add more with **+**; each click picks one by Weight.
-2. Click where each should stand. Accept.
+### Scatter stroke. Run: PASS
 
-Three clicks gave three rocks at the clicked spots.
+Paint → Paint → **ScatterTool**. Spawning → mesh. Then `PStroke`: a relative drag left a trail of rocks along its
+path. A teleported drag leaves one rock. Brush → Size widens the band (not run).
 
-### Fill a box. Partly tested (step 1 only; canceled before spawning)
+### Fill a box. Run: PASS, with a catch
 
 Volume → **Volume** → ScatterTool.
 
-1. Draw the box (`agent_driving`). Details → **Brush Settings X/Y/Z** and Transform Location give exact numbers; edit
-   them for precise sizing.
-2. Sampling → Points Per Squared Meter `0.1`.
-3. Spawning → mesh. **Sample Landscape Only** if props inside must stay clear.
-4. Accept. The box must overlap the surface.
+1. Draw the box (`agent_driving`), then read Transform and Brush Settings in Details.
+2. Spawning → mesh. Objects appear on every surface inside the box.
+3. In the test the box sat above the ground and only rooftops inside it got rocks. Fix the height by typing in
+   Details, or tick **Sample Landscape Only** (not run) to keep props clear.
 
-### Row of Fortnite Blueprint props
+### Row of Fortnite Blueprint props. Not run
 
-Build the placeholder row, then swap. See `after_placing`. Prefer a static mesh of the same prop when it doesn't need
-Blueprint behaviour: it stays linked to the tool and costs less.
+Build a placeholder row, then swap. See `after_placing`. Prefer a static mesh when the prop needs no Blueprint
+behaviour: it stays linked to the tool and costs less.
 
 ### After any build
 
-`get_all_actors(label_filter="PCG")`, a capture from a closer camera, then report tool, mesh, count or density and seed.
-Saving is one `save_current_level`, when the person wants it kept.
+`FindActors {"filter": {"name": "Tool Actor"}}`, a capture from a closer camera, then report tool, mesh, count or
+density and seed. Saving is one save of the level, when the person wants it kept.

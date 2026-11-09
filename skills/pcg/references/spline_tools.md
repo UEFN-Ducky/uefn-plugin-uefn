@@ -31,7 +31,7 @@ Roads, fences, rails. Deforms and connects the mesh instead of spacing copies. F
 |---|---|
 | Mesh | Mesh to bend. One mesh, not an array. Both rows start unticked |
 | Mesh Forward Axis | Which axis runs along the spline. **Looks wonky → try each axis**; none work → fix the pivot in Modeling mode |
-| Resample Spline + Distance | Fewer points, smoother curve |
+| Resample Spline + Resample Distance | **Needed for tiles.** Off: one mesh stretched per spline segment. On, with the tile's length (1000 for 10 m): the tile repeats at real size along a smooth curve |
 | Fit to Curve | Mesh ends exactly at the spline's end |
 
 ### Area Tool: fills the inside of a closed shape
@@ -58,9 +58,9 @@ BiomeSplineTool sits next to it; it wasn't in the source tutorial, so read its g
 
 | Section | Effect |
 |---|---|
-| Global Transform | Same offset, rotation, scale on all points. Absolute Global Rotation ignores the point's own |
+| Global Transform | Same offset, rotation, scale on all points. Absolute Global Rotation ignores the point's own. On Spline Mesh, Global Scale Factor Y is the road width (3 = three times wider) |
 | Random Transform | Min/Max per point. 360 on rotation = fully random. **Uniform Random Scale Factor** on = even scale; off = each axis apart |
-| Snap to Surface | Drops each point to the nearest surface |
+| Snap to Surface | Drops each point to the nearest surface. **Needed for roads on hills**: without it the mesh runs straight between points and goes underground |
 | Snap to Surface Max Distance | How far it searches. **0 = no snap**; raise it until points land |
 | Align to Surface | Rotates to the surface. **Overrides your rotations**, so usually leave it off |
 
