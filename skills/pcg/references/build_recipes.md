@@ -11,8 +11,8 @@ metadata:
 
 Use the helper and loop from `agent_driving`. Find every control by its label in a fresh capture.
 
-**Tested** means the whole recipe ran by mouse. **Same steps, untested** means the tool opened and its panel was read
-but the recipe's result was not produced.
+**Partly tested** names which steps ran by mouse; the rest follow the tutorial. **Same steps, untested** means the tool
+opened and its panel was read but the recipe's result was not produced.
 
 ### Every recipe starts
 
@@ -22,7 +22,7 @@ but the recipe's result was not produced.
 3. Different tool in the group: Cancel first, then press it. Settings return to defaults on every new tool. Draw Mode
    can carry over between tools in a group: read it, don't assume.
 
-### Rock line. Tested
+### Rock line. Partly tested (steps 2, 7 with a Free Draw line; step 1 and 3 drew and were canceled)
 
 Spline → **Draw Spline** → SpacingTool.
 
@@ -34,7 +34,7 @@ Spline → **Draw Spline** → SpacingTool.
 6. Projection → tick Snap to Surface and raise its Max Distance if rocks float.
 7. Accept → deselect.
 
-Result in the test: 8 boulders (default count), one ISM.
+Result in the test, steps 4 to 6 skipped: 8 boulders (default count), one ISM.
 
 ### Road. Same steps, untested
 
@@ -64,7 +64,7 @@ Spline → **Draw Spline Surface** → AreaTool.
 
 Watch the count: density is per square metre, and this island is big. Raise it in small steps.
 
-### Hand-place trees or rocks. Tested
+### Hand-place trees or rocks. Partly tested (placement ran; Accept not pressed)
 
 Paint → **Paint** → PlaceTool.
 
@@ -73,7 +73,7 @@ Paint → **Paint** → PlaceTool.
 
 Three clicks gave three rocks at the clicked spots.
 
-### Fill a box. Tested to the drawn box
+### Fill a box. Partly tested (step 1 only; canceled before spawning)
 
 Volume → **Volume** → ScatterTool.
 
