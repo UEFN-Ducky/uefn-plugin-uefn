@@ -134,6 +134,28 @@ GeometryScript. No files are needed:
 Tested: 564 fitted pieces (287 three-way, 188 four-way, 28 five-way, 14 six-way, 38 corners or width changes,
 9 cul-de-sacs). Building all of them takes about 6 s.
 
+**Kit pieces on the network (cloverleaf, loop, bridge):**
+- **Cloverleaf / loop:**
+  - Put the kit mesh on one control point (`Mesh`, `MeshScale`, Rotation yaw), with no MaterialOverrides because the
+    asset already has its materials.
+  - Read the mesh's open ends from its vertices: the bbox faces give each end's centre, width and height. The kit
+    cloverleaf ends at ±23000 and is 43.2 m wide; scale it 0.764 in XY for a 33 m freeway. The loop's ends are offset
+    9.6 m sideways: rotate it so the line between its two ends follows the road.
+  - Each arm road starts at its end with a 9 m straight lead-in, plus a mesh-less link to the piece's point.
+  - Follow each freeway outward through every junction inside the footprint, join those roads into one arm, and
+    end it at the first junction outside. Then drop the other roads inside. Dropping every road that touches the
+    footprint cuts the freeway off just beyond the piece.
+  - Choose the site by relief: a 470 m cloverleaf on 90 m of relief makes cliffs whatever you do; 36 m blends in.
+- **Bridge (overpass):**
+  - Take the crossing road off the junction and leave the freeway running through as a plain point.
+  - Lay the crossing road as one straight spline with segments of exactly the tile lengths: `Bridge_Ramp40m`, then
+    n × `Bridge_Straight20m`, then `Bridge_Ramp40m` with its connections reversed so the ramp's x=0 sits on the ground.
+  - Keep every point at ground height: the meshes carry the rise.
+- **Flat pads: `editor_apply_spline` blends only at the spline's sides, never at its two ends.** A flat strip ends in a
+  vertical wall. Extend each pad strip 150 m past the pad, with its end points at real ground height, so it ramps down.
+  A wider side falloff alone does not help, and re-baking over an old cliff keeps the cliff: re-import the clean
+  heightmap first.
+
 ### 4. Road meshes
 
 - The tile's **length must run along X**; landscape splines and PCG Spline Mesh both lay a mesh along X by default.
