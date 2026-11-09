@@ -100,6 +100,40 @@ Baking those roads into the terrain:
 
 Tested: 1,018 roads and 559 junctions (T 327, Cross 232) in one connected graph, 5,750 points.
 
+**Every junction type: generate a fitted piece per node.** Kit T/Cross pieces only fit 90° junctions of a
+single width. For Y, 5-6 way, mixed widths, width changes and cul-de-sacs, build each node's own mesh in UEFN with
+GeometryScript. No files are needed:
+
+1. **Layout:** sort the arms by angle. For each pair of neighbouring arms, fit a kerb corner between arm i's left
+   edge and arm j's right edge:
+   - fillet arc (R = sidewalk width + 2 m, at least 6 m) for 15-165°;
+   - straight taper for about 180° (width change);
+   - round bulge for reflex angles.
+   - Mouth distance = the larger of the two corner tangent points + 4.5 m crosswalk.
+   - Cap the mouths at (road length - 12 m)/2; if they don't fit, shrink R and the crosswalk.
+2. **Mesh:**
+   - Asphalt is a fan from the centre over the boundary (mouth edges + corners).
+   - Kerb 30 cm (z 17), pavers (z 16) and outer kerb 20 cm run along each corner, with widths blended between the
+     two arms' sidewalk widths.
+   - Crosswalk stripes go at each mouth, and skirts run down to -40.
+   - The mouth cross-section equals the kit tile's (asphalt half width, sidewalk), so the road tile butts on exactly.
+3. **Asset:**
+   - `DynamicMesh` + `GeometryScript_Materials.enable_material_i_ds` + `GeometryScript_MeshEdits.append_buffers_to_mesh(dm, buffers, material_id)`
+     for each material, then `GeometryScript_NewAssetUtils.create_new_static_mesh_asset_from_mesh`.
+   - Rebuild in place later with `GeometryScript_AssetUtils.copy_mesh_to_static_mesh_v2`.
+   - **Winding:** an upward face needs **clockwise** order seen from above (x right, y up). Vertical faces are emitted both ways.
+   - Give every mesh all material IDs (a 1 cm hidden triangle for any that are missing), so slot index = material.
+     Then set materials in the paste text: `MaterialOverrides=("/Script/Engine.Material'…M_Asphalt'", …)` on the junction
+     control point. The slots come out unnamed, so Epic SetMaterial (by slot name) cannot target them.
+4. **Graph merging:**
+   - Merge two junctions only when the link between them is under 15 m, or when it is shorter than both pieces
+     and the result has 6 arms or fewer.
+   - Unlimited merging cascades into 10-18 arm blobs.
+   - Re-check, and hand-fix what is left.
+
+Tested: 564 fitted pieces (287 three-way, 188 four-way, 28 five-way, 14 six-way, 38 corners or width changes,
+9 cul-de-sacs). Building all of them takes about 6 s.
+
 ### 4. Road meshes
 
 - The tile's **length must run along X**; landscape splines and PCG Spline Mesh both lay a mesh along X by default.
