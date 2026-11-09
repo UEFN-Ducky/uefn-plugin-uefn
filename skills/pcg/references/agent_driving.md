@@ -1,82 +1,138 @@
 ---
-description: "How a Ducky agent operates UEFN PCG Mode: capture-first clicking with uefn_window_capture and uefn_window_click, spotlighting controls for the person with ducky_ui_show, what clicks can and can't draw, MCP inspection of the tool graphs, and the traps"
+description: "How a Ducky agent physically operates UEFN PCG Mode with the real mouse: the tested hover-click and drag PowerShell helper, why uefn_window_click fails on menus, typing into asset pickers, drawing splines, paint and volumes, Cancel and cleanup, spotlighting controls with ducky_ui_show, and every trap found in live testing"
 metadata:
-  order: 5
-  label: "Driving PCG Mode as an agent"
+  order: 1
+  label: "Driving PCG Mode with the mouse"
   default_enabled: false
-  load_condition: "An agent needs to click through PCG Mode in UEFN, or show the person where to click in it"
+  load_condition: "An agent needs to click, drag or draw in UEFN PCG Mode, build something with the PCG tools by mouse, or show the person where to click"
 ---
 
-## Driving PCG Mode as an agent
+## Driving PCG Mode with the mouse
+
+Everything on this page was run against UEFN 43.00 and worked unless marked **untested**.
 
 ### Pick the method
 
 | Goal | Method |
 |---|---|
-| Person asks where something is, or will do it themselves | **Spotlight**: `ducky_ui_show` with `window="uefn"` |
-| Open a tool, set up clicks, draw with clicks | **Click**: `uefn_window_click` |
-| Exact placement with numbers, no human | Skip the UI: PCG graphs in leveldesign `procedural_generation` |
+| Build with PCG Mode | The helper below, then a recipe from `build_recipes` |
+| Person asks where something is | `ducky_ui_show` with `window="uefn"` |
+| Exact placement from numbers, no viewport | PCG graphs in leveldesign `procedural_generation` |
 
-### Click loop
+This moves the person's real cursor and raises UEFN over their windows. Do it when they asked for it, and tell
+them before you start. They should not touch the mouse during a run.
 
-`uefn_window_click` is a real pointer: it raises UEFN over the person's other windows and moves their cursor.
-Do it when they asked for it, not as a background step.
+### The trap that breaks everything: Slate needs a hover
 
-1. `uefn_window_list` → take `hwnd`. **Empty `rect` means minimized: stop.** A click there returns `ok:true` and
-   does nothing, and capture fails with "window has no on-screen rect". Have the window restored first.
-2. Clear the selection (`select_actors` with nothing, or Epic equivalent). See SKILL rule 1.
-3. `uefn_window_capture(hwnd)` → **look at the picture** and work out the control's position as `x/width, y/height`.
-   Other windows covering UEFN show in the capture: capture again after the first click has raised it.
-4. `uefn_window_click(hwnd, nx, ny)` with one control per click.
-5. Capture again and confirm the change before the next click. Dropdowns need one click to open, a new capture,
-   one click to choose.
+`uefn_window_click` sends move-and-press as one input event. Slate never sees the pointer arrive, so:
 
-Use the `ui_map` fractions only to know where to look. **Never click from the table without a capture.**
+| Target | `uefn_window_click` | Hover first (helper) |
+|---|---|---|
+| Opening a toolbar dropdown | Works | Works |
+| **Item inside a menu** | **Closes the menu, picks nothing, returns `ok:true`** | Works |
+| Viewport spline points | Works | Works |
+| Panels, checkboxes, tool buttons | Use the helper | Works |
 
-**Keyboard:** `uefn_window_key` sends a single key, so **Shift+7 and Shift+F2 can't be sent**. Use the mode dropdown.
-Typing into a number field is key by key: click it, send digits, then `Enter`.
+Always use the helper for UI. `ok:true` from a click proves nothing: compare captures.
 
-### What clicks can draw
+It also has no drag, sends only single keys (no Shift+7, Shift+F2) and silently does nothing on a minimized window.
 
-`uefn_window_click` only clicks: it has no drag.
+### Helper
 
-| Works by clicks | Needs a drag (the person does it) |
-|---|---|
-| Spline tools with **Draw Mode = Auto Click Tangent** | Free Draw and Tangent Drag |
-| Area Tool with Auto Click Tangent | Volume box (drag + mouse height) |
-| PlaceTool single drops | Scatter strokes, Place drag rows |
+Terminals close when idle, so paste this at the start of every terminal command that uses it. Set `$L,$T` from
+`uefn_window_list` (`rect.left`, `rect.top`). The coordinates you pass are **pixels in the capture image**, which is
+1:1 with the window.
 
-Click points in the viewport area of the capture, then Accept. Each one lands where the raycast hits, so check the
-capture for the sky or a prop under the point.
-
-`PCGToolset.DrawSpline` (`actorLabel`, `actorTag`, `bRedraw`, `bClosedSpline`) also waits for a human to draw.
-
-### Walkthrough for the person
-
-One `ducky_ui_show` call, all steps in `steps`, with `window="uefn"`, each `box` as `{x, y, w, h}` window fractions
-from a fresh capture, `click: true` on steps they must press:
-
-```json
-{"window": "uefn", "steps": [
-  {"box": {"x": 0.03, "y": 0.04, "w": 0.08, "h": 0.03}, "title": "Open modes", "body": "Click here, then **PCG**.", "click": true},
-  {"box": {"x": 0.03, "y": 0.11, "w": 0.12, "h": 0.03}, "title": "Spacing Tool", "body": "Places objects along a line.", "click": true},
-  {"box": {"x": 0.44, "y": 0.83, "w": 0.09, "h": 0.04}, "title": "Accept", "body": "Press when the line looks right."}
-]}
+```powershell
+$sig='[DllImport("user32.dll")] public static extern bool SetCursorPos(int x,int y); [DllImport("user32.dll")] public static extern void mouse_event(uint f,uint x,uint y,uint d,UIntPtr e);'
+$M=Add-Type -MemberDefinition $sig -Name PcgPtr -Namespace Ducky -PassThru -ErrorAction SilentlyContinue; if(-not $M){$M=[Ducky.PcgPtr]}
+Add-Type -AssemblyName System.Windows.Forms
+$L=1396; $T=0   # from uefn_window_list
+function PMove($x,$y){[void]$M::SetCursorPos($L+$x,$T+$y)}
+function PHover($x,$y){PMove ($x-3) $y; Start-Sleep -Milliseconds 150; PMove $x $y; Start-Sleep -Milliseconds 250}
+function PDown{$M::mouse_event(2,0,0,0,[UIntPtr]::Zero)}
+function PUp{$M::mouse_event(4,0,0,0,[UIntPtr]::Zero)}
+function PClick($x,$y){PHover $x $y; PDown; Start-Sleep -Milliseconds 60; PUp}
+function PDrag($pts){PHover $pts[0][0] $pts[0][1]; PDown; Start-Sleep -Milliseconds 120
+  for($i=1;$i -lt $pts.Count;$i++){$a=$pts[$i-1];$b=$pts[$i]
+    for($s=1;$s -le 12;$s++){PMove ([int]($a[0]+($b[0]-$a[0])*$s/12)) ([int]($a[1]+($b[1]-$a[1])*$s/12)); Start-Sleep -Milliseconds 25}}
+  Start-Sleep -Milliseconds 120; PUp}
+function PType($t){[System.Windows.Forms.SendKeys]::SendWait($t)}   # escape + ^ % ~ ( ) { }
 ```
 
-The panel only appears after PCG Mode opens, so if later boxes depend on it, click into the mode first, capture,
-then build the steps.
+Never name a function `Mv`: it is PowerShell's alias for Move-Item and wins over your function.
 
-### Reading the tools through MCP
+### Before the first click
 
-The tools are PCG graphs and can be inspected: `search_assets(directory="/PCG/EdMode/", class_name="PCGGraph")`
-lists them, `PCGToolset.GetGraphStructure {"graph": {"refPath": "/PCG/EdMode/DrawSpline/SpacingTool.SpacingTool"}}`
-reads one (its description is "Distribute assets along a spline.").
+1. `uefn_window_list`. **Empty `rect` = minimized.** Restore it:
+   `ShowWindow(hwnd, 9)` from the same PowerShell, adding that P/Invoke.
+2. Other windows may cover UEFN. `uefn_window_click` on an **empty toolbar spot** raises it (cooldown applies, so
+   don't repeat it). Avoid the title bar.
+3. `get_selected_actors`; if anything is selected, `select_actors(actor_paths=[])`.
+4. Frame the area: `set_viewport_camera`. Points land where the raycast hits under the pointer, so pick a view where
+   the target ground is visible and clear of the left panel and the Accept bar.
+5. Note the current mode and put it back when you finish.
 
-Before customizing one, duplicate it into the project (`EditorToolset.AssetToolset.Duplicate`) under
-`get_project_info().content_root`. Never edit `/PCG/EdMode` assets.
+### The loop
 
-### Check the result
+`uefn_window_capture` → read the pixel position from the image → run helper → move pointer away
+(`PMove` to the status bar, so tooltips don't cover what you need) → capture → confirm the change.
 
-Count the new actor and its ISM in the Outliner, then a screenshot. Actor label is `PCG <Tool> Actor`. Tell the
-person the seed if you set one.
+**One UI change, one fresh capture.** Rows move constantly: expanding Spawning, adding a mesh, or changing Draw Mode
+(Click Auto Tangent removes the Min Point Spacing row) all shift everything below.
+
+Timing that worked: 1 s after a checkbox or expander, 2 s after opening a tool, 3 s after opening an asset picker and
+3 s after typing into it, 2 s after Accept or Cancel.
+
+### Set a mesh
+
+1. Expand **Spawning**, tick the **Static Meshes** row checkbox, press its **+**.
+2. A `Index [0]` block appears with a mesh dropdown (shows `N..e`) and a Weight field.
+3. `PClick` the dropdown, wait 3 s, `PType "name"`, wait 3 s, capture, `PClick` the result row.
+
+The search box takes focus by itself. The picker opens about 240 px below and 100 px right of its dropdown. Rocks appear
+as a preview as soon as a mesh is set, before Accept.
+
+### Draw
+
+| Gesture | How | Result |
+|---|---|---|
+| Click Auto Tangent | One `PClick` (or plain `uefn_window_click`) per point | Points landed within 2 px. **Use this for every shape** |
+| Free Draw | `PDrag` | Works, but a scripted drag kept only the two end points, so it comes out straight |
+| PlaceTool | One click per object | Exact |
+| Volume | `PDrag` corner to corner, release, `PMove` upward in steps, `PDown`/`PUp` | Box drawn. Footprint then height |
+
+Volume sequence that worked:
+
+```powershell
+PDrag @(@(1000,900),@(1130,880)); Start-Sleep -Milliseconds 800
+for($i=1;$i -le 10;$i++){PMove 1130 (880-8*$i); Start-Sleep -Milliseconds 40}
+Start-Sleep -Milliseconds 500; PDown; Start-Sleep -Milliseconds 60; PUp
+```
+
+Tangent Drag, Paint ScatterTool strokes and LayeredPlaceTool: **untested by mouse**.
+
+### Finish
+
+- **Accept** commits and leaves the tool. The actor **stays selected**, so run `select_actors(actor_paths=[])` before the
+  next tool or it lands inside that actor.
+- **Cancel** removes the draft actor and everything it spawned, including painted objects.
+- Spline tools: Accept is grey until there's a spline. Paint and Volume: Accept is lit from the start, so it can commit
+  an empty tool.
+- Check: `get_all_actors(label_filter="PCG")`. The Spacing actor's internal name is `PCGToolWorkingActor`, its label
+  `PCG Spacing Tool Actor`. Details shows `ISM_<mesh>_0` under it when meshes spawned.
+- Leave PCG Mode via the mode dropdown → restore the earlier mode.
+- Test actors you made: `delete_actors`. First use also adds a `PCGWorldActor` to the level; it's Epic's and stays.
+
+### Spotlight for the person
+
+One `ducky_ui_show` call with `window="uefn"`, all steps in `steps`, `box` as `{x, y, w, h}` window fractions from a
+fresh capture, `click: true` where they must press. A panel only exists after its mode is open, so enter PCG Mode first,
+capture, then build the boxes.
+
+### Read a tool graph
+
+`search_assets(directory="/PCG/EdMode/", class_name="PCGGraph")`, then
+`PCGToolset.GetGraphStructure {"graph": {"refPath": "/PCG/EdMode/DrawSpline/SpacingTool.SpacingTool"}}`.
+To change one, `EditorToolset.AssetToolset.Duplicate` it under `get_project_info().content_root`. Never edit `/PCG/EdMode`.
+`PCGToolset.DrawSpline` waits for a human to draw.

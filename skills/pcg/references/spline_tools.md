@@ -29,14 +29,15 @@ Roads, fences, rails. Deforms and connects the mesh instead of spacing copies. F
 
 | Setting | Effect |
 |---|---|
-| Mesh | Mesh to bend |
+| Mesh | Mesh to bend. One mesh, not an array. Both rows start unticked |
 | Mesh Forward Axis | Which axis runs along the spline. **Looks wonky → try each axis**; none work → fix the pivot in Modeling mode |
 | Resample Spline + Distance | Fewer points, smoother curve |
 | Fit to Curve | Mesh ends exactly at the spline's end |
 
 ### Area Tool: fills the inside of a closed shape
 
-Rail **Spline → Draw Spline Surface → AreaTool**. Draw around the area.
+Rail **Spline → Draw Spline Surface → AreaTool**. Draw around the area. It closes itself, so there's no Closed Spline row.
+BiomeSplineTool sits next to it; it wasn't in the source tutorial, so read its graph first.
 
 | Sampling | Effect |
 |---|---|
@@ -72,8 +73,8 @@ snapping in the prebuilt tools; that takes a custom graph.
 | Setting | Effect |
 |---|---|
 | Closed Spline | Joins last point to first |
-| Draw Mode | **Free Draw**: hold and drag. **Auto Click Tangent**: each click adds a point, tangents automatic. **Tangent Drag**: click and drag sets each tangent |
-| Min Point Spacing | Free Draw point gap. Higher = smoother, less sensitive |
+| Draw Mode | **Free Draw**: hold and drag. **Click Auto Tangent**: each click adds a point, tangents automatic (best for agents). **Tangent Drag**: click and drag sets each tangent |
+| Min Point Spacing | Free Draw only, default 200. Higher = smoother, less sensitive. The row disappears in Click Auto Tangent |
 
 ### Raycast: what a click hits
 

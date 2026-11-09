@@ -5,7 +5,7 @@ description: "PCG Editor Tools in UEFN 43.00 (PCG Mode, Shift+7): where every bu
 license: MIT
 metadata:
   label: UEFN PCG Editor Tools
-  version: 1
+  version: 2
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -22,6 +22,7 @@ drag a volume in the viewport and PCG places meshes or actors. No graph authorin
 | The job | Route |
 |---|---|
 | Person wants to draw or paint by hand; roads, fences, rock lines, tree clusters | **PCG Mode** (this skill) |
+| Agent builds with the real mouse | `agent_driving` + `build_recipes` |
 | Show the person where a button is | `ducky_ui_show` → `agent_driving` |
 | Agent must place by exact numbers, no viewport drawing | PCG graphs → `skill_read_subskill("leveldesign", "procedural_generation", section="Route A: PCG graphs (UEFN 43.00+)")` |
 | Custom logic (process after raycast, custom nodes) | PCG graphs (same page). The prebuilt tools can't reorder their steps |
@@ -36,15 +37,16 @@ which stage owns it.
 
 | Sub-skill | Load when |
 |---|---|
-| `ui_map` | You need the location of a menu, tab, tool button, section or Accept/Cancel |
+| `agent_driving` | **Read first to build by mouse:** the tested click and drag helper, why plain clicks fail on menus |
+| `build_recipes` | Step-by-step roads, rock lines, fences, filled areas, hand placing, volume fills |
+| `ui_map` | The location of a menu, tab, tool button, section or Accept/Cancel |
 | `spline_tools` | Spacing, Spline Mesh, Area; spline draw modes, raycast rules, draw target |
 | `paint_volume_tools` | Place, Scatter, Layered Place; Volume Scatter, Biome Volume |
 | `after_placing` | Regenerate, Cleanup, editing a placed tool, spawning Fortnite Blueprints, mass rename |
-| `agent_driving` | An agent clicks through PCG Mode, or walks the person through it |
 
-## Five rules
+## Six rules
 
-1. **Deselect everything before you start a tool.** With an actor selected, the PCG component goes
+1. **Deselect everything before you start a tool, including right after Accept** (the new actor stays selected). With an actor selected, the PCG component goes
    *inside that actor* (even a landscape proxy) or overrides the PCG actor you had selected. With nothing
    selected a new actor is created.
 2. **Tick the row's checkbox first.** Rows under *Parameters Overrides* stay grey and do nothing until the
@@ -54,3 +56,6 @@ which stage owns it.
 4. **Leave PCG Mode to edit a spline.** The transform gizmo only comes back in Selection Mode.
 5. **Static Meshes make one ISM per actor** (cheap, one Outliner row). **Actors spawn one actor per point**
    (costly). Use meshes unless each one must be its own actor.
+6. **Each new tool starts from defaults.** Set the mesh and settings again every time.
+
+The `PCGToolComponent` generates in editor worlds only: what it spawns ships, the graph doesn't run in-game.

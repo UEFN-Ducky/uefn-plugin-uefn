@@ -20,10 +20,10 @@ Rail **Paint**. Add a mesh under Spawning, then work in the viewport. **Accept**
 | Paint setting | Effect |
 |---|---|
 | Brush Mode | Sphere by default. Little visible effect on PlaceTool |
-| Brush radius | **Matters on ScatterTool**: bigger brush, wider scatter |
+| Brush section: Size, Strength, Falloff | Defaults 0.25, 1.0, 0.0. **Size matters on ScatterTool**: bigger brush, wider scatter |
 | Min Point Spacing | Gap between points while dragging (50 default) |
 | Rotate Yaw Step Size | 10 default |
-| Erase Points Of Selected Data Instance | Paint-erase on the selected layer |
+| Erase Points Of Selected Data Instance | Paint-erase on the selected layer. On by default |
 | Data Instance | `PaintLayer` holds what you painted |
 
 Global Transform, Random Transform, Projection and Raycast work as in `spline_tools`.
@@ -33,8 +33,8 @@ Global Transform, Random Transform, Projection and Raycast work as in `spline_to
 Rail **Volume**. **ScatterTool** fills a box with points on whatever is inside it. **BiomeVolume** was not covered
 in the source tutorial; read its graph before relying on it.
 
-**Draw a volume:** click the first corner → drag out the footprint → move the mouse up to set the height →
-**Accept**.
+**Draw a volume:** press at the first corner → drag out the footprint → release → move the mouse up to set the height →
+click to lock it → **Accept**. Exact numbers afterwards: Details → Transform and **Brush Settings X/Y/Z**.
 
 | Setting | Effect |
 |---|---|
