@@ -154,6 +154,8 @@ Asset-side changes are already saved by the assembly tools.
 - `references/niagara_workflow.md` — capability probes, user parameters,
   component control, publish-blocker repair.
 - `references/vfx_design.md` — composing effects that read well and run fast.
+- `references/ai_spell_vfx.md` — spells and abilities: AI pattern video, flipbook /
+  code / mesh parts, three flipbook sources with cost, camera-facing sprite stacks.
 
 ## Verify
 
