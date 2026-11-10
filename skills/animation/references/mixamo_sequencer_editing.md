@@ -8,10 +8,12 @@ metadata:
 
 ## Mixamo → FN Mannequin / M_Medium_Base
 
-`list_skeleton_bones` only guesses `biped` / `mannequin`. A Mixamo skeleton comes back
-`unknown`, so pass its chains explicitly to `add_retarget_chains`. Read the real names
-first: depending on the importer the namespace stays (`mixamorig:Hips`) or is stripped
-(`Hips`). Use whichever `list_skeleton_bones` returns.
+`list_skeleton_bones` and `create_ik_rig_asset` detect Mixamo (`preset_guess: "mixamo"`)
+and return `bone_prefix`: `mixamorig:`, a renumbered `mixamorig1:`, or `""` when the
+importer stripped it. `list_skeleton_bones` also returns `preset_chains`, already
+rewritten for that prefix: feed them to `set_retarget_root` + `add_retarget_chains`.
+`retarget_animation_pipeline` with `source_preset="auto"` does all of this itself.
+`get_retarget_preset("mixamo")` returns the `mixamorig:` form below.
 
 | Chain | Start | End |
 |-------|-------|-----|

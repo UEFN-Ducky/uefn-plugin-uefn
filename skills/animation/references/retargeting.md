@@ -71,6 +71,10 @@ presets so any source maps to any target.
 LeftArm `upperarm_l→hand_l`, RightArm `upperarm_r→hand_r`, LeftLeg
 `thigh_l→foot_l`, RightLeg `thigh_r→foot_r`, clavicles `clavicle_*`.
 
+**Mixamo** (root `mixamorig:Hips`, prefix detected and swapped automatically; T-pose
+source, so fix the retarget pose for an A-pose target): table and the editor UI route in
+`skill_read_subskill("animation", "mixamo_sequencer_editing")`.
+
 Any chain whose start/end bone isn't in the skeleton is **skipped** and listed in
 the `skipped` array of the `add_retarget_chains` response (with the reason) — read
 that; it usually means a naming variant (e.g. `Bip001 Neck` with a space, or no

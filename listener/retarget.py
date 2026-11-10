@@ -79,7 +79,48 @@ RETARGET_CHAIN_PRESETS: dict = {
             {"name": "RightClavicle", "start": "clavicle_r", "end": "clavicle_r"},
         ],
     },
+    # Mixamo is a T-pose rig; the FN Mannequin is an A-pose, so fix the retarget pose.
+    # Importers keep, renumber (mixamorig1:) or strip the prefix: _with_prefix adapts it.
+    "mixamo": {
+        "root": "mixamorig:Hips",
+        "chains": [
+            {"name": "Spine", "start": "mixamorig:Spine", "end": "mixamorig:Spine2"},
+            {"name": "Head", "start": "mixamorig:Neck", "end": "mixamorig:Head"},
+            {"name": "LeftArm", "start": "mixamorig:LeftArm", "end": "mixamorig:LeftHand"},
+            {"name": "RightArm", "start": "mixamorig:RightArm", "end": "mixamorig:RightHand"},
+            {"name": "LeftLeg", "start": "mixamorig:LeftUpLeg", "end": "mixamorig:LeftFoot"},
+            {"name": "RightLeg", "start": "mixamorig:RightUpLeg", "end": "mixamorig:RightFoot"},
+            {"name": "LeftClavicle", "start": "mixamorig:LeftShoulder", "end": "mixamorig:LeftShoulder"},
+            {"name": "RightClavicle", "start": "mixamorig:RightShoulder", "end": "mixamorig:RightShoulder"},
+        ],
+    },
 }
+
+_MIXAMO_PREFIX = "mixamorig:"
+
+
+def _mixamo_prefix(bones: List[str]) -> Optional[str]:
+    """Text in front of the skeleton's Mixamo bone names ('mixamorig:', 'mixamorig1:',
+    '' when stripped), or None when it is not a Mixamo skeleton."""
+    names = {str(b) for b in bones}
+    for b in names:
+        if b.endswith("Hips") and f"{b[:-4]}LeftUpLeg" in names and f"{b[:-4]}RightForeArm" in names:
+            return b[:-4]
+    return None
+
+
+def _with_prefix(preset: dict, prefix: Optional[str]) -> dict:
+    """The Mixamo preset rewritten for a skeleton that uses another prefix."""
+    if prefix is None or prefix == _MIXAMO_PREFIX:
+        return preset
+
+    def swap(n: str) -> str:
+        return prefix + n[len(_MIXAMO_PREFIX):] if n.startswith(_MIXAMO_PREFIX) else n
+
+    return {
+        "root": swap(preset["root"]),
+        "chains": [{**c, "start": swap(c["start"]), "end": swap(c["end"])} for c in preset["chains"]],
+    }
 
 
 # --- shared helpers ---------------------------------------------------------
@@ -212,6 +253,8 @@ def _guess_preset(bones: List[str]) -> str:
     s = {str(b).lower() for b in bones}
     if "pelvis" in s and ("spine_01" in s or "upperarm_l" in s):
         return "mannequin"
+    if _mixamo_prefix(bones) is not None:
+        return "mixamo"
     return "unknown"
 
 
@@ -271,11 +314,15 @@ def ik_retarget_capabilities() -> dict:
 
 
 def list_skeleton_bones(skeletal_mesh_path: str) -> dict:
-    """List a skeletal mesh's bone names and guess its chain preset (biped/mannequin)."""
+    """List a skeletal mesh's bone names and guess its chain preset (biped/mannequin/mixamo)."""
     mesh = _load_asset(skeletal_mesh_path)
     names = _mesh_bones(mesh)
     if names:
-        return {"ok": True, "count": len(names), "preset_guess": _guess_preset(names), "bones": names}
+        out = {"ok": True, "count": len(names), "preset_guess": _guess_preset(names), "bones": names}
+        if out["preset_guess"] == "mixamo":
+            out["bone_prefix"] = _mixamo_prefix(names)
+            out["preset_chains"] = _with_prefix(RETARGET_CHAIN_PRESETS["mixamo"], out["bone_prefix"])
+        return out
     return {
         "ok": False,
         "error": "could not enumerate bones; create_ik_rig_asset also returns bone_count + preset_guess",
@@ -371,6 +418,8 @@ def create_ik_rig_asset(skeletal_mesh_path: str, dest_folder: str, name: str) ->
     if bones:
         out["bone_count"] = len(bones)
         out["preset_guess"] = _guess_preset(bones)
+        if out["preset_guess"] == "mixamo":
+            out["bone_prefix"] = _mixamo_prefix(bones)
         if out["preset_guess"] == "unknown":
             out["bones_sample"] = bones[:60]
     _save(ik_rig)
@@ -779,6 +828,8 @@ def retarget_animation_pipeline(
         if not preset:
             rig["chains_error"] = "preset unknown — call get_retarget_preset / add_retarget_chains manually"
             return rig
+        if key == "mixamo":
+            preset = _with_prefix(preset, rig.get("bone_prefix"))
         rig["root"] = set_retarget_root(f"{dest_folder}/{rig_name}", preset["root"])
         rig["chains"] = add_retarget_chains(f"{dest_folder}/{rig_name}", preset["chains"], replace_existing=True)
         return rig
