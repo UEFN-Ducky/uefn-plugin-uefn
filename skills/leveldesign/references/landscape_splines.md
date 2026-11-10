@@ -71,7 +71,10 @@ Roads that only overlap at a crossing are not connected. Build the network as **
    - The junction control point carries the piece: `Mesh="/Script/Engine.StaticMesh'…_T.…_T'"`, `MeshScale=(…)`,
      `Width` = half the piece size.
    - Each arm ends at a **mouth** point (centre + axis × half size), rotated along that axis.
-   - Add a straight **lead-in** point ~9 m out on the same axis, so the road enters square instead of bending at the kerb.
+   - **No lead-in points.** The road runs from mouth to mouth as ONE segment. Its end tangents (the mouth's
+     rotation, TangentLen = the chord) already make it enter each junction square. Add a point between two
+     mouths only where the spline drawn mouth to mouth would leave the planned road by more than ~50 cm
+     (a real bend) or cut/fill more than ~1.5 m (a slope change).
    - Join each mouth to the junction point with a segment that has **no** `SplineMeshes`. That segment only joins
      the graph and draws nothing.
    - Check that a flood fill over points and segments finds exactly **one** connected piece.
@@ -124,7 +127,7 @@ Tested: 564 fitted pieces (287 three-way, 188 four-way, 28 five-way, 14 six-way,
   - Read the mesh's open ends from its vertices: the bbox faces give each end's centre, width and height. The kit
     cloverleaf ends at ±23000 and is 43.2 m wide; scale it 0.764 in XY for a 33 m freeway. The loop's ends are offset
     9.6 m sideways: rotate it so the line between its two ends follows the road.
-  - Each arm road starts at its end with a 9 m straight lead-in, plus a mesh-less link to the piece's point.
+  - Each arm road starts at its end (no lead-in point; the end tangent keeps it square), plus a mesh-less link to the piece's point.
   - Follow each freeway outward through every junction inside the footprint, join those roads into one arm, and
     end it at the first junction outside. Then drop the other roads inside. Dropping every road that touches the
     footprint cuts the freeway off just beyond the piece.
@@ -183,4 +186,4 @@ Segments), Ctrl+C over the viewport, read the clipboard.
 - Traced plans often draw roads through a spot the person wants kept (a cinema, a plaza). Clip every polyline
   at that keep-out box, then join the new dead ends to a ring road with short spokes.
 - A bare shared control point can only face one road, so the other roads bend near it. Use the junction
-  recipe in section 3 (a piece on the node, a mouth point and a lead-in for each arm), never a bare shared point and never overlapping roads.
+  recipe in section 3 (a piece on the node and a mouth point for each arm), never a bare shared point and never overlapping roads.
