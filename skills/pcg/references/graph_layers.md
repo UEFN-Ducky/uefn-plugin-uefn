@@ -23,7 +23,7 @@ changes them. Most broken graphs have the right nodes in the wrong order.
 | 5 | District / area mask | See below. |
 | 6 | **Difference** (Density Function **Binary**) | Removes points overlapping another set: the roads, or the *Bounds Modifier output* of a layer placed earlier (never its spawner: the spawner is visual only). One Difference per other set; chain them. |
 | 7 | **Self Pruning** (`LargeToSmall`) | No overlaps inside the layer. Only works after 3 and 4: pruning before the transform prunes the wrong sizes. Prune early in the layer (after bounds) to keep point counts down. |
-| 8 | **Static Mesh Spawner** | Weighted selector: one entry per mesh, `weight` = how often (5:2:1). Collision **NoCollision** for grass, saplings and any dense scatter (collision on dense scatter freezes the editor and stops players). |
+| 8 | **Static Mesh Spawner** | Weighted selector: one entry per mesh, `weight` = how often (5:2:1). Collision **NoCollision** for grass, saplings and any dense scatter (collision on dense scatter freezes the editor and stops players). Every material on a spawned mesh needs **Used with Instanced Static Meshes** (and Nanite if the mesh is Nanite): without it the instances draw the grey checker. FBX-imported materials are flat colours with the flag off; give the meshes instances of a world-aligned PBR master instead (City Builder: `road_network_kit_materials`). Through PCGToolset the selector is `{"meshSelector": {"meshes": ["/Path/SM_X.SM_X"]}}` (the default simple selector; `meshEntries` is refused). |
 
 Difference before or after Self Pruning: before keeps more points, after keeps fewer. Either is valid;
 be consistent. A Difference whose density function still shows Minimum after setting Binary: toggle the node
