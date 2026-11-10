@@ -24,7 +24,8 @@ drag a volume in the viewport and PCG places meshes or actors. No graph authorin
 | Person wants to draw or paint by hand; roads, fences, rock lines, tree clusters | **PCG Mode** (this skill) |
 | Agent builds with the real mouse | `agent_driving` + `build_recipes` |
 | Show the person where a button is | `ducky_ui_show` → `agent_driving` |
-| Agent must place by exact numbers, no viewport drawing | PCG graphs → `skill_read_subskill("leveldesign", "procedural_generation", section="Route A: PCG graphs (UEFN 43.00+)")` |
+| Agent must place by exact numbers, no viewport drawing | PCG graphs → `graph_layers` (node order, layers, traps) + `skill_read_subskill("leveldesign", "procedural_generation", section="Route A: PCG graphs (UEFN 43.00+)")` (tool calls) |
+| Trees, rocks, street props or buildings for a Road Network world | Road Network PCG tab → `road_network_pcg_plan` → `graph_layers` |
 | Custom logic (process after raycast, custom nodes) | PCG graphs (same page). The prebuilt tools can't reorder their steps |
 
 ## The model
@@ -43,6 +44,7 @@ which stage owns it.
 | `spline_tools` | Spacing, Spline Mesh, Area; spline draw modes, raycast rules, draw target |
 | `paint_volume_tools` | Place, Scatter, Layered Place; Volume Scatter, Biome Volume |
 | `after_placing` | Regenerate, Cleanup, editing a placed tool, spawning Fortnite Blueprints, mass rename |
+| `graph_layers` | **Building PCG graphs by tool call:** the node order that works, layers that keep clear of each other and the roads, district masks, parameters and instances, UEFN 43 traps, Linear Grammar syntax, Road Network layer plans |
 
 ## Six rules
 
