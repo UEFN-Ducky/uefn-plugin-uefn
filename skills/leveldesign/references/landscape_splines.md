@@ -46,7 +46,9 @@ and the ground follows, exactly like a spline drawn in the editor.
   Layer, no heightmap imports or despike patches. A bake is baked forever: the roads can no longer be moved,
   and wherever beds overlap or end it leaves cliffs.
 - The landscape needs a **Splines** edit layer for live roads to deform anything. With only the base Layer, a
-  live paste changes nothing; tell the person (they add the layer in Landscape > Edit Layers).
+  live paste changes nothing. Add it: Landscape > Manage > Edit Layers, the **+** next to "N Edit Layers" >
+  **Landscape Edit Layer Splines** > Select (the picker can open off-screen). Every live spline already in the
+  level then writes into it, with no re-paste. Ctrl+clicking a spline point does not create the layer.
 - Heights: set each point Z about 40 cm under the road surface and lift the mesh with **Mesh Vertical Offset**
   (50 cm), so the bed sits under the asphalt and grass cannot poke through.
 
