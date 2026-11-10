@@ -136,6 +136,9 @@ Each project has ONE memory shared by its duckies: named entries stored in app d
 `skill_read_subskill("localization", "ui_ready")`). Not Ducky app UI translation.
 
 This guide is already in your context — do **not** call `uefn_skill` to re-fetch it. Load the reference files listed below with `skill_read_subskill` only when their condition applies.
+Worked examples: `golden_paths` (a Verse device and a Creative device configured end to end).
+Which tool family a placed thing takes (Verse device, Creative device, plain actor): `tool_paths`.
+Listener or wiring failures: `troubleshooting`.
 
 ## Verify
 

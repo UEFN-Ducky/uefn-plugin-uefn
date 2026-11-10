@@ -76,3 +76,12 @@ This guide is already in your context — load reference files with `skill_read_
 - Restarting a session is faster; Launch Session logs why assets needed resaving.
 - Fixed: proximity voice chat, consumables vanishing on respawn, the Ready Up button
   missing for a UEFN island, a false "party members cannot change game modes" error.
+
+## Reference files
+
+- `device_simulation` — offline device-graph snapshot, audit and event simulation.
+  Load when: auditing wiring, simulating button/trigger chains, or explaining what a device will fire.
+- `session_probes` — live session probes: PIE status, log streaming, actor before/after diffs.
+  Load when: checking play session state, streaming logs, or verifying movement/teleport after a live action.
+- `verse_harness` — in-game Verse assert harness (ExpectEqual / ExpectTrue / ExpectInRange).
+  Load when: writing leveling/movement asserts, scaffolding DuckyTests, or parsing [DUCKY-TEST] results.

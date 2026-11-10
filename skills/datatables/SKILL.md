@@ -83,3 +83,8 @@ When `epic_mcp_online`, Epic also edits tables in the editor:
 `ImportFile`, `Diff`). The 42.x `editor_toolset.toolsets.data_table` / `curve_table` names fail
 in 43.00. Prefer them for single-row edits (`SetRows`) over a full
 `fill_data_table_from_json`; `unreal__describe_toolset` first for argument names.
+
+## Reference files
+
+- `row_editing` — JSON round-trip for row edits, CSV variant, struct discovery, fill-rejection fixes.
+  Load when: editing/adding/deleting rows, a fill call was rejected, or column discovery came back unavailable.

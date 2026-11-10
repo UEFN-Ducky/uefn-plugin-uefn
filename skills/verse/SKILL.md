@@ -51,16 +51,22 @@ message, never `_v2` copies of a device (`skill_read_subskill("uefn", "verse_dev
 | Quests, objectives, missions, achievements in the Fortnite quest UI (43.00) | `sys_quests` |
 | Saves across sessions | `persistence`, `sys_persistence_migration` |
 | Rounds, phases, countdowns | `sys_rounds_timers` |
+| Scores, kills, streaks, leaderboards, king of the hill | `sys_scoring` |
+| Analytics events, funnels, accolades | `sys_analytics` |
+| Input triggers, held keys, Register/Unregister per player | `sys_input_devices` |
 | Anything that loops, waits, races or must stop | `async`, `events_subscriptions` |
 | Moving, animating or attaching anything | scenegraph `movement_transforms` |
 | Spawning things at runtime, waves, pools | `sys_spawning`, `design_patterns` |
 | Ground height, paths, obstacles, GPS / NPC routes without raycasts; seeded random | `sys_world_data` |
 | NPCs and enemies | `sys_npc_ai` (+ the `npc-ai` skill) |
+| NPCs that talk (LLM persona, conversations) | `sys_conversations` |
 | Damage, healing, elimination | `sys_damage_health` |
 | Destructible props, custom health pools, damage types, damaging entities (43.00, Experimental) | `sys_health_pipeline` |
 | Teams, party, chat | `sys_teams`, `sys_party`, `sys_chat_channels`, `sys_text_chat` |
 | Weapons and items | `sys_owned_weapons`, `sys_inventory` (+ scenegraph `custom_weapons`, `custom_items`) |
-| Tycoon / idle | `sys_tycoon`, `sys_generators` |
+| Tycoon / idle | `sys_tycoon`, `sys_generators`; unlocking / revealing buildings `sys_buildings` |
+| Paid entitlements, V-Bucks offers | `sys_marketplace` |
+| On-screen overlay or grid minigame | `sys_minigame_overlay` |
 | Any UI | `verse_ui_kit` → `umg_*`; per-player HUD `sys_hud` |
 | Language: types, arrays, maps | `datatypes` |
 | Language: if, for, loops, case | `control_flow` |
