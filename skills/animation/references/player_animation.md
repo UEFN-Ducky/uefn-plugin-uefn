@@ -215,6 +215,35 @@ FX layered rigs available without hunting.
 
 Retarget details: `skill_read_subskill("animation", "retargeting")`.
 
+### One clip for a whole player cutscene (run → blast → fall)
+
+When the beat needs several clips and the player has to travel, bake them into **one**
+AnimSequence. Then the timing and the travel can't drift apart.
+
+1. Level Sequence → bind an FN Mannequin / M_Medium_Base placed exactly where the player
+   will start. Stack the clips on one Animation track and blend them with the ease
+   triangles (`anim_authoring` § Blending).
+2. Right-click the mesh track → **Bake to Control Rig** → FK Control Rig, **Reduce Keys** on.
+3. Move the character by keying the rig's **root** control, not a Transform track. A
+   Transform track is not baked into the clip. Key the root at takeoff and landing, and
+   delete stray root keys after the landing.
+4. Bake Animation Sequence → one clip (e.g. `AS_ExplosionCutscene`) → play it with the
+   Verse device above, with stasis. Effects and camera: a Cinematic Sequence started
+   from the same trigger (`sequencer_cinematics` § FX and sound tracks).
+
+> Unverified: whether baked root travel moves the player's capsule or only the mesh.
+> Check in a session, and `TeleportTo` the landing spot after `Await()` if the capsule
+> stays behind.
+
+### Legacy: chair-device `DefaultAnimation` (do not use)
+
+Old tutorials (2024) copy a Chair device as T3D text, add a hidden
+`DefaultAnimation="<Copy Reference of an FN-skeleton AnimSequence>"` line (a missing comma
+fails validation), and paste it back. Then they seat the player with a trigger. It was an
+unreleased property: it isn't shown in Details, it isn't documented, and it can break on
+any update. Use `GetPlayAnimationController`. If the person's island already has one of
+these chairs, look for the hidden line in the chair's copied text before you change it.
+
 ## Hard limits (do not paper over these)
 
 - **No per-bone weight blending** between your clip and Fortnite's. You cannot

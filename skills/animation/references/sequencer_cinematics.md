@@ -175,6 +175,18 @@ Import → MetaSound → device, all by MCP:
    asset with `DeviceToolset.SetDeviceProperty`. Streaming-sound subtitles now wait for
    the sound to start.
 
+## FX and sound tracks in a sequence
+
+- **Niagara burst at a frame:** place the effect (e.g. Fortnite's gas explosion Niagara
+  system) with **Auto Activate off**, bind it → **+ → Niagara Component** → **FX System
+  Toggle** track → key **Trigger** (or Activate / Deactivate) at the frame.
+- **One-shot sound:** **+ Track → Audio Track** → drop the Sound Wave / MetaSound at the
+  frame. Use an Audio Player device for music and loops instead (above).
+- **Run beside an FX blast:** key the actor's Transform with **Linear** keys so the speed
+  stays constant, and fire the FX once the actor is clear of it.
+- Device options for a repeating cutscene: **Loop Playback**, and **On Finish → Restore
+  State** on the last one, so the bound props go back to where they started.
+
 ## Multi-actor choreography
 
 1. Block shot list (times + who moves).
