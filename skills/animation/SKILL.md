@@ -5,7 +5,7 @@ description: "Create, import, retarget, bake, and PLAY custom skeletal animation
 license: MIT
 metadata:
   label: UEFN Animation
-  version: 34
+  version: 35
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -247,7 +247,7 @@ Load with MCP `skill_read_subskill("animation", "<id>")` when needed. Do **not**
   Load when: Choosing how to make something move, or the request names an animation system you have not used yet
 - `anim_authoring` [plugin] — Control Rig authoring + Bake Animation Sequence, Mixamo/FBX import settings, Layered Control Rig additive overlays, AnimSequence bone keys, Verse prop keyframes, blending and moving an actor mid-animation, plus animation design principles
   Load when: Creating or importing an animation (Control Rig, Mixamo, FBX, hand-keyed motion) rather than retargeting an existing one
-- `player_animation` [plugin] — Play clips on the PLAYER via `GetPlayAnimationController` — full override vs Additive Local Space overlay, Layered Control Rig authoring, stasis/teleport, Assets digest, emote/fire reset and hitbox limits
+- `player_animation` [plugin] — Play clips on the PLAYER via `GetPlayAnimationController` — FullBody vs UpperBody layer, emote toggle device, Player Reference + Cinematic route, Fortnite Body/Face rigs, full override vs Additive Local Space overlay, Layered Control Rig authoring, stasis/teleport, Assets digest, emote/fire reset and hitbox limits
   Load when: Playing a custom animation on the player character, additive/overlay player anims, giant/tiny player, weapon inspect, or melee on the player
 - `runtime_playback` [plugin] — Making an animation actually play in game: Animated Mesh device, Cinematic Sequence device, NPC AnimPresets, player anim controller, and why the Verse Scene Graph API is not publishable
   Load when: An animation exists but nothing plays it, or choosing between device / preset / Verse playback

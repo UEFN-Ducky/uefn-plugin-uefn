@@ -39,7 +39,11 @@ Chain names match the biped/mannequin presets, so `auto_map_retarget_chains` pai
   in the IK Retargeter: Source = Mixamo rig, Target = FN rig → **Edit Retarget Pose** →
   Asset Browser → select clips → **Export Selected Animations**.
 - Mixamo download: **FBX**, **With Skin**, **60 FPS**, **In Place**. For the first clip,
-  use **Import All**. Import every later clip onto that same Mixamo skeleton, not a new one.
+  use **Import All** with Skeleton **None**. Import every later clip onto that same Mixamo
+  skeleton, not a new one. Turn on **Use T0 As Reference Pose** so the rest pose is not the
+  clip's first frame.
+- For **player** clips the target IK Rig is **M_Medium_Base**, not FN_Mannequin
+  (`player_animation`). Match **Target Mesh Scale** in the retarget pose when the sizes differ.
 
 ## Sequencer key editing (Control Rig and Transform tracks)
 

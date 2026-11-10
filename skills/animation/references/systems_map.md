@@ -14,6 +14,8 @@ Start by asking what moves. Then use the row's player and skill page.
 |------------|---------------|-------------------|-----------|------------|
 | Skeletal mesh prop / statue | Control Rig bake, FBX/Mixamo, bone keys | **Animated Mesh device** | Yes | `animation` `runtime_playback` |
 | Player body (dance, cutscene beat) | Same clips on the player skeleton | Verse `GetPlayAnimationController` | Yes | `animation` `player_animation` |
+| Player emote button, arms-only while running | Any clip on the player skeleton | Verse `GetPlayAnimationController` (`?Layer := UpperBody`) | Yes | `animation` `player_animation` § Emote button |
+| Player in a full sequence (face rig, camera, FX) | Level Sequence on a **Player Reference** | Cinematic Sequence device + Verse slot pool | Yes | `animation` `player_animation` § Player Reference route |
 | Player overlay (wave, giant/tiny) | Layered Control Rig → Additive Local Space | Verse `GetPlayAnimationController` | Yes | `animation` `player_animation` |
 | NPC locomotion / attacks | Clips on one skeleton | AnimPreset + NPCCharacterDefinition + `npc_behavior` | Yes | `animation` `npc_characters`, `npc-ai` |
 | Cutscene, camera, choreography, FX bursts, sound cues | Level Sequence (transform, animation, Niagara, audio, camera cut tracks) | **Cinematic Sequence device** | Yes | `animation` `sequencer_cinematics` |

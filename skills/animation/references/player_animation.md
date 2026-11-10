@@ -1,9 +1,9 @@
 ---
-description: "Play custom AnimSequences on the PLAYER character via fort_character.GetPlayAnimationController — full override or additive overlay (Layered Control Rig + AdditiveAnimType Local Space), with stasis, teleport, blend times, and hard limits"
+description: "Play custom AnimSequences on the PLAYER character via fort_character.GetPlayAnimationController — full body or UpperBody layer, additive overlay (Layered Control Rig + AdditiveAnimType Local Space), a per-player emote toggle device, Fortnite Body/Face/MetaHuman face rigs and additive Sequencer layering, the Player Reference + Cinematic Sequence route, stasis, teleport, blend times, and hard limits"
 metadata:
   label: "Player animation"
   default_enabled: false
-  load_condition: "Playing a custom animation on the player character, additive/overlay player anims, GetPlayAnimationController, Layered Control Rig, AdditiveAnimType Local Space, player stasis during a clip, giant/tiny player, weapon inspect, or melee on the player"
+  load_condition: "Playing a custom animation on the player character, additive/overlay player anims, GetPlayAnimationController, Layered Control Rig, AdditiveAnimType Local Space, player stasis during a clip, giant/tiny player, weapon inspect, melee on the player, custom emotes or an emote button, arms-only animation while running, Player Reference device animation, Fortnite body/face rigs"
 ---
 
 # Player animation — anim controller + additive overlay
@@ -13,8 +13,9 @@ metadata:
 > `verse_template_apply` pack) when pasting into a real `.verse` file.
 
 Players are not Animated Mesh devices. As of the Play Animation Controller
-shipping for players, you play clips through Verse on `fort_character` — no
-player reference prop, no chair device.
+shipping for players, you play clips through Verse on `fort_character`. That is
+the default. The Player Reference + Cinematic Sequence route (below) is for full
+sequences on the player's look; the chair device trick is legacy.
 
 Confirm signatures with `search_verse_digest` / `get_verse_api` before shipping —
 names evolve. Module: `/Fortnite.com/Animation/PlayAnimation`.
@@ -105,6 +106,10 @@ Optional named args on `Play` / `PlayAndAwait`:
 | `?PlayRate` | Speed; useful if you scale playback with movement |
 | `?PlayCount` | How many times to play |
 | `?StartPositionSeconds` | Start mid-clip |
+| `?Layer` | `play_animation_layer.FullBody` (default, whole skeleton) or `.UpperBody` (upper body only while the character moves, so the legs keep running) |
+
+`IsPlaying[]` and `GetState()` on the instance tell you whether it is still running — use
+them for a toggle instead of a separate `logic` map.
 
 Place the device, wire the trigger in Details, launch a session, walk onto the
 trigger. Compile Verse first or the Assets digest identifier / `@editable`
@@ -136,6 +141,85 @@ PlayOnAgent(Agent : agent)<suspends>:void =
 Verse has no `defer`. If you `race` the play against a cancel event, call
 `ReleaseFromStasis()` in **every** branch that leaves the freeze, or the player
 stays locked.
+
+## Emote button (toggle, every player)
+
+One input trigger starts the clip for whoever presses it and stops it on the next press.
+`UpperBodyOnly` plays it on the `UpperBody` layer so the player keeps walking (no stasis).
+Type-checked against the 43.00 digests.
+
+```verse
+using { /Fortnite.com/Devices }
+using { /Fortnite.com/Characters }
+using { /Fortnite.com/Animation/PlayAnimation }
+using { /Fortnite.com/Playspaces }
+using { /Verse.org/Simulation }
+using { /Verse.org/Assets }
+
+emote_toggle_device := class(creative_device):
+
+    @editable
+    EmoteButton : input_trigger_device = input_trigger_device{}
+
+    @editable
+    Emote : ?animation_sequence = false
+
+    # True: arms only, the player keeps walking (UpperBody layer). False: whole body, player frozen.
+    @editable
+    UpperBodyOnly : logic = false
+
+    # How many times the clip plays; a big number keeps it going until the button is pressed again.
+    @editable
+    PlayCount : float = 1.0
+
+    var Playing : [agent]play_animation_instance = map{}
+
+    OnBegin<override>()<suspends>:void =
+        EmoteButton.PressedEvent.Subscribe(OnPressed)
+        GetPlayspace().PlayerRemovedEvent().Subscribe(OnPlayerRemoved)
+
+    OnPressed(Agent:agent):void =
+        if (Instance := Playing[Agent], Instance.IsPlaying[]):
+            Instance.Stop()
+        else:
+            spawn{ PlayEmote(Agent) }
+
+    OnPlayerRemoved(Player:player):void =
+        if (Instance := Playing[Player]):
+            Instance.Stop()
+        Forget(Player)
+
+    PlayEmote(Agent:agent)<suspends>:void =
+        if:
+            Clip := Emote?
+            Character := Agent.GetFortCharacter[]
+            not Character.IsInAir[]
+            Controller := Character.GetPlayAnimationController[]
+        then:
+            Layer := if (UpperBodyOnly?) then play_animation_layer.UpperBody else play_animation_layer.FullBody
+            if (not UpperBodyOnly?):
+                Character.PutInStasis(stasis_args{AllowTurning := false, AllowFalling := false, AllowEmotes := false})
+            Instance := Controller.Play(Clip, ?Layer := Layer, ?PlayCount := PlayCount,
+                ?BlendInTime := 0.2, ?BlendOutTime := 0.2)
+            if (set Playing[Agent] = Instance) {}
+            Instance.Await()   # Completed, Interrupted (emote / fire / Stop) or Error
+            if (not UpperBodyOnly?):
+                Character.ReleaseFromStasis()
+            Forget(Agent)
+
+    # Rebuild the map without Agent (Verse maps have no remove).
+    Forget(Agent:agent):void =
+        var Kept : [agent]play_animation_instance = map{}
+        for (Key -> Value : Playing, Key <> Agent):
+            if (set Kept[Key] = Value) {}
+        set Playing = Kept
+```
+
+- `not Character.IsInAir[]` refuses the emote mid-jump: with `AllowFalling := false` a
+  frozen player would hang in the air.
+- Input trigger: Interact (or any key), **Consume Input** on. It registers every player
+  by default.
+- Hide the Verse device in game (Visible in Game off).
 
 ## Teleport (frame the player for a cutscene)
 
@@ -200,16 +284,44 @@ rig, bake, set Local Space, play. Visual only — see Limits.
 
 ### Getting Fortnite Control Rigs into a project
 
-Open / create an **Animation template** project → Content Drawer → **Fortnite**
-folder → migrate the Control Rig assets into your island project. Makes Body /
-FX layered rigs available without hunting.
+Project Browser → **Feature Examples → Animation** → create it → Content Drawer →
+right-click the **Fortnite** folder → **Migrate** → pick your island's `Content` folder.
+An empty Fortnite folder after migrating means UEFN needs a reopen. You get:
+
+| Rig | Use |
+|-----|-----|
+| **Body Rig** | Body controls. Global control → **FK/IK switches** per arm, leg and spine (rotate circles vs drag a box) |
+| **Face Rig** | Classic Fortnite faces |
+| **MetaHuman Face Rig** | MetaHuman skins; use it for those, the classic face rig stops working on them |
+
+### Layering a clip in Sequencer (base + additive + face)
+
+1. Bind the mesh (M_Medium_Base, a Player Reference, or a placed mannequin); **+ → Control
+   Rig**, skeleton filter **off**, **Body Rig**.
+2. Right-click the Body Rig track → **Import Sequence** (load the AnimSequence into the
+   rig) with **Reduce Keys** on. Without it every frame is a key and the editor crawls.
+3. **+ → Additive** on the same rig: a second section that adds deltas on top. Key only what
+   changes (head up, a hand wave). Realism trick: a breathing idle in the base, the actions in
+   the additive layer.
+4. **+ Control Rig → Face Rig / MetaHuman Face Rig** for expressions (eyes, brows, jaw).
+5. Trim the playback range, then right-click → **Bake Animation Sequence**. Layered rigs
+   with thousands of keys are expensive; ship the baked clip and delete the rig tracks.
 
 ### Mixamo / FBX full-body clips (usually override)
 
-1. Mixamo: mannequin + clip, download (In Place if you will add a Transform
-   track later).
-2. Import onto the Mixamo skeleton; **Retarget Animations** → source Mixamo,
-   target **M_Medium_Base** → export.
+1. Mixamo: mannequin + clip, **FBX Binary**, **With Skin** (In Place if you will add a
+   Transform track later).
+2. First import: **Skeleton = None** (creates the Mixamo skeleton; rename it). Later clips:
+   Skeleton = that one. Turn on **Use T0 As Reference Pose** or the skeleton's rest pose is
+   the clip's first frame (the option has behaved backwards on some builds; flip it if the
+   rest pose comes out wrong).
+3. IK Rigs: Mixamo mesh, and **M_Medium_Base** for the player (not FN_Mannequin). Auto
+   Create Retarget Chains + Auto Create IK on both (`retarget_animation_pipeline` does it
+   headlessly, Mixamo preset included).
+4. Retargeter: Edit Retarget Pose → raise the target's arms to the Mixamo T-pose, match
+   **Target Mesh Scale** so the sizes agree, fix fingers if they read wrong → Asset Browser
+   → Export Selected Animations into a `Retargeted` folder (thumbnails look blank; the clips
+   are fine).
 3. Play via the Verse device. Leave Additive = No Additive for a full dance
    takeover; set Local Space only if the clip was authored as a delta overlay.
 
@@ -244,11 +356,36 @@ unreleased property: it isn't shown in Details, it isn't documented, and it can 
 any update. Use `GetPlayAnimationController`. If the person's island already has one of
 these chairs, look for the hidden line in the chair's copied text before you change it.
 
+## Player Reference route (a stand-in copy of the player)
+
+The pre-controller method, still useful when the shot needs a full Level Sequence on the
+player's look: face rig animation, a camera, several actors, Niagara/audio tracks.
+
+1. **Player Reference device**: Visible in Game on, **Hologram Strength 0** (looks like the
+   real player), Show Base off, Activate Sequencer off. *Only Take Animation Pose When
+   Rendered* pauses it when nobody is looking; *Use First Local Player Visual If Empty* fills
+   it with the local player when nothing is registered.
+2. Level Sequence: bind the Player Reference, add the clip (or the rig layers above), press
+   **G** and drop it onto the floor.
+3. **Cinematic Sequence device**: the sequence, Loop Playback, Visibility **Instigator Only**
+   for multiplayer (Everyone for a show).
+4. Verse: `PlayerRef.Register(Agent)`, `Enable()`, `TeleportTo[...]` it to the player (about
+   **−85 cm Z** so it stands on the floor), `Character.Hide()` + stasis, `Cine.Play(Agent)`. End:
+   `Cine.Stop(Agent)`, `PlayerRef.Clear()`, `Disable()`, `Character.Show()`,
+   `ReleaseFromStasis()`.
+5. Multiplayer: one Player Reference + one Cinematic Sequence (its own copy of the sequence
+   asset bound to that reference) **per possible player**, at the same array index; a
+   `[]logic` free list, a `[agent]int` slot map, free the slot on `PlayerRemovedEvent`.
+
+Limits: the copy drops **back blings**; long loops can stop early (restart from
+`StoppedEvent`); every player needs a pre-placed reference. For a plain emote, use
+`GetPlayAnimationController`: no pool, the real character, any number of players.
+
 ## Hard limits (do not paper over these)
 
-- **No per-bone weight blending** between your clip and Fortnite's. You cannot
-  say "this bone 100% custom, that bone 100% Fortnite" — wait for Scene Graph
-  skeletal editing / mover work.
+- **No custom bone masks.** The only split is `?Layer := play_animation_layer.UpperBody`
+  (upper body while moving). You cannot say "this bone 100% custom, that bone 100%
+  Fortnite".
 - **Emoting or firing a weapon resets** the anim controller back to default
   Fortnite animations. Design around it (stasis with `AllowEmotes := false`,
   short clips, or accept the reset).
@@ -274,6 +411,10 @@ all on the real player character while (for additive) they keep walking.
 | `GetPlayAnimationController` fails | No `fort_character`, or build predates player support — confirm digest |
 | Player stuck after clip | Forgot `ReleaseFromStasis` on an Interrupted / Error / race exit |
 | Overlay snaps off mid-play | Player emoted or fired — controller reset (known limit) |
+| Want arms-only while the player runs | `?Layer := play_animation_layer.UpperBody`, no stasis |
+| Emote button does nothing mid-jump | `IsInAir[]` guard (by design) — or drop it and allow falling in stasis |
+| Player Reference copy floats / missing back bling | Offset it about −85 cm Z; back blings are a known Player Reference limit |
+| Player Reference loop stops after a while | Restart the Cinematic Sequence from `StoppedEvent` |
 | Giant/tiny looks right but collisions wrong | Scale is visual only — hitboxes unchanged |
 | Layered rig edits overwrite the dance | Used a non-layered Control Rig — enable **Layered** when adding the rig |
 | Property Matrix / tool can't set additive | UEFN build missing the enum — `anim_author_capabilities` → `additive_route`; use the UI hint in the tool response |
