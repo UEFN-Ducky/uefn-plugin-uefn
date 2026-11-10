@@ -5,7 +5,7 @@ description: "Create, import, retarget, bake, and PLAY custom skeletal animation
 license: MIT
 metadata:
   label: UEFN Animation
-  version: 31
+  version: 32
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -251,6 +251,8 @@ Load with MCP `skill_read_subskill("animation", "<id>")` when needed. Do **not**
   Load when: An animation exists but nothing plays it, or choosing between device / preset / Verse playback
 - `retargeting` [plugin] — Step-by-step IK Rig + IK Retargeter workflow, the Biped-vs-Mannequin chain trap, retarget-pose (A-pose vs T-pose) fixes, and troubleshooting
   Load when: Retargeting an animation, building an IK Rig/Retargeter, or chains/preset came back unknown or skipped
+- `mixamo_sequencer_editing` [plugin] — Mixamo chain table + T-to-A retarget pose, editor retargeter UI path, Sequencer key interpolation / curve editor, Animation section properties (play rate, trim, loop, ease, weight)
+  Load when: Retargeting Mixamo clips, smoothing robotic Control Rig keys, or editing Animation sections in Sequencer
 - `npc_characters` [plugin] — Custom-mesh NPC pipeline: physics, AnimPreset, character Blueprint, NPCCharacterDefinition, spawner assign. Agent does every click.
   Load when: Building NPCCharacterDefinition assets, AnimPresets, restoring imported UE4 packs, custom quadrupeds/creatures, or wiring custom mesh NPCs to Verse behaviors
 - `npc_ecosystem` [plugin] — Multi-species NPC patterns (session registries, FSMs, play-dead). Default: `verse_template_apply("npc_core")` then customize; `npc_ecosystem` is the optional cat+dog example.
