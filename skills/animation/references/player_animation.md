@@ -103,7 +103,7 @@ Optional named args on `Play` / `PlayAndAwait`:
 | Arg | Meaning |
 |-----|---------|
 | `?BlendInTime` / `?BlendOutTime` | Seconds — snappy clips still want a short blend |
-| `?PlayRate` | Speed; useful if you scale playback with movement |
+| `?PlayRate` | Speed; scale it with the player's speed (`GetLinearVelocity`) so a run cycle matches the run |
 | `?PlayCount` | How many times to play |
 | `?StartPositionSeconds` | Start mid-clip |
 | `?Layer` | `play_animation_layer.FullBody` (default, whole skeleton) or `.UpperBody` (upper body only while the character moves, so the legs keep running) |
@@ -315,6 +315,10 @@ An empty Fortnite folder after migrating means UEFN needs a reopen. You get:
    Skeleton = that one. Turn on **Use T0 As Reference Pose** or the skeleton's rest pose is
    the clip's first frame (the option has behaved backwards on some builds; flip it if the
    rest pose comes out wrong).
+   Shortcut without your own IK rigs: right-click the clip → **Retarget Animations** →
+   Source = Mixamo mesh, Target = **M_Medium_Base** (male player body; **F_Medium_Base** for
+   the female body — find both with `search_assets`) → Export. The target is invisible in
+   the preview (no visual mesh); preview on any other mesh to see it move.
 3. IK Rigs: Mixamo mesh, and **M_Medium_Base** for the player (not FN_Mannequin). Auto
    Create Retarget Chains + Auto Create IK on both (`retarget_animation_pipeline` does it
    headlessly, Mixamo preset included).

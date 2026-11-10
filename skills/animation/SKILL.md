@@ -5,7 +5,7 @@ description: "Create, import, retarget, bake, and PLAY custom skeletal animation
 license: MIT
 metadata:
   label: UEFN Animation
-  version: 35
+  version: 36
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -243,6 +243,8 @@ Tags: [yours]=you created, [store]=Store, [shipped]=bundled, [plugin]=plugin.
 
 Load with MCP `skill_read_subskill("animation", "<id>")` when needed. Do **not** use the IDE Read/open-file tool on `~/.claude/skills`, `~/.cursor/skills`, or `references/*.md` paths (outside the project workspace — permission prompts / always errors).
 
+- `editor_ui_driving` [plugin] — Every animation step: the Ducky / Epic MCP tool, or the exact UEFN menu path to click yourself (Sequencer, Layered Control Rig, Import Sequence, Bake, Retarget Animations, IK Retargeter, Property Matrix, devices) and the capture → hover → click → capture loop
+  Load when: A step has no tool or returned available:false, or you are about to ask the person to click anything for an animation
 - `systems_map` [plugin] — Every way something animates in UEFN (clips, player, NPCs, cinematics, props, Scene Graph, materials, morphs, faces, UI, physics): what plays it, whether it publishes, which page covers it
   Load when: Choosing how to make something move, or the request names an animation system you have not used yet
 - `anim_authoring` [plugin] — Control Rig authoring + Bake Animation Sequence, Mixamo/FBX import settings, Layered Control Rig additive overlays, AnimSequence bone keys, Verse prop keyframes, blending and moving an actor mid-animation, plus animation design principles
