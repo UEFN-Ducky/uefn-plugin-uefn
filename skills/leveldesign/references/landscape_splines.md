@@ -1,5 +1,5 @@
 ---
-description: "UEFN landscape spline road design rules: how few control points to use (ends, junctions, curves, slope changes only), road meshes and their axis, road materials that actually show on spline meshes, which edit layer shapes the terrain, and the tested generate-and-paste recipe for whole road networks"
+description: "UEFN landscape spline road design rules: how few control points to use (ends, junctions, curves, slope changes only), road meshes and their axis, road materials that actually show on spline meshes, live terrain through the Splines edit layer (never bake), and the tested generate-and-paste recipe for whole road networks"
 metadata:
   order: 7
   label: "Landscape spline roads"
@@ -30,39 +30,25 @@ Thinning recipe: Douglas-Peucker the road polyline in plan (0.5-1 m tolerance), 
 each remaining segment and split it only at the worst spot while it is off by more than the limit.
 Tangent length on both connections of a segment = the segment's length (`TangentLen=+L` / `-L`).
 
-### 2. Terrain: which layer the road shapes
+### 2. Terrain: live splines through the Splines edit layer only (HARD)
 
 The landscape has a base edit layer (usually **Layer**) and a reserved **Splines** layer
 (`LandscapeEditLayerSplines`, "This layer is reserved for Landscape Splines"). Control points and segments with
-**Raise Terrain / Lower Terrain** on always write into that reserved Splines layer.
+**Raise Terrain / Lower Terrain** on write into that reserved Splines layer, procedurally: move a point by hand
+and the ground follows, exactly like a spline drawn in the editor.
 
 | Want | Do |
 |---|---|
-| Road drapes on the ground, terrain untouched | Raise/Lower Terrain **off** on points and segments |
-| Road shapes the terrain (flattened road bed) through the Splines layer | Raise/Lower **on**, Side Falloff 5-15 m, End Falloff 10-20 m |
-| Road shapes the **base Layer** itself | Splines keep Raise/Lower **off**; bake each road into the base layer with `Landscape.editor_apply_spline(spline_component, start_width, end_width, start_side_falloff, end_side_falloff, ..., raise_heights=True, lower_heights=True, edit_layer_name="Layer")` |
+| Road shapes the terrain (flattened road bed) | Raise/Lower **on** on points and segments, Side Falloff 25-40 m, End Falloff 20 m |
+| Road drapes on the ground, terrain untouched | Raise/Lower **off** |
 
-Ask the person which one before shaping terrain: it changes the heightmap under every road.
-
-**Bake into the base Layer (tested recipe):**
-
-1. `editor_apply_spline` needs a plain `SplineComponent`. Add one temporary actor with Epic
-   `EditorToolset.LevelToolset.AddToSceneFromClass` (`actorType={refPath:"/Script/Engine.Actor"}`), then
-   `EditorToolset.ActorToolset.AddComponent` (`componentType={refPath:"/Script/Engine.SplineComponent"}`).
-   Python spawning and `SubobjectDataSubsystem` are blocked in Ducky.
-2. Per road: `sc.set_spline_points([Vector(x,y,ground_z)...], WORLD, True)` (closed loops: `set_closed_loop(True)`),
-   then `landscape.editor_apply_spline(sc, half_width+100, half_width+100, falloff, falloff, 0, 0, subdivisions, True, True, None, "Layer")`.
-   Widths are **half** widths. Subdivisions about one per 10 m (4-60). About 1,100 roads bake in under a second.
-3. Bake small roads first and freeways last: a later bake wins where roads cross.
-4. Collision updates one Python call later. Trace the result in a **separate** call; in the same call it still
-   reads the old heights.
-5. Delete the temporary actor, then paste the spline actor with Raise/Lower **off** and the point Z set to the baked heights.
-
-Checked on 60 random roads: the centre matches the spline Z to about 1 cm and the bed is flat across its width.
-The only outliers are crossings at different heights.
-
-Heights: set each control point Z to the ground, not above it. If the terrain is flattened to the road, lift the
-mesh with **Mesh Vertical Offset** (10-20 cm) instead of the point, so grass cannot poke through.
+- **Never write the terrain yourself:** no `Landscape.editor_apply_spline`, no road-bed bakes into the base
+  Layer, no heightmap imports or despike patches. A bake is baked forever: the roads can no longer be moved,
+  and wherever beds overlap or end it leaves cliffs.
+- The landscape needs a **Splines** edit layer for live roads to deform anything. With only the base Layer, a
+  live paste changes nothing; tell the person (they add the layer in Landscape > Edit Layers).
+- Heights: set each point Z about 40 cm under the road surface and lift the mesh with **Mesh Vertical Offset**
+  (50 cm), so the bed sits under the asphalt and grass cannot poke through.
 
 ### 3. Junctions: one connected network with real T / + pieces (HARD)
 
@@ -90,13 +76,8 @@ Roads that only overlap at a crossing are not connected. Build the network as **
 5. **Tangent sign:** per segment, `TangentLen` = +L at the start if the point's forward faces along A→B, else -L.
    At the end it is -L when forward faces along A→B, else +L. This lets any point face either way.
 
-Baking those roads into the terrain:
-- The temporary `SplineComponent` must use the **same tangents** as the pasted segments:
-  `set_tangents_at_spline_point(j, fwd*L_prev, fwd*L_next)`, where fwd is the point's Rotation vector including pitch.
-  With automatic tangents the bed and the road sag differently on slopes, and dirt shows through the asphalt.
-- Bake the bed **~45 cm below** the road surface, with the flat width equal to the road half width. Landscape grass
-  is taller than a road mesh: if the bed sits right at road height, grass grows through the asphalt.
-- Bake a flat pad under each junction last: two straight splines along its X and Y axes at the node height.
+Junction points keep Raise/Lower **on** like the roads, so the Splines layer flattens the ground under the piece
+too (give the piece mesh a ~50 cm lift so grass stays under it).
 
 Tested: 1,018 roads and 559 junctions (T 327, Cross 232) in one connected graph, 5,750 points.
 
@@ -151,10 +132,6 @@ Tested: 564 fitted pieces (287 three-way, 188 four-way, 28 five-way, 14 six-way,
   - Lay the crossing road as one straight spline with segments of exactly the tile lengths: `Bridge_Ramp40m`, then
     n × `Bridge_Straight20m`, then `Bridge_Ramp40m` with its connections reversed so the ramp's x=0 sits on the ground.
   - Keep every point at ground height: the meshes carry the rise.
-- **Flat pads: `editor_apply_spline` blends only at the spline's sides, never at its two ends.** A flat strip ends in a
-  vertical wall. Extend each pad strip 150 m past the pad, with its end points at real ground height, so it ramps down.
-  A wider side falloff alone does not help, and re-baking over an old cliff keeps the cliff: re-import the clean
-  heightmap first.
 
 ### 4. Road meshes
 
