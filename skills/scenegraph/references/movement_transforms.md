@@ -26,10 +26,6 @@ and from 43.00 the server also skips entities that aren't moving.
 Fortnite Creative devices. Never actor-scale buttons, triggers, or volumes —
 those resize via Details Width/Height/zone (`SetDeviceProperty`).
 
-> **Snippets here are fragments.** The `using` block in this file's first code
-> block applies to all of them — copy those imports (or start from the matching
-> `verse_template_apply` pack) when pasting into a real `.verse` file.
-
 Every signature here is from this build's digests. Re-check with
 `get_verse_api({"name": "<identifier>"})` before writing anything unfamiliar.
 

@@ -6,10 +6,6 @@ metadata:
 
 # Enable / disable Virtual Pointer
 
-> **Snippets here are fragments.** The `using` block in this file's first code
-> block applies to all of them — copy those imports (or start from the matching
-> `verse_template_apply` pack) when pasting into a real `.verse` file.
-
 ## Enable
 
 Virtual Pointer is enabled per player by adding the `TouchMapping` input mapping. Custom input maps must be added to players for any custom input to apply in game.

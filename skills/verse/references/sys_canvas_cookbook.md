@@ -9,10 +9,6 @@ metadata:
 
 ## Canvas cookbook — invent any UI that shows
 
-> **Snippets here are fragments.** The `using` block in this file's first code
-> block applies to all of them — copy those imports (or start from the matching
-> `verse_template_apply` pack) when pasting into a real `.verse` file.
-
 **Epic's Verse UI Kit comes first** (`verse_ui_kit`): shops, inventories,
 settings, dialogs, lists, grids, HUDs and toasts are kit screens in UMG. Use this
 cookbook only when the screen must be built in Verse code — a data-sized cell

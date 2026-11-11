@@ -12,7 +12,6 @@ metadata:
 Checked against the 43.00 Verse digests (diffed with 42.40) and every Epic MCP toolset
 described live in UEFN 43.00 (**56 toolsets / 826 tools**, 42.40: 30 / 388). Where the notes
 and the digest disagree, the digest wins; rows marked *not in the notes* came from the diff.
-42.40 → `patch_42_40`.
 
 ## Build with it
 

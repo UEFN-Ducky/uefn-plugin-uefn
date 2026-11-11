@@ -9,10 +9,6 @@ metadata:
 
 ## Per-player HUD management
 
-> **Snippets here are fragments.** The `using` block in this file's first code
-> block applies to all of them — copy those imports (or start from the matching
-> `verse_template_apply` pack) when pasting into a real `.verse` file.
-
 **Epic's Verse UI Kit first** (`verse_ui_kit`): HUD elements are kit screens
 in UMG, one widget per player, `ui_input_mode.None` so they never steal input
 or block clicks; notices are kit toasts. The same per-player ownership rules

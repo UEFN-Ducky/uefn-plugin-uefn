@@ -9,8 +9,6 @@ metadata:
 
 ## Custom entity player controller
 
-> **Snippets here are fragments.** The `using` block below applies to all of them.
-
 Replace Fortnite character movement with your own: the player drives a **Scene
 Graph entity** you integrate yourself, an **orbit camera modifier** follows it,
 and the stock `fort_character` is parked so it cannot fight your motion. Every

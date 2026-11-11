@@ -42,28 +42,12 @@ decides **how you place and verify it**.
 | 5-min walk (400 m) between "things to do" | 15–25 s of player travel | time it in playtest; budget in seconds |
 | Ratios: H:W, coverage %, FAR, open-space % | **unchanged** | ratios are scale-free |
 
-## The theory that makes cities readable
+## Readability in a game city
 
-**Kevin Lynch — 5 elements.** Every city level needs all five; a missing one is why players get lost.
-- **Paths** — street network; hierarchy visible (avenue wider/brighter than alley).
-- **Edges** — rivers, rail, walls, highways; district borders and map boundaries.
-- **Districts** — one shared character each (one prop family per district).
-- **Nodes** — junctions/plazas where paths meet; objectives, shops, spawns.
-- **Landmarks** — one tall/unique thing per district, visible from its entrances.
-
-**Jane Jacobs.** Mixed uses, **short blocks** (frequent corners = route choice = flanks), buildings of varied age, enough density. *Eyes on the street*: windows/doors facing the street make it alive and give vantage points.
-
-**Jan Gehl.** Activity happens at **edges**, not in empty middles. Active facade = a door/window every ~1–2 cells at eye level on hero streets.
-
-**Christopher Alexander.** Small squares 15–21 m (1536–2048 uu) feel best; > 4 storeys loses connection to the street; mark district entries with **gateways**; outdoor space must be **positive** (enclosed, convex), never leftover.
-
-**Gordon Cullen — serial vision.** A street is a sequence of reveals. Bent streets build anticipation; **terminated vistas** pull movement (see `cinematic_composition`).
-
-**Camillo Sitte.** Plazas are outdoor rooms: width = 1–2× surrounding building height; monuments off-centre.
-
-**Ian Bentley.** Permeability, variety, legibility, robustness, richness, personalization (lived-in details).
-
-**Space syntax (Hillier).** The most-connected streets get the most traffic → shops, loot, fights there; quiet homes on segregated streets.
+You know the classic theory (Lynch, Jacobs, Gehl, Alexander, Cullen). What matters in a match:
+every district needs all five Lynch elements or players get lost; short blocks mean route
+choice and flanks; active facades (a door or window every 1–2 cells on hero streets) give
+vantage points; the most-connected streets get the traffic, so put shops, loot and fights there.
 
 ## Enclosure — height : street width
 
@@ -88,12 +72,3 @@ decides **how you place and verify it**.
 10. **Ambiguous slivers** — buildings flush or ≥ 512 apart (same rule as `theme_recipes`).
 11. **Uniform heights** — vary 1–2 storeys per block; corners taller.
 12. **Mixed eras per block** — one prop family per district.
-
-## Climate → visual language
-
-| Climate | Streets | Buildings | Dressing |
-|---|---|---|---|
-| Hot-arid | narrow, H:W 2:1–3:1 for shade | courtyards, thick walls, light colours | arcades, awnings, shade sails, fountains |
-| Tropical | wide, rain channels | raised on stilts, deep eaves | dense canopy 40–50 %, verandahs |
-| Temperate | H:W 1:2–1:1 | perimeter blocks, mixed | deciduous trees, cafés |
-| Cold | compact, sheltered | dense, dark paving | covered walkways, evergreens, snow piles |

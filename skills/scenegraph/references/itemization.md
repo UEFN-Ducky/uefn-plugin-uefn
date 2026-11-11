@@ -9,10 +9,6 @@ metadata:
 
 ## Items, inventories & granting weapons
 
-> **Snippets here are fragments.** The `using` block in this file's first code
-> block applies to all of them — copy those imports (or start from the matching
-> `verse_template_apply` pack) when pasting into a real `.verse` file.
-
 **Weapons and items are entities, not devices.** Every Fortnite weapon is a
 concrete `entity` class in the digests, so "spawn a weapon" is
 `AssaultRifle_BR_CH4S1_Rare{}` — then you put that entity into an

@@ -27,7 +27,7 @@ message, never `_v2` copies of a device (`skill_read_subskill("uefn", "verse_dev
 4. **No lag.** Events over polling; every loop waits; per-tick work is pure state, visuals ~10 Hz; pool entities, share materials; build arrays with `for`, never `+=` in a loop; HUD updates on change; saves on change. → `runtime_pitfalls`
 5. **Everything stops when its owner goes.** Per-player loops race a stop event signalled on leave and elimination; cleanup in `defer`; never `branch` at the end of `OnBegin`. → `async`
 6. **One house code style** — our templates' style. → `code_style`
-7. **Names come from the digest.** Copy names from a loaded skill or `search_verse_digest`; never deprecated calls. → `digests`
+7. **Names come from the digest.** Copy names from a loaded skill or `search_verse_digest`; never deprecated calls. → `digests`. Snippets in every skill are fragments: the `using` block of a file's first code sample applies to all of them.
 8. **Done means played.** Clean build, then one live run with tagged `Print`s (two players for multiplayer) and the done checklist. → `runtime_pitfalls`
 
 ## Verse must-knows

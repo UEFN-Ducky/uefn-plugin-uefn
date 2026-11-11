@@ -9,9 +9,6 @@ metadata:
 
 ## Scene Graph cameras & camera modifiers
 
-> **Snippets here are fragments.** The `using` block in this file's first code
-> block applies to all of them.
-
 > **Everything on this page is `@experimental` and blocks publishing.** Every
 > symbol below emits `Script warning 2304` and a project that uses one cannot be
 > published. Say that to the user *before* building a camera rig.
