@@ -1,4 +1,4 @@
-# 43.00: movement and focus go through npc_actions_component (GetNavigatable / GetFocusInterface are deprecated).
+# Movement and focus go through npc_actions_component (GetNavigatable / GetFocusInterface are deprecated).
 using { /Fortnite.com/AI }
 using { /Verse.org/SceneGraph }
 using { /Fortnite.com/Animation/PlayAnimation }

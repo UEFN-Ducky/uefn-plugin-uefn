@@ -1,8 +1,8 @@
 ---
-description: "Common UEFN performance causes and their fixes (v43.00): what each looks like in a capture and the MCP toolset that fixes it. CPU Niagara particles with per-particle collision (spawn rate × lifetime), oversized textures (Maximum Texture Size), heavy Verse loops, too many Scene Graph entities/components, Nanite fallback meshes, mobile memory"
+description: "Common UEFN performance causes and their fixes: what each looks like in a capture and the MCP toolset that fixes it. CPU Niagara particles with per-particle collision (spawn rate × lifetime), oversized textures (Maximum Texture Size), heavy Verse loops, too many Scene Graph entities/components, Nanite fallback meshes, mobile memory"
 metadata:
   order: 32
-  label: "Profiling fixes (43.00)"
+  label: "Profiling fixes"
   default_enabled: false
   load_condition: "A profile or capture shows a cost (Effects / particles, textures, Verse, entities, meshes, memory) and the user or agent needs the cause and the fix; or the user asks whether to use GPU or CPU particles, how big textures should be, or how to cut memory"
 ---
@@ -16,7 +16,7 @@ a toolset; argument and property names are Epic's.
 
 ## Quick table
 
-| Cause | Evidence in the capture | Fix | Fix toolset (43.00) | Skill |
+| Cause | Evidence in the capture | Fix | Fix toolset | Skill |
 | --- | --- | --- | --- | --- |
 | CPU Niagara with per-particle collision | Client trace: the *Effects* csv scope takes most of the frame; GPU time fine; frame time red only near the effect (Spatial Profiler hotspot) | GPU sim; turn off collision nobody sees; lower spawn rate × lifetime; fixed bounds; culling on | `NiagaraToolsets.NiagaraToolset_System` | vfx |
 | Oversized textures | Memory Snapshot: *Texture* is the top category; 4K maps on small props; `MaxTextureSize = 0` | Maximum Texture Size 512 / 1024, then a new snapshot | `EditorToolset.ObjectToolset` `SetProperties`; `EditorToolset.TextureToolset` `GetSize` | texture-workflow |

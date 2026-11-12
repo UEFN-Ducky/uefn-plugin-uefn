@@ -142,7 +142,7 @@ stays locked.
 
 One input trigger starts the clip for whoever presses it and stops it on the next press.
 `UpperBodyOnly` plays it on the `UpperBody` layer so the player keeps walking (no stasis).
-Type-checked against the 43.00 digests.
+Type-checked against the digests.
 
 ```verse
 using { /Fortnite.com/Devices }

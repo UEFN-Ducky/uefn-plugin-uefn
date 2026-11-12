@@ -4,7 +4,7 @@ description: "Create, edit, and fix UEFN materials (2026) — registry tools, MF
 license: MIT
 metadata:
   label: UEFN Materials
-  version: 27
+  version: 28
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -186,9 +186,9 @@ Verify with `get_asset_info` / `get_material_info` / `validate_uefn_asset` — n
 
 `recompile_material` then `get_material_info`.
 
-## 42.30 notes
+## Notes
 
-- Epic `EditorToolset.MaterialInstanceToolset` (43.00 name; create and set
+- Epic `EditorToolset.MaterialInstanceToolset` (name; create and set
   MaterialInstanceConstant parameters) joins `EditorToolset.MaterialToolset` when `epic_mcp_online` —
   uefn `epic_toolsets` for exact tool names.
 - The material editor's shader count no longer includes local vertex factory shaders

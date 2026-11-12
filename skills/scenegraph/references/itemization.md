@@ -52,8 +52,8 @@ qualify transform types, because `/UnrealEngine.com` carries its own copies
 | `GetEquippedItems()` | `[]entity` |
 | `AddItemEvent` / `RemoveItemEvent` / `EquipItemEvent` / `UnequipItemEvent` | `listenable(...)` |
 
-`AddItem` / `AddItemDistribute` / `RemoveItem` are gated
-`@available {MinUploadedAtFNVersion := 3800}`.
+`AddItem` / `AddItemDistribute` / `RemoveItem` have an
+`@available` attribute in the digest (older uploads do not get them).
 
 ### `item_component` (same module)
 
@@ -81,7 +81,7 @@ Entity Prefab items** (mesh/icon/pickup, KFM spin, equipped detect) →
 `/Fortnite.com/Weapons` / `/Fortnite.com/Items` grants and shared
 inventory/pickup APIs.
 
-Each weapon is `class<concrete>(entity)` (`<final>` dropped in 43.00 — built-in
+Each weapon is `class<concrete>(entity)` (`<final>` dropped now — built-in
 entity classes can be subclassed now), so `{}` constructs one. Find them without
 guessing:
 
@@ -119,10 +119,10 @@ The four things that break this if you change them:
    `(for (X : Gen) do X)[0]` converts and indexes it — and indexing is failable,
    which is why the whole thing sits inside `if: … then:`.
 2. The `@editable` list is `[]concrete_subtype(entity)` so `Item{}` can construct
-   each entry. **From v42.10 the editor validator enforces that every type you
+   each entry. **The editor validator enforces that every type you
    put into a `concrete_subtype(foo)` field is itself `<concrete>`** (every field
    has a default). Stock `/Fortnite.com/Weapons` and `/Fortnite.com/Items`
-   classes are `class<concrete>` (no longer `<final>` in 43.00); your own item prefab classes must be
+   classes are `class<concrete>` (no longer `<final>` now); your own item prefab classes must be
    `<concrete>` too or the project fails validation on republish.
 3. `AddItemDistribute` returns a `result`, it is **not** failable. Do not wrap
    it in `if`; read the result if you care whether the inventory was full.
@@ -153,7 +153,7 @@ custom Armory prefabs — grant from Verse. Constructing `EP_*{}` from another
 Verse folder needs the prefab folder declared `<public>` (Script error 3593
 otherwise — `sys_owned_weapons`).
 
-### Recipe B2 — punch / FPS melee (v42.20 Unarmed)
+### Recipe B2 — punch / FPS melee (Unarmed)
 
 **HARD:** grant the stock Unarmed item. Never a custom punch montage, animation
 notify, or `input_trigger_device` melee.
@@ -169,7 +169,7 @@ Pair with a placed **First Person Camera** Creative device
 `DeviceToolset` `PlaceDevice` — never `spawn_actor(actor_class="gameplay_camera_first_person_device")`.
 Details: `skill_read_subskill("uefn", "creative_devices")`.
 
-### 42.20 stock guns (copy these class names)
+### Stock guns (copy these class names)
 
 All under `/Fortnite.com/Weapons`. Construct with `{}` like Recipe B.
 
@@ -181,15 +181,15 @@ All under `/Fortnite.com/Weapons`. Construct with `{}` like Recipe B.
 | `OverclockedEightBitShotgun_BR_CH7S4_Exotic` | |
 | `BalloonPopperAssaultRifle_BR_CH7S4_Exotic` | |
 | `AccelerantDrumGun_BR_CH7S4_Exotic` | |
-| `GatekeeperShotgun_BR_CH7S4_Rare` | 42.40; also `_BR_CH7S4_Epic` |
-| `GatekeeperShotgun_BR_CH7S2_Legendary` | 42.40 — note the CH7**S2** in the Legendary name |
+| `GatekeeperShotgun_BR_CH7S4_Rare` | also `_BR_CH7S4_Epic` |
+| `GatekeeperShotgun_BR_CH7S2_Legendary` | — note the CH7**S2** in the Legendary name |
 
 Do not invent shorter aliases. Search `list_verse_types(digest="fortnite", name_filter="CH7S4")` if you need another rarity.
 
 ### Recipe C — a pickup in the world
 
 `fort_item_pickup_interactable_component` (`/Fortnite.com/Itemization`, gated
-`MinUploadedAtFNVersion := 4040`) extends `basic_interactable_component`. Its
+an `@available` attribute) extends `basic_interactable_component`. Its
 digest is explicit about the requirements: the owning entity needs an
 `item_component` **and** a `mesh_component`, and the interacting agent needs a
 subentity with an `inventory_component`.

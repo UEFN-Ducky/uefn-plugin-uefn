@@ -69,7 +69,7 @@ A `UAgentSkill` instance saved as a Content Browser asset, via `AgentSkillToolse
 - **Create:** `CreateSkill` — `FolderPath` (Content Browser folder, e.g. `/Game/Skills/`), `AssetName` (PascalCase, e.g. `MyWorkflowSkill`), `Description`, `Details` (an `FAgentSkillDetails` with `Instructions`).
 - **Update:** `UpdateSkill` — `SkillPath` (e.g. `/Game/Skills/MyWorkflowSkill.MyWorkflowSkill_C`), `Description`, `Details`.
 
-UEFN: only if `AgentSkillToolset` shows in `list_toolsets` (it is not in the 42.40 catalog), and the folder goes under the island's `content_root`, never an invented `/Game/...`.
+UEFN: only if `AgentSkillToolset` shows in `list_toolsets` (it is not in the catalog), and the folder goes under the island's `content_root`, never an invented `/Game/...`.
 
 ## Review
 

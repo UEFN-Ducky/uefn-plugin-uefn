@@ -21,7 +21,7 @@ with `get_verse_api` / `search_verse_digest` before shipping.
 | Stock Fortnite gun grant / pickup | `skill_read_subskill("scenegraph", "itemization")` |
 | **Custom mesh + tunable AR/pistol/shotgun/SMG** | **this file** |
 | Custom non-weapon item (pickup / icon / mesh) | `skill_read_subskill("scenegraph", "custom_items")` |
-| Something the player **holds** that is not a gun (torch, lantern, tool) — 42.30 `held_item_template` | `skill_read_subskill("scenegraph", "held_items")` |
+| Something the player **holds** that is not a gun (torch, lantern, tool) — older-build `held_item_template` | `skill_read_subskill("scenegraph", "held_items")` |
 | Soft persist bags + Creative Item Granter | `skill_read_subskill("verse", "sys_inventory")` |
 | Owned guns (persist, load on join, collectible pickup, canvas shop, rejoin) | `skill_read_subskill("verse", "sys_owned_weapons")` |
 | NPC combat / projectiles | Store `npc-ai` / `sys_npc_ai` |
@@ -46,7 +46,7 @@ on the player table and grants a fresh prefab each session.
 
 ## Author the prefab
 
-Over MCP (43.00): `ValkyrieToolset.PrefabToolset` `CreatePrefab`
+Over MCP: `ValkyrieToolset.PrefabToolset` `CreatePrefab`
 `{"folderPath": "SceneGraph/CustomWeapons", "assetName": "EP_CustomAR",
 "parentClass": {"refPath": "/Armory/_Verse/VNI/ArmoryRuntime.assault_rifle_template"}}`
 (`pistol_template`, `shotgun_template`, `sub_machine_gun_template` the same
@@ -64,14 +64,14 @@ or `Content/SceneGraph/CustomWeapons/`):
 | `pistol_template` | Sidearm |
 | `shotgun_template` | Shotgun |
 | `sub_machine_gun_template` | SMG |
-| `held_item_template` (42.30) | Not a weapon — a held prop (torch by default) → `held_items` |
+| `held_item_template` | Not a weapon — a held prop (torch by default) → `held_items` |
 
-These four are the only Armory weapon templates in the 42.40 digest. A bow,
+These four are the only Armory weapon templates in the digest. A bow,
 sniper or minigun is one of them re-meshed and re-tuned. Templates already ship
 a full fire/reload loop — you tune and re-skin them.
 
 **Build Verse** after creating or renaming a prefab: only then is it a class in
-Assets.digest. **43.00:** a prefab whose parent is a template is a **subclass of that
+Assets.digest. A prefab whose parent is a template is a **subclass of that
 template** in Verse (before: a plain `(entity)` class), and the templates are no longer
 `<final>` — so casts and parent-member access work:
 
@@ -81,11 +81,11 @@ using { /Fortnite.com/Armory }
 AsRifle(E:entity)<decides><transacts>:assault_rifle_template = assault_rifle_template[E]
 # if (Rifle := AsRifle[EP_CustomAR{}]) { ... }   # succeeds for any AR-template prefab
 
-my_rifle := class<concrete>(assault_rifle_template):   # legal from 43.00 (was 'final' error)
+my_rifle := class<concrete>(assault_rifle_template): # legal now (was 'final' error)
     Tier : int = 1
 ```
 
-Compiled 0 errors in 43.00. Read the generated parent with
+Compiled 0 errors. Read the generated parent with
 `get_verse_api("EP_CustomAR", digest_path=<Assets digest>)` rather than assuming it.
 Same for `pistol_template`, `sub_machine_gun_template`, `shotgun_template`,
 `held_item_template` — and the stock `/Fortnite.com/Weapons` classes are now
@@ -97,7 +97,7 @@ Verse in another folder reaches it only after the prefab folder is declared
 
 **Pickup** — `fort_item_pickup_interactable_component`
 (`/Fortnite.com/Itemization`, extends `basic_interactable_component`).
-Gated `@available {MinUploadedAtFNVersion := 4040}`. Owning entity must have
+Gated `@available`. Owning entity must have
 `item_component` **and** `mesh_component`. Fields from
 `basic_interactable_component`:
 
@@ -125,16 +125,16 @@ too:
 | | `ShotAmmoCost` | 0–10 ammo per shot — **0 = never uses ammo, never reloads** (infinite magazine) |
 | Visuals | `MuzzleFlash`, `MuzzleOffset`, `BulletTracer` (Niagara), `EjectionPortOffset`, `BulletShells` | |
 | Sounds | `WeaponFireSound`, `EquipSound` (UI “clip”), ADS start/end, reload start/insert/end, `OutOfAmmoSound` | `[]sound_wave` |
-| Aim (42.30) | `AllowAimDownSightsInAir`, `AllowAimDownSightsDuringReload` | `logic` |
+| Aim | `AllowAimDownSightsInAir`, `AllowAimDownSightsDuringReload` | `logic` |
 
 There is no separate reserve-ammo setter on this component.
 
-**Fire from Verse (43.00, `@available 4300`, not experimental)** — on `fort_trace_weapon_component`:
+**Fire from Verse (`@available`, not experimental)** — on `fort_trace_weapon_component`:
 `BeginFire():void` (as if the wielder pressed and kept holding fire), `EndFire():void`
 (release), `IsFiring()<decides><reads>:void`. Trap: `IsFiring[]` can **fail right after
 `BeginFire`** — e.g. while the weapon reloads. Always pair every `BeginFire` with an
 `EndFire` (also on cleanup), or the weapon keeps firing. Auto-fire / AI turret (compiled
-0 errors, 0 warnings in 43.00):
+0 errors, 0 warnings):
 
 ```verse
 using { /Fortnite.com/Armory }
@@ -156,7 +156,7 @@ auto_fire_component := class<final_super>(component):
             Sleep(1.0)
 ```
 
-**Stock weapon catalog 42.40 → 43.00:** unchanged — the same 1,445 `/Fortnite.com/Weapons`
+**Stock weapon catalog:** the same 1,445 `/Fortnite.com/Weapons`
 / `Items` entity classes; the only difference is `<final>` dropped
 (`class<final><concrete>(entity)` → `class<concrete>(entity)`). No new class names.
 
@@ -223,7 +223,7 @@ material → build Verse → register it next to the base prefab
   (`collectible_object_device`) + `sys_owned_weapons` — the pickup records
   ownership and grants a fresh prefab.
 - **Item Granter / Item Spawner / Save Point** do not handle custom Armory
-  prefabs (Save Point restored them as a grey, invisible template in 41.00).
+  prefabs (Save Point restored them as a grey, invisible template).
   Grants are Verse.
 - Verify look in **free camera** (third person) before trusting first person —
   first person is often bugged for custom Armory meshes.

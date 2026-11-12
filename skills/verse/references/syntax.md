@@ -1,5 +1,5 @@
 ---
-description: "Verse language reference — types, effects, control flow, classes, concurrency, the 43.00 dot forms (if. / spawn. / array. / option.), `of` with an archetype block, the indented array: block, the first(X : Xs){X} macro"
+description: "Verse language reference — types, effects, control flow, classes, concurrency, the dot forms (if. / spawn. / array. / option.), `of` with an archetype block, the indented array: block, the first(X : Xs){X} macro"
 metadata:
   order: 2
   label: "Verse syntax reference"
@@ -45,7 +45,7 @@ inside `if (…)`, `if:`, `for` filters, `[]` or a `<decides>` body (E3512). Acc
 - Never name a binding `Distance`, `Dot`, `Cross`, `Normalize`, `Lerp`, `Floor`, `Min`, `Max`, `Print`, `Sleep` (ambiguity E3588).
 - Tuples index with `T(0)`; arrays/maps with failable `A[0]`.
 - `int / int` is failable and yields `rational`; convert with `* 1.0` and `Floor[]`.
-- Array literal is `array{…}`. On 43.00 an indented `array:` block with one element per line is also an array (`Many:[]int = array:` + `1` / `2` / `3` lines compiles); on 42.x it built tuples (3509). One line per element; never `array: 1, 2`.
+- Array literal is `array{…}`. Now an indented `array:` block with one element per line is also an array (`Many:[]int = array:` + `1` / `2` / `3` lines compiles); on older builds it built tuples (3509). One line per element; never `array: 1, 2`.
 - Field initialisers are literals/archetypes only — never a call (E3582).
 - An empty body is `if (set M[K] = V) {}` on **one line**; `if (…):` followed by `{}` on the next line is parse error 3100 "Expected expression, got {".
 - A field or local may not share a name with a module (folder) in the project: `var Progression : ?xp_awarder` next to a `Verse/Progression/` folder is E3532 ambiguous.
@@ -72,7 +72,7 @@ loop:
 - `case (X):` with `Pattern => expr` branches and `_ =>` default.
 - `return X` exits a function; string interpolation is `"{Expr}"`.
 
-### Short forms that compile on 43.00 (verified Nov 1 2026)
+### Short forms that compile (verified Nov 1 2026)
 
 They appear in no release note. They work and are fine to read in tutorials, but our
 house style (`code_style`) keeps the long forms in new code.

@@ -250,7 +250,7 @@ BuildToggles(Owner : agent) : []settings_toggle =
 - The helpers are `<transacts>` so they also work inside `option{}` and `if`.
 - Worth it when one class drives many unrelated setters; for two or three, a small
   `if` is simpler.
-- Verified with verse-lsp against the 42.40 digests (all five wrappers, the
+- Verified with verse-lsp against the digests (all five wrappers, the
   helpers and the toggle above).
 
 ### Message helpers

@@ -1,15 +1,15 @@
 ---
-description: "Audio via Epic MCP (43.00): import wav/ogg/mp3 as SoundWaves (SoundWaveToolset.ImportFile), MetaSound presets for background music, ambience loops and one-shot SFX (MetaSoundAuthoringToolset: FindMetaSoundAssets, CreateSourcePresetBuilder, SetDefaults, BuildToAsset, Attach/Commit/Detach), playing them with the Audio Player device and Verse audio_player_device.Play(), tested results and traps"
+description: "Audio via Epic MCP: import wav/ogg/mp3 as SoundWaves (SoundWaveToolset.ImportFile), MetaSound presets for background music, ambience loops and one-shot SFX (MetaSoundAuthoringToolset: FindMetaSoundAssets, CreateSourcePresetBuilder, SetDefaults, BuildToAsset, Attach/Commit/Detach), playing them with the Audio Player device and Verse audio_player_device.Play(), tested results and traps"
 metadata:
   order: 5
-  label: "Audio: SoundWaves + MetaSound (43.00 MCP)"
+  label: "Audio: SoundWaves + MetaSound (MCP)"
   default_enabled: false
   load_condition: "Make or import background music, ambience, a loop, a sound effect / SFX / one-shot, a horn or alarm sound; MetaSound, SoundWave, wav / mp3 / ogg import; Audio Player device sound setup"
 ---
 
-# Audio: SoundWaves + MetaSound via Epic MCP (43.00)
+# Audio: SoundWaves + MetaSound via Epic MCP
 
-Tested live in UEFN 43.00 (claudeduckytest, Nov 1 2026). Results per step are marked
+Tested live in UEFN (claudeduckytest, Nov 1 2026). Results per step are marked
 **tested** / **fails** below. Toolsets: `EditorToolset.SoundWaveToolset` (1 tool) and
 `MetaSoundToolset.MetaSoundAuthoringToolset` (8 tools) — `epic_toolsets`. Call
 `unreal__describe_toolset` first; one mutating `unreal__call_tool` per turn.
@@ -32,7 +32,7 @@ tools make it); never download one. Tested: a 1 s 22 kHz mono wav imported in on
 
 ## 2. New MetaSound = a preset over a built-in parent
 
-`FindMetaSoundAssets{pattern, maxResults}` lists the parents you may use. In UEFN 43.00 it
+`FindMetaSoundAssets{pattern, maxResults}` lists the parents you may use. In UEFN it
 returns only **built-in** MetaSounds, all read-only:
 
 | Parent | Use |
@@ -50,7 +50,7 @@ SetDefaults{builderName: "ThemeBuilder", defaults: [                            
   {"node": "", "pin": "VolumeBase", "value": "-6", "page": ""}]}
 # → {"bOk": true, "applied": 2}
 BuildToAsset{builderName: "ThemeBuilder", assetName: "MSS_Theme",
-             packagePath: "<content_root>/Audio", author: "UEFN-Ducky"}                   # FAILS in 43.00, see below
+             packagePath: "<content_root>/Audio", author: "UEFN-Ducky"} # FAILS now, see below
 ```
 
 `CreatePatchPresetBuilder{presetName, referencedPatchPath}` is the same for MetaSoundPatch parents.
@@ -83,14 +83,14 @@ Not tested: the island had no writable MetaSound (all 5 listed are read-only bui
 - **Audio Player device** (classic Creative device): place it with
   `ValkyrieFortniteToolset.DeviceToolset.PlaceDevice`, then `ListClassicDeviceOptions` →
   `SetClassicDeviceOption` (sound asset, looping, volume, who hears it), one option per call. Not
-  `SetDeviceProperty`: in 43.00 that only takes a Verse `creative_device`. Recipe: `creative_devices`.
+  `SetDeviceProperty`: that only takes a Verse `creative_device`. Recipe: `creative_devices`.
 - **Verse:** `@editable Music:audio_player_device = audio_player_device{}` then
   `Music.Play()` / `Music.Stop()`; `Play(Agent)` / `Stop(Agent)` only with *Heard by Instigator*;
   `Register(Agent)` / `Unregister` / `UnregisterAll` for registered-player hearing;
   `Enable` / `Disable` (Disable also stops playback). Music: play once at round start on a looping
   sound, never re-`Play` in a loop.
 
-## Tested results (43.00)
+## Tested results
 
 | Step | Result |
 | --- | --- |

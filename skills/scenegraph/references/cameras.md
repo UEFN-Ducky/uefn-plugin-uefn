@@ -1,78 +1,67 @@
 ---
-description: "Scene Graph cameras (43.00) — perspective/orthographic/physical camera components, FieldOfView in radians, camera_director_component.AddCamera, Pre/Post/Presentation modifier layers, user-written camera_modifier (runs on the server), fort_orbit / fort_fixed_angle / fort_fixed_point modifiers, transitions and blends, play-server known issue; all Experimental (blocks publishing)"
+description: "Scene Graph cameras — perspective / orthographic / physical camera components, FieldOfView in radians, camera_director_component.AddCamera, Pre / Post / Presentation modifier layers, camera modifiers as small pieces you stack in order (attach to entity, boom arm, offset, collision push, dampen translation / rotation, set translation / rotation, panning and dolly framing), recipes for orbit, fixed angle and fixed point cameras, user-written modifiers (run on the server), transitions and blends"
 metadata:
   order: 11
   label: "Cameras & camera modifiers"
   default_enabled: false
-  load_condition: "Scene Graph cameras, camera components, orbit camera, camera modifier, camera shake, camera director, camera transitions/blends, FieldOfViewDegrees / GlobalModifierPosition / VisualModifierPosition errors, camera not activating on a play server, following a custom entity with a camera, or a custom camera rig instead of the Fortnite gameplay camera"
+  load_condition: "Scene Graph cameras, camera components, orbit camera, fixed angle or fixed point camera, top-down or isometric camera, boom arm, camera modifier, camera shake, camera director, camera transitions/blends, camera framing a target, AddModifier errors, fort_orbit_camera_modifier / FieldOfViewDegrees / GlobalModifierPosition unknown identifier, following a custom entity with a camera, or a custom camera rig instead of the Fortnite gameplay camera"
 ---
 
 ## Scene Graph cameras & camera modifiers
 
-> **Everything on this page is `@experimental` and blocks publishing.** Every
-> symbol below emits `Script warning 2304` and a project that uses one cannot be
-> published. Say that to the user *before* building a camera rig.
+> **Check the digest before you build.** `get_verse_api("camera_component")`,
+> `search_verse_digest("camera_modifier")`. A name with an `@experimental` line above it
+> emits `Script warning 2304`, and an island that uses it cannot be published; tell the
+> user that *before* building a camera rig. If the line is gone, it can be published.
+> A name on this page that is not in the digest does not exist in the installed build:
+> `verse_digest_changes("camera")` shows what replaced it.
 
 ```verse
-using { /Verse.org/SceneGraph }        # camera components, modifier stack, positions
+using { /Verse.org/SceneGraph }        # camera components, modifier stack
 using { /Verse.org/Simulation }        # required for @editable in a component file
 using { /Verse.org/SpatialMath }       # vector3 / rotation (LUF)
 using { /Fortnite.com/SceneGraphCameras }   # fort_* camera modifiers
 ```
 
-Everything here was read from the **43.00** digests and **compile-checked in UEFN
-43.00** (0 errors, warnings 2304 only).
+### Rules that hold everywhere
 
-### 43.00 breaking changes (read first)
+- **Radians everywhere**: `FieldOfView`, rotation offsets, cone angles, blends. `Deg * PiFloat / 180.0`, or `MakeRotationFromYawPitchRollRadians`.
+- **Modifiers run in the order you add them.** `AddModifier(Modifier)` takes the modifier only. To change the order, add them in the order you want.
+- `CameraModifiers` is a field on `camera_component` itself; the director has three more layer stacks (below).
+- Names that no longer exist (error 3506): `FieldOfViewDegrees`, `GlobalModifierPosition`, `VisualModifierPosition`, `FirstPosition`, `LastPosition`, a second `Position` argument on `AddModifier`, `fort_orbit_camera_modifier`, `fort_fixed_angle_camera_modifier`, `fort_fixed_point_camera_modifier`. Build those three cameras from the pieces below.
 
-| Old (≤ 42.40) | 43.00 |
-|---|---|
-| `perspective_camera_component.FieldOfViewDegrees` | **`FieldOfView`**, in **radians** (horizontal, for 16:9; Hor+ scaling on wider screens) |
-| any camera angle in degrees | **radians everywhere** — FOV, `RotationOffset`, blends. `Deg * PiFloat / 180.0`, or `MakeRotationFromYawPitchRollRadians` |
-| `GlobalModifierPosition` / `VisualModifierPosition` | **removed** (3506). Pick a layer stack on the director instead (below); `Position` is now just your own `rational` order inside that stack |
-| `has_camera_modifier` interface | removed; `CameraModifiers` is a field on `camera_component` itself |
-| `camera_state` `<epic_internal>` | public: **user-written modifiers work** (below) |
-| `camera_body` / `camera_lens` `<final>` | not final; `CloneCameraBody` / `CloneCameraLens` / `CloneCameraState` constructors |
-
-> [!WARNING] Known issue (43.00, fixed in 43.10)
-> Scene Graph cameras **do not activate on play servers** — `Player.GetComponent[camera_director_component]`
-> fails there (UEFN edit sessions are fine). Workaround, **private versions only**: add
-> `using { /Fortnite.com/SceneGraphCameras }` to any Verse file in the project. Keep that
-> `using` in every camera file anyway — it is harmless after 43.10.
-
-> [!WARNING] Known issue: interaction
+> [!WARNING] Interaction
 > Interactive objects can be harder to interact with while a Scene Graph camera is active.
-> Workaround: place a **Third Person Controls** device alongside your camera.
+> Place a **Third Person Controls** device alongside your camera.
 
 ### The camera components
 
-`camera_component` is `class<final_super><abstract>(component)` (43.00; the `has_camera_modifier` interface is gone)
-— abstract, so you never place it directly; you query with it and you place one of
-these concrete subclasses (all `@available {MinUploadedAtFNVersion := 4110}`):
+`camera_component` is abstract: you never place it, you query with it and place one of
+these concrete subclasses:
 
 | Component | Use | Key field |
 |---|---|---|
 | `perspective_camera_component` | normal gameplay camera | `var FieldOfView : float` (**radians**) |
 | `orthographic_camera_component` | 2D / isometric / map views | `OrthographicProjectionWidth` |
-| `physical_camera_component` | cinematic / physically accurate | `var Body : camera_body` + `var Lens : camera_lens` (sensor mm, `FocalLengthMillimeters`, `FStop`, `SqueezeFactor`, `BladeCount`). 43.00 adds **body and lens presets matching the UE Cine Camera** in Details — pick a sensor and lens there; swap `Body`/`Lens` at runtime with `set` |
+| `physical_camera_component` | cinematic / physically accurate | `var Body : camera_body` + `var Lens : camera_lens` (sensor mm, `FocalLengthMillimeters`, `FStop`, `SqueezeFactor`, `BladeCount`); pick a sensor and lens preset in Details, swap `Body`/`Lens` at runtime with `set` |
 | `camera_director_component` | picks the active camera and blends | `AddCamera` (below) |
 
 On the base class (so on all of them): `var NearClippingPlaneDistance : float`
-and `var FarClippingPlaneDistance : float` — both `@editable`; the docs' rule is
-`<= 0.0` / `Inf` means "use defaults".
+and `var FarClippingPlaneDistance : float`, both `@editable`; `<= 0.0` / `Inf` means
+"use defaults".
 
-One component per class per entity, as everywhere in Scene Graph — so a rig that
+One component per class per entity, as everywhere in Scene Graph, so a rig that
 needs two views needs two child entities.
 
 ```verse
-set Cam.FieldOfView = 90.0 * PiFloat / 180.0      # 90° -> radians (43.00)
+set Cam.FieldOfView = 90.0 * PiFloat / 180.0      # 90 degrees in radians
 ```
 
-The updated **Scene Graph feature example** (43.00) has a camera section with
-commented Verse: perspective / orthographic / physical camera entities, a camera shown
-while inside a Volume device (and restored on exit), swapping a physical camera's body
-and lens during play, a director cycling cameras with a per-switch blend, and a custom
-blend style + duration. Point users there for reference rigs.
+Epic's **Scene Graph feature example** has a camera section with commented Verse:
+perspective / orthographic / physical camera entities, a camera shown while inside a
+Volume device (and restored on exit), swapping a physical camera's body and lens during
+play, a director cycling cameras with a per-switch blend, and a custom blend style +
+duration. Point users there for reference rigs.
 
 ### Making a camera the player's view — `camera_director_component`
 
@@ -87,23 +76,24 @@ then:
     Print("custom camera active")
 ```
 
-Highest `Priority` wins. The returned `cancelable` is how you give the view back
-— hold it per player and `Cancel()` it on leave/teardown.
+Highest `Priority` wins. The returned `cancelable` is how you give the view back:
+hold it per player and `Cancel()` it on leave/teardown. If the director is not found on a
+play server, keep `using { /Fortnite.com/SceneGraphCameras }` in the file.
 
-### Camera modifiers and the 43.00 layers
+### Camera modifiers and layers
 
-A modifier mutates the final `camera_state` (render location/rotation, projection,
+A modifier changes the final `camera_state` (render location/rotation, projection,
 body/lens, clip planes) without moving any camera entity.
 
 Every `camera_component` has `CameraModifiers : modifier_stack(camera_state)` (the
 **Main** layer, runs with that camera). The `camera_director_component` adds three
-layer stacks (`@available 4230`):
+layer stacks:
 
 | Layer (on the director) | Runs | Use for |
 |---|---|---|
 | `PreCameraModifiers` | before any camera component evaluates | shared defaults for the whole camera system |
-| *Main* — active camera's `CameraModifiers` | the highest-priority camera | the rig itself (orbit, fixed angle) |
-| `PostCameraModifiers` | after Pre + Main, **on the blended state** (once, not per blending camera) | collision, weapon recoil — the gameplay camera |
+| *Main*: the active camera's `CameraModifiers` | the highest-priority camera | the rig itself (attach, boom arm, offset) |
+| `PostCameraModifiers` | after Pre + Main, **on the blended state** (once, not per blending camera) | collision, weapon recoil: the gameplay camera |
 | `PresentationCameraModifiers` | last | cosmetic only: camera shake that must not move aim |
 
 Nested directors: every director's Pre layer runs outermost first, then the innermost
@@ -113,85 +103,112 @@ The stack API (same on every layer):
 
 ```verse
 # AddModifier has NO <decides> -> PARENTHESES, not brackets. Returns cancelable.
-# AddModifier<public>(Modifier:modifier(t), Position:rational)<transacts>:cancelable
-Handle := Cam.CameraModifiers.AddModifier(Orbit, 0)          # Position = your own order
-Shake := Director.PresentationCameraModifiers.AddModifier(MyShake, 0)
+# AddModifier<public>(Modifier:modifier(t))<transacts>:cancelable
+Handle := Cam.CameraModifiers.AddModifier(Follow)             # runs first
+Shake := Director.PresentationCameraModifiers.AddModifier(MyShake)
 ...
 Handle.Cancel()                                   # removes it from the stack
 ```
 
-Calling it `AddModifier[...]` is the mistake to avoid: it yields
-`Script error 3511` (square brackets on a non-`decides` function) and then `3513`.
-`GlobalModifierPosition` / `VisualModifierPosition` are **gone in 43.00**
-(`3506 Unknown identifier`) — choose the layer stack instead and pass any `rational`.
-Within a stack, modifiers evaluate in position order; same position = most recently
-added evaluates last. `FirstPosition` / `LastPosition` are readable on the stack.
+Calling it `AddModifier[...]` is the mistake to avoid: `Script error 3511` (square
+brackets on a non-`decides` function) and then `3513`.
 
-#### User-written modifiers (43.00)
+### The pieces (`/Fortnite.com/SceneGraphCameras`)
 
-`camera_state` is now public, so subclass `camera_modifier` and override `Evaluate`.
-Fields are not `var`: build a new state with field overrides **first**, then the
-`CloneCameraState` constructor call (the other order is `Script error 3690`):
+Each piece does one job. Set them up in the Details panel (so they ship in a prefab) or
+create them at runtime. Fields marked `var` can be retuned live with `set`.
+
+| Modifier | Job | Fields |
+|---|---|---|
+| `fort_attach_to_entity_camera_modifier` | follow a target entity | `var TargetEntity`, `var ShouldFollowTranslation`, `var ShouldFollowOrientation` |
+| `fort_boom_arm_camera_modifier` | swing around the pivot with the player's look input | `var BoomOffset : vector3` (rotation happens at the base, before the offset), `IsRotationAdditive`, `AutoRotateSettings` (`fort_auto_rotate_camera_modifier_settings`: `IsEnabled`, `Direction`, `WaitTime`, `DisableThreshold`, yaw / pitch), `BoomLengthInterpolationSettings`, max forward / backward interpolation factors |
+| `fort_offset_camera_modifier` | shift or turn the camera | `var TranslationOffset`, `var RotationOffset`, `OffsetSpace` (`fort_camera_offset_space.CameraSpace` / `PivotSpace` / `GlobalSpace`) |
+| `fort_collision_push_camera_modifier` | keep the camera out of walls | `var IgnoreEntities`, `var IgnoreEntitiesAndDescendants`, `var SafeLocationOffset`, `var CollisionSphereRadius`, push / pull interpolation settings |
+| `fort_dampen_translation_camera_modifier` | smooth movement, per axis | `var ForwardDampingFactor`, `var LeftDampingFactor`, `var UpDampingFactor`, `DampenSpace` (0.0 = no damping on that axis) |
+| `fort_dampen_rotation_camera_modifier` | smooth turning, per axis | `var YawDampingFactor`, `var PitchDampingFactor`, `var RollDampingFactor` |
+| `fort_set_translation_camera_modifier` | put the camera at a global position (replaces, does not offset) | `var Translation` |
+| `fort_set_rotation_camera_modifier` | point the camera in a global direction (replaces) | `var Rotation` |
+| `fort_panning_framing_camera_modifier` | keep targets in frame by turning in place | `var TargetEntities : [entity]float` (entity to weight), `CanYaw`, `CanPitch`, framing position, dead zone and damping fields |
+| `fort_dolly_framing_camera_modifier` | keep targets in frame by sliding sideways (and up / down) | the same framing fields, `CanMoveHorizontally`, `CanMoveVertically` |
+
+Interpolation settings are subclasses of `fort_camera_value_interpolation_settings`
+(critical damper, IIR, double IIR, acceleration / deceleration, pop). Read the exact fields
+with `get_verse_api("<name>")`.
+
+### Recipes: orbit, fixed angle, fixed point (compiled)
 
 ```verse
-raise_camera_modifier := class(camera_modifier):
+# Orbit: follow the target, swing around it with the player's look input, stay out of walls.
+MakeOrbitCamera(Cam : camera_component, Target : entity, BoomLength : float, Height : float) : []cancelable =
+    Follow := fort_attach_to_entity_camera_modifier{}
+    set Follow.TargetEntity = Target
+    set Follow.ShouldFollowTranslation = true
+    set Follow.ShouldFollowOrientation = false
+    Boom := fort_boom_arm_camera_modifier{}
+    set Boom.BoomOffset = vector3{Forward := -BoomLength, Up := Height}
+    Push := fort_collision_push_camera_modifier{}
+    set Push.IgnoreEntitiesAndDescendants = array{Target}
+    Stack := Cam.CameraModifiers
+    array{Stack.AddModifier(Follow), Stack.AddModifier(Boom), Stack.AddModifier(Push)}
+
+# Fixed angle: follow the target, keep one viewing angle, sit back from it, smooth the move.
+MakeFixedAngleCamera(Cam : camera_component, Target : entity, Look : rotation, Back : float) : []cancelable =
+    Follow := fort_attach_to_entity_camera_modifier{}
+    set Follow.TargetEntity = Target
+    set Follow.ShouldFollowOrientation = false
+    Aim := fort_set_rotation_camera_modifier{}
+    set Aim.Rotation = Look
+    Away := fort_offset_camera_modifier{OffsetSpace := fort_camera_offset_space.CameraSpace}
+    set Away.TranslationOffset = vector3{Forward := -Back}
+    Smooth := fort_dampen_translation_camera_modifier{}
+    set Smooth.ForwardDampingFactor = 5.0
+    set Smooth.LeftDampingFactor = 5.0
+    set Smooth.UpDampingFactor = 5.0
+    Stack := Cam.CameraModifiers
+    array{Stack.AddModifier(Follow), Stack.AddModifier(Aim), Stack.AddModifier(Away), Stack.AddModifier(Smooth)}
+
+# Fixed point: the camera stays where it is placed and turns to keep the target in frame.
+MakeFixedPointCamera(Cam : camera_component, Target : entity) : cancelable =
+    Frame := fort_panning_framing_camera_modifier{}
+    if (set Frame.TargetEntities[Target] = 1.0) {}
+    Cam.CameraModifiers.AddModifier(Frame)
+```
+
+Keep every returned `cancelable`: cancelling one removes that piece, which is how you
+swap one camera mode for another. Don't name a local `Distance`: it clashes with the
+SpatialMath function (3588 / 3532). These compile against the digest; tune the numbers in
+a live session.
+
+`vector3` / `rotation` here are `/Verse.org/SpatialMath` (Forward/Left/Up), not
+the Temporary XYZ family. Mixing them is `movement_transforms`' classic bug.
+
+### User-written modifiers
+
+Implement `modifier(camera_state)` and override `Evaluate`. Fields of `camera_state` are
+not `var`: build a new state with field overrides **first**, then the `CloneCameraState`
+constructor call (the other order is `Script error 3690`):
+
+```verse
+raise_camera_modifier := class(modifier(camera_state)):
     var HeightCentimeters : float = 50.0
     Evaluate<override>(InValue:camera_state)<reads>:camera_state =
         camera_state:
             RenderLocation := InValue.RenderLocation + vector3{Up := HeightCentimeters}
             CloneCameraState<constructor>(InValue)
 
-# Director.PostCameraModifiers.AddModifier(raise_camera_modifier{}, 0)
+# Director.PostCameraModifiers.AddModifier(raise_camera_modifier{})
 ```
 
-> [!NOTE] Runs on the server
-> Verse doesn't run on the client yet, so a camera with a **user-written** modifier is
-> evaluated on the server and its state replicated to the client. Expect latency —
-> keep per-frame modifiers simple, prefer the built-in `fort_*` modifiers for
-> responsive follow cameras.
+Subclassing `camera_modifier` is the other form; the offline check flags its `Evaluate`
+override as inaccessible (3593), so compile it in UEFN before relying on it.
 
-#### `fort_orbit_camera_modifier` (`/Fortnite.com/SceneGraphCameras`)
+> [!NOTE] One user-written modifier moves the whole camera to the server
+> Verse does not run on the client yet. As soon as a stack holds one modifier that is not
+> Epic's, the whole camera system runs on the server and replicates the result, so the
+> delay hits every modifier in the stack. If a camera must feel immediate, use only the
+> `fort_*` pieces.
 
-`class<concrete>(camera_modifier)`, `@available {MinUploadedAtFNVersion := 4200}`
-— i.e. **42.00+**, and Experimental. `TargetEntity` is not a `var`, so it is set
-at construction; everything else is a `var` you can retune live.
-
-```verse
-Orbit := fort_orbit_camera_modifier:
-    TargetEntity := RigRoot                       # entity the camera orbits
-set Orbit.CameraDistanceCentimeters = 450.0       # boom length along forward
-set Orbit.CameraHeightCentimeters = 120.0         # pivot height above the entity root
-set Orbit.EnableCollision = true                  # camera-to-world collision avoidance
-set Orbit.CollisionSphereRadiusCentimeters = 20.0
-```
-
-Full field list (all cm / all `var` unless noted):
-
-| Field | Meaning |
-|---|---|
-| `TargetEntity : entity` (not `var`) | entity the camera is attached to |
-| `BoomArmOffsetCentimeters : vector3` | boom offset relative to the entity |
-| `BoomArmMaxForwardInterpolationFactor` / `...BackwardInterpolationFactor` | boom interpolation clamps |
-| `ForwardDampingFactor`, `LateralDampingFactor`, `VerticalDampingFactor` | per-axis follow damping |
-| `EnableCollision : logic`, `CollisionSphereRadiusCentimeters` | collision avoidance |
-| `CameraDistanceCentimeters` | camera → orbit pivot along forward |
-| `CameraHeightCentimeters` | pivot height above the entity root |
-| `PositionOffsetCentimeters : vector3` | offset applied after the boom arm |
-| `RotationOffset : rotation` | orientation offset — **radians** in 43.00, e.g. `MakeRotationFromYawPitchRollRadians(0.0, -0.3, 0.0)` |
-
-Siblings in the same module, same version gate and shape:
-
-- **`fort_fixed_angle_camera_modifier`** — `TargetEntity`, `CameraDistanceCentimeters`,
-  `PositionOffsetCentimeters`, `RotationOffset`, the three damping factors,
-  `EnableCollision`, `CollisionSphereRadiusCentimeters`,
-  `CollisionSafePositionOffsetCentimeters`. Fixed-angle chase / isometric follow.
-- **`fort_fixed_point_camera_modifier`** — `RotationOffset` (+ its own fields);
-  a camera pinned to a point that looks around.
-
-`vector3` / `rotation` here are `/Verse.org/SpatialMath` (Forward/Left/Up) — not
-the Temporary XYZ family. Mixing them is `movement_transforms`' classic bug.
-
-### Transitions and blends (working from 42.10, unchanged in 43.00)
+### Transitions and blends
 
 Subclassing a **concrete** camera component in creator Verse is legal — verified
 by compile — so transitions are authored by overriding on your own subclass:
@@ -211,15 +228,15 @@ Both hooks are `<transacts><decides>`. Blends (all `<concrete>`, all Experimenta
 new camera inherits: `PreviousYawPitch`, `PreviousAbsoluteTarget`,
 `PreviousRelativeTarget`.
 
-### Recipes from the 43.00 feature example
+### Recipes from Epic's feature example
 
 Four behaviors from Epic's updated Scene Graph feature example, rewritten as
-components and **compiled in UEFN 43.00** (0 errors, 2304 warnings only). They share
+components and **compiled in UEFN** (0 errors, 2304 warnings only). They share
 this header and helper:
 
 ```verse
 using { /Fortnite.com/Devices }
-using { /Fortnite.com/SceneGraphCameras }   # also the 43.00 play-server workaround (fixed 43.10)
+using { /Fortnite.com/SceneGraphCameras }   # keep it: without it the director may not be found on a play server
 using { /Verse.org/SceneGraph }
 using { /Verse.org/Simulation }
 
@@ -227,11 +244,6 @@ using { /Verse.org/Simulation }
 GetDirector(Agent:agent)<transacts><decides>:camera_director_component =
     Agent.GetComponent[camera_director_component]
 ```
-
-> [!WARNING] Play servers (43.00)
-> Every recipe below calls `GetDirector[Agent]`, which **fails on play servers in 43.00**,
-> so nothing happens there. Keep the `using { /Fortnite.com/SceneGraphCameras }` line in
-> the file (private versions; fixed in 43.10). UEFN edit sessions are unaffected.
 
 #### 1. Show a camera while a player is inside a Volume device
 
@@ -404,8 +416,8 @@ Add it to an entity as an asset component through Epic `EntityToolset.AddCompone
    offline LSP alone will not prove a camera rig builds.
 2. Launch a session; the rig camera should take over on join (`Print` in the
    `AddCamera` success branch).
-3. Retune `CameraDistanceCentimeters` / `CameraHeightCentimeters` live and
-   re-enter the session rather than guessing numbers.
+3. Retune `BoomOffset` and the damping factors live and re-enter the session rather
+   than guessing numbers.
 
 ### Don'ts
 
@@ -413,18 +425,16 @@ Add it to an entity as an asset component through Epic `EntityToolset.AddCompone
 - Don't call `AddCamera(...)` with parens — it **is** `<decides>`. Error 3511 covers
   both directions (compile-verified): "uses parentheses to call a function that has
   the 'decides' effect" and "uses square brackets to call a function that does not".
-- Don't use `FieldOfViewDegrees`, degrees anywhere, or `GlobalModifierPosition` /
-  `VisualModifierPosition` — all gone in 43.00 (radians, `FieldOfView`, layer stacks).
+- Don't use degrees anywhere, or any name listed as gone under "Rules that hold everywhere".
 - Don't put a cosmetic shake in `PostCameraModifiers` — it moves aim; use
   `PresentationCameraModifiers`. Collision/recoil go in Post (runs once on the blend).
 - In a custom `Evaluate`, field overrides go **before** `CloneCameraState<constructor>(InValue)` (3690).
 - Don't subclass `mesh_component`, and don't invent mesh class names — read them
   from the Assets digest.
-- Don't promise publishing: every symbol on this page is Experimental.
-- Audio follows the active camera (fixed in 42.40 and again in 43.00): sound is spatialized
+- Don't promise publishing while the digest marks these names `@experimental`.
+- Audio follows the active camera: sound is spatialized
   around the Scene Graph camera, not the player character — don't add listener workarounds.
-- Don't ship a play-server build relying on cameras without the
-  `using { /Fortnite.com/SceneGraphCameras }` workaround until 43.10.
+- Keep `using { /Fortnite.com/SceneGraphCameras }` in every camera file.
 - Don't place two components of the same camera class on one entity.
 
 ### Related

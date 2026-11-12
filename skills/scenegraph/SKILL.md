@@ -5,7 +5,7 @@ description: "UEFN Scene Graph — use when the task is entities, components, or
 license: MIT
 metadata:
   label: "UEFN Scene Graph"
-  version: 31
+  version: 32
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -22,30 +22,32 @@ metadata:
 4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
 5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
 6. **One house code style** (verse `code_style`).
-7. **Names come from the digest** (verse `digests`).
+7. **Names come from the digest of the installed build** (verse `digests`). The digest wins over every skill page: after a Fortnite update, or when a name does not compile, call `verse_digest_changes()`; an `@experimental` line above a name means it blocks publishing.
 8. **Done means played** — build, then one live run; two players for multiplayer (verse `runtime_pitfalls`).
 
-## 43.00 changes (Nov 1 2026)
+## Changes agents miss
+
+The digest of the installed build decides; `verse_digest_changes()` lists what an update changed.
 
 | Change | What to do | Page |
 |---|---|---|
 | Cameras use **radians**; `FieldOfViewDegrees` → `FieldOfView` | convert degrees (`* PiFloat / 180.0`) | `cameras` |
-| `GlobalModifierPosition` / `VisualModifierPosition` removed | director `PreCameraModifiers` / `PostCameraModifiers` / `PresentationCameraModifiers` | `cameras` |
-| User-written `camera_modifier` allowed | runs on the server, replicated | `cameras` |
-| **Known issue:** cameras don't activate on play servers | `using { /Fortnite.com/SceneGraphCameras }` in any file (private versions; fixed 43.10) | `cameras` |
+| Camera modifiers are small pieces that run in the order added; `fort_orbit` / `fort_fixed_angle` / `fort_fixed_point` modifiers and modifier positions do not exist | stack attach + boom arm + offset + collision push pieces; `AddModifier(Modifier)` | `cameras` |
+| Perception: sight, hearing, touch | emitter + detector components, filtered `Subscribe` | `perception` |
+| A user-written camera modifier moves the whole camera to the server | use only Epic's pieces when the camera must feel immediate | `cameras` |
+| Camera director not found on a play server | keep `using { /Fortnite.com/SceneGraphCameras }` in every camera file | `cameras` |
 | Interacting is harder with a Scene Graph camera | add a Third Person Controls device | `cameras` |
 | Interactable hold: `OnStarted` at hold **start** | completion logic → `SucceededEvent`; remove workarounds | `components` |
 | Moves visible to overlap/sweep the same frame | no `Sleep` between move and query | `movement_transforms` |
 | Component on another entity → warning (future error) | fresh component per entity | `components` |
 | Prefabs subclass their parent; templates/items not `<final>` | `assault_rifle_template[E]` casts work | `custom_weapons` |
 | `fort_item_owner_pose_modifier_component` (5 hold poses) | `SetEquippedPose` | `held_items` |
-| **Known issue:** wedge target query misses actor-less entities | fixed 43.10 | `template_abilities` |
 | Editor uses entities directly (no proxy actors); prefab live edit | find entities with `FindEntities` | `editor_tools`, `prefab_only` |
 | Built-in damage hits entities | health pipeline | verse `sys_health_pipeline` |
 | Max `weak_map` per module 4 → 6 | — | verse `persistence` |
 | **Performance:** spawning many entities is cheaper (fewer hitches), moving costs less per frame, the server skips entities that haven't moved, Verse compile / Push Changes reinstance less, mass deletes are faster, many Verse objects or material properties use less client memory, Scene Graph memory is tracked better | **re-cook (launch/push again) to see it**; still pool and reuse, still move with KFM, not per-tick teleports; measure with the Memory Snapshot *Scene Graph* filter | below, uefn `profiling` |
 
-### 43.00 performance: what it changes for you
+### Performance: what it changes for you
 
 - **Spawning in bulk** (waves, PCG-style scatter from Verse, pickups) hitches less, but a pool
   (spawn once, hide / show, `RemoveFromParent` only at the end) is still cheaper than spawn/destroy loops.
@@ -53,11 +55,11 @@ metadata:
   entities that **didn't move**, so many static or rarely moving entities are now cheap. Keep
   movers on `keyframed_movement_component` instead of per-frame `SetGlobalTransform`.
 - **Memory:** islands with many Verse objects or Verse-driven material properties use less
-  client memory **once uploaded from 43.00**. Check with Memory Snapshot's *Filter by Scene Graph
+  client memory **once the island is uploaded again**. Check with Memory Snapshot's *Filter by Scene Graph
   Objects* (entities vs components; it doesn't show parent links).
 - **Editor:** Verse compiles and Push Changes spend less time reinstancing, mass entity deletes are faster,
   and big prefabs don't reinitialize while you drag them (they do on release).
-- **Some gains need a new cook:** launch or push again before you profile a 43.00 change.
+- **Some gains need a new cook:** launch or push again before you profile a change.
 
 ## What to build it with
 
@@ -113,7 +115,7 @@ mutating a placed level instance as the primary workflow — see
 | Kind | Tools |
 |------|-------|
 | **PROBE** | `scene_graph_capabilities` (prefab helpers); entity CRUD via Epic `ValkyrieToolset.EntityToolset` (`skill_read_subskill("uefn", "epic_mcp")`) |
-| **PREFAB (Epic, 43.00)** | `ValkyrieToolset.PrefabToolset`: `CreatePrefab` (optional `parentClass` template), `GetPrefab`, `ApplyPrefabEdits`, `CreatePrefabFromEntities`, `GetPrefabForEntity`; prefab **contents** are edited with the EntityToolset tools on the prefab's `rootEntity` |
+| **PREFAB (Epic)** | `ValkyrieToolset.PrefabToolset`: `CreatePrefab` (optional `parentClass` template), `GetPrefab`, `ApplyPrefabEdits`, `CreatePrefabFromEntities`, `GetPrefabForEntity`; prefab **contents** are edited with the EntityToolset tools on the prefab's `rootEntity` |
 | **PREFAB (Ducky fallback)** | `create_empty_prefab`, `create_prefab_from_entities`, `instantiate_prefab`, `convert_actors_to_entities` |
 | **VERSE API** | `get_verse_api`, `search_verse_digest`, `list_verse_modules` |
 
@@ -146,7 +148,7 @@ unreal__call_tool({
 
 ## Golden path (Entity Prefab — asset first, then place)
 
-Build the prefab and everything on it over MCP (verified 43.00). Never stop at
+Build the prefab and everything on it over MCP. Never stop at
 an empty prefab and hand the user Details-panel steps.
 
 ```
@@ -208,7 +210,7 @@ free-text hunts, `list_verse_modules` for the module map.
   (Save the prefab). Do not move bodies, add meshes, or attach comps on the
   placed level copy as the primary workflow — those become instance overrides
   (or destroy hierarchy). Details: `prefab_only`.
-- **Prefab contents are editable over MCP (43.00).** `PrefabToolset.GetPrefab`
+- **Prefab contents are editable over MCP.** `PrefabToolset.GetPrefab`
   / `CreatePrefab` return the prefab's `rootEntity`; every EntityToolset tool
   (`AddComponent`, `SetComponentProperty`, `CreateEntity` with `parentEntity`,
   `FindEntities` with `rootEntity`) works on it. Then `ApplyPrefabEdits` and
@@ -240,7 +242,7 @@ free-text hunts, `list_verse_modules` for the module map.
   - A full turn is four 90° keys (one 360° key is no rotation).
   - Chasing = a short keyframe re-aimed ~10 times a second
     (`ChaseSegments`), never a per-frame transform.
-  - Five easings, all concrete and publishable on 43.00: `linear_`, `ease_`,
+  - Five easings, all concrete and publishable: `linear_`, `ease_`,
     `ease_in_`, `ease_out_`, `ease_in_out_cubic_bezier_easing_function{}`.
   - `<final>`: compose, never subclass. Empty pivots need `transform_component`
     first (`SetLocalTransform` creates one). **Never** `creative_prop` /
@@ -285,15 +287,15 @@ free-text hunts, `list_verse_modules` for the module map.
   icon → save → place → Verse grant): `custom_items`.
   **Template abilities** (Spicy Sprint, status-effect AbilityElements,
   `fort_item_ability_component` + `fort_template_ability`) — `template_abilities`.
-  **42.30:** `fort_template_ability` is not parametric (`x := class(fort_template_ability):`,
+  `fort_template_ability` is not parametric (`x := class(fort_template_ability):`,
   or no Verse at all); target queries take `Targets := array{…}` (`Any` → `Neutral`).
-  **42.40:** abilities are out of Experimental (publishable); wedge `Angle` is in radians
+  Abilities are out of Experimental (publishable); wedge `Angle` is in radians
   (`CentralAngle` gone), `fort_self_ability_target_query`, attribute modifier point/span
   are in Verse, open enums need `_ =>`. Verse-authored abilities (`ability(context,
   effect)`, `ability_context.Instigator : ?entity`, `Use()` is no_rollback) —
   `custom_abilities`.
   **Held items** (a carried torch / lantern / tool, `held_item_template`) — `held_items`;
-  **43.00** hold pose via `fort_item_owner_pose_modifier_component` (torch default,
+  Hold pose via `fort_item_owner_pose_modifier_component` (torch default,
   flashlight, map, small/large consumable). Prefabs made from a template are Verse
   subclasses of it (templates are no longer `<final>`).
   Scene-event `OnReceive` runs on the server only (client calls are ignored).
@@ -319,7 +321,7 @@ free-text hunts, `list_verse_modules` for the module map.
   `create_prefab_from_entities` (loose entities → new name only) create assets
   under the project mount; `instantiate_prefab` places them via
   `spawn_actor_from_object` (same as Content Browser drag). Do
-  **not** `spawn_actor` an `EntityProxyActor` by class. From 43.00 the editor works on
+  **not** `spawn_actor` an `EntityProxyActor` by class. The editor works on
   entities directly (no proxy actors) — find placed prefabs with `FindEntities`.
 - **Module name collision** — do not put Verse under `Content/Verse/<Name>/`
   when `Content/<Name>/` already owns Assets module `Name`. Use a distinct
@@ -358,11 +360,12 @@ Load with `skill_read_subskill("scenegraph", "<id>")`:
 - `itemization` — items and inventories, granting stock weapons from `/Fortnite.com/Weapons`, pickups, equipping
 - `custom_weapons` — custom Armory Entity Prefabs (AR/pistol/shotgun/SMG), mesh/pivot/collision, `fort_trace_weapon_component`, Verse grant: poll until `GetFirstInventory[Agent]` succeeds (a `Sleep(0.1)` loop you write — not an API) + AddItemDistribute then GetParentInventory/PickUp/Equip (not AddResult.Ok); stat ranges, infinite ammo, rarity, skins, upgrades from base values, find held guns by prefab type. Owned collectible + canvas shop + persist + load on join → verse `sys_owned_weapons`
 - `custom_items` — make a custom item yourself over MCP (CreatePrefab, component class paths, message text from Verse, category/rarity via Python, icon, place, grant); itemization shell + Verse components for any behavior, categories/stack/rarity, KFM spin component, equipped logic, Verse grant/has/clear by prefab type (no Creative granter yet)
-- `cameras` — Scene Graph camera components (perspective/orthographic/physical), `camera_director_component.AddCamera[...]`, the `camera_modifier` stack (`AddModifier(...)` has NO `<decides>`), `fort_orbit` / `fort_fixed_angle` / `fort_fixed_point` modifiers with full field tables, enter/exit transitions + blends, why `camera_state` and `mesh_component` are `epic_internal`. All Experimental.
-- `custom_player_controller` — fully custom locomotion on an entity: 42.10 `Move`/`Jump` on `TraversalMapping`, `OnSimulate` + `Sleep(0.0)` delta loop (tick subscribe is `epic_internal`), editable speed/accel/friction/gravity/jump, orbit camera install, stock character in stasis; compiled templates via `verse_template_apply("custom_movement")`
-- `template_abilities` — Fortnite template abilities (publishable since 42.40): `fort_template_ability` (not parametric), `fort_item_ability_component` on an item prefab, `Targets` arrays (open enum), `fort_self_ability_target_query`, wedge `Angle` in radians, AbilityElements (burn/pepper/removal), attribute modifier point/span (in Verse since 42.40), animation spans, IA_Sprint, hotbar grant device
-- `custom_abilities` — Verse-authored abilities (/UnrealEngine.com/Abilities, 42.40): `ability(context, effect)`, `ability_context` (Instigator `?entity`), effect prefab + `ability_effect_component` lifecycle, `Use()` no_rollback, Cancel / CanCancel / cancel_reason, granting with input, compiled heal-over-time example
-- `held_items` — 42.30 `held_item_template`: carryable non-weapon prefabs (torch → lantern/tool/banner), setup, Verse grant/equip, ADS toggles
+- `cameras` — Scene Graph camera components (perspective/orthographic/physical), `camera_director_component.AddCamera[...]`, the modifier stack (`AddModifier(Modifier)` has NO `<decides>`, runs in the order added), the camera modifier pieces (attach, boom arm, offset, collision push, dampen, set, framing) and orbit / fixed angle / fixed point recipes with full field tables, enter/exit transitions + blends, why `camera_state` and `mesh_component` are `epic_internal`. All Experimental.
+- `custom_player_controller` — fully custom locomotion on an entity: `Move`/`Jump` on `TraversalMapping`, `OnSimulate` + `Sleep(0.0)` delta loop (tick subscribe is `epic_internal`), editable speed/accel/friction/gravity/jump, orbit camera install, stock character in stasis; compiled templates via `verse_template_apply("custom_movement")`
+- `template_abilities` — Fortnite template abilities (publishable): `fort_template_ability` (not parametric), `fort_item_ability_component` on an item prefab, `Targets` arrays (open enum), `fort_self_ability_target_query`, wedge `Angle` in radians, AbilityElements (burn/pepper/removal), attribute modifier point/span (in Verse), animation spans, IA_Sprint, hotbar grant device
+- `custom_abilities` — Verse-authored abilities (/UnrealEngine.com/Abilities): `ability(context, effect)`, `ability_context` (Instigator `?entity`), effect prefab + `ability_effect_component` lifecycle, `Use()` no_rollback, Cancel / CanCancel / cancel_reason, granting with input, compiled heal-over-time example
+- `perception` — sight, hearing and touch: emitter + detector components, filtered `Subscribe`, events in `OnReceive`, a guard that sees
+- `held_items` — `held_item_template`: carryable non-weapon prefabs (torch → lantern/tool/banner), setup, Verse grant/equip, ADS toggles
 
 ## Verify
 

@@ -1,5 +1,5 @@
 ---
-description: "Verse compiler error catalogue — every Script error code agents actually hit (3512 no_rollback, 3582 divergent initialiser, 3593 internal module, 3588 ambiguous identifier, 3104, 3506, 3509, 3524, 3511, 3514, 3100, 3000, 3502, 9002, plus the 42.40 ability / event changes and the 43.00 changes: weak_map cap 6, asset-module accessibility, SendUp no_rollback, Self in initializers, LSP false positives, quest API renames) with the real cause and a compiling fix"
+description: "Verse compiler error catalogue — every Script error code agents actually hit (3512 no_rollback, 3582 divergent initialiser, 3593 internal module, 3588 ambiguous identifier, 3104, 3506, 3509, 3524, 3511, 3514, 3100, 3000, 3502, 9002, plus the older-build ability / event changes and the changes: weak_map cap 6, asset-module accessibility, SendUp no_rollback, Self in initializers, LSP false positives, quest API renames) with the real cause and a compiling fix"
 metadata:
   order: 3
   label: "Compile errors — code → cause → fix"
@@ -14,28 +14,28 @@ from real agent sessions (113 errors), so the first four cover most of what you
 will see. **The offline LSP (`workspace_list_verse_errors`) cannot see 3512, 3582,
 3593, 3588 or 3532** — only `workspace_compile_verse` finds them.
 
-**43.00: the offline LSP is behind the compiler.** Verified on 43.00 (Nov 1 2026), it
+**the offline LSP is behind the compiler.** Verified now (Nov 1 2026), it
 reports two errors the UEFN build does not:
 
 | LSP says | UEFN build | Do |
 | --- | --- | --- |
 | "Accessing instance member `X` from this scope is not yet implemented" on a field initializer that reads an earlier `<final>` field | compiles | trust `workspace_compile_verse` (`classes`) |
-| "Only 4 persistent `var`s allowed (used 5/6)" | the 43.00 cap is 6, so 5 or 6 compiles | trust the build; the 7th is a real 3502 |
+| "Only 4 persistent `var`s allowed (used 5/6)" | the cap is 6, so 5 or 6 compiles | trust the build; the 7th is a real 3502 |
 | "Unknown member `Await` in `listenable(…)`" (e.g. `TriggeredEvent.Await()`, `OnDamaged.Await()`), plus follow-on "Must be an array, map, or generator" / "Dynamic cast $unknown" | compiles (same build, 0 errors) | trust the build; `listenable(t)` still has `Await` |
 
 When the two disagree, the `workspace_compile_verse` result is the truth.
 
-**Rule: never "fix" a red squiggle on `listenable.Await()`.** On 43.00 the LSP marks every
+**Rule: never "fix" a red squiggle on `listenable.Await()`.** The LSP marks every
 `.Await()` on a listenable (`TriggeredEvent`, `SpawnedEvent`, `GrantEvent`, `DeactivateEvent`,
 `OnDamaged`, `OnDied` …) as an error, plus the cascade errors after it. Run
 `workspace_compile_verse`. If it reports 0 errors, leave the code alone.
 
-### 43.00 errors seen building quests and health code (real compiler)
+### Errors seen building quests and health code (real compiler)
 
 | Error | Cause | Fix |
 |-------|-------|-----|
 | 3100 `vErr:S88: Expected expression, got "do" in indented block` | a multi-line `for:` filter block followed by `do:` on its own line | one line: `for (P -> M : Map, Cond) do M` |
-| 3506 Unknown member `AwaitRoundStart` in `entity` | tutorial helper, not a 43.00 API | delete it, or write your own wait |
+| 3506 Unknown member `AwaitRoundStart` in `entity` | tutorial helper, not a API | delete it, or write your own wait |
 | 3509 No overload of `operator'()'` … `(:generator(inventory_component), :type{0})` | indexing a **generator** (`FindDescendantComponents(...)[0]`) | iterate it, or `first(X : Gen) { X }` (`syntax`) |
 | 3502 "Can't use built-in macros other than to invoke them" | `first(X : Gen)` without a body | `first(X : Gen) { X }` |
 | 3513 "Expected an expression that can fail in the 'if' condition clause" | `first(…){…}` over a generator alone in an `if` (it can't fail) | add a failable clause (`if (true?, X := first(…){X})`), or bind it outside the `if` |
@@ -71,7 +71,7 @@ Variants with the same code:
   which is not allowed by its context" — you built `foo{}` at **module scope**. Move
   it into `OnBegin` or a device field.
 - "This invocation calls a function (`(/Verse.org/SceneGraph/entity:)SendUp`) that has
-  the 'no_rollback' effect" (43.00 health pipeline) — `Target.SendUp(damage_event{…})`
+  the 'no_rollback' effect" (health pipeline) — `Target.SendUp(damage_event{…})`
   inside a `<transacts>` / `<decides>` function or an `if`. Make the sender a plain
   (no-specifier) function and call it on its own line (`sys_health_pipeline`).
 - "This division can fail, but `F` does not have the `<decides>` effect" — integer
@@ -81,11 +81,11 @@ Variants with the same code:
   `spawn{}` it.
 - "This invocation calls a function (`(/UnrealEngine.com/Abilities/ability:)Use`) that
   has the 'no_rollback' effect" — `Ability.Use(…)` inside `if (…)` or a `<decides>`
-  function. Call it on its own line, then `if (Effect := Spawned?):` (42.40, verified).
+  function. Call it on its own line, then `if (Effect := Spawned?):`.
   Same for `Sim.AddChatChannel(…)`: bind the result first.
 - "Case might fail because its argument is an open enumeration type
   `fort_ability_attach_socket`, and doesn't have a default clause (e.g. _ => {})" —
-  42.40 made `fort_ability_attach_socket` and `fort_target_query_affiliation`
+  Epic made `fort_ability_attach_socket` and `fort_target_query_affiliation`
   `<open>`; a `case` over them needs `_ => …` even when it lists every value.
 
 ### 3582 — "Divergent calls (calls that might not complete) cannot be used to define data-members" (17 hits)
@@ -102,9 +102,9 @@ and `<converges>` calls may initialise a field.
 
 ### 3593 — "Invalid access of internal module / scoped class from control scope" (16 hits)
 
-**43.00:** modules that contain reflected assets default to project-wide accessibility,
+Modules that contain reflected assets default to project-wide accessibility,
 so the asset-folder form of this error should mostly stop. It still applies to your own
-nested code folders and to 42.x islands.
+nested code folders and to islands.
 
 Cause: importing a **nested** Assets-digest module (`using { Materials.HexPlatforms }`)
 or constructing a prefab (`EP_Weapon_Pistol{}`) that sits in a nested asset
@@ -129,13 +129,13 @@ existing reference to it.
 Cause: you named a field, local or parameter the same as a module function
 (`Distance`, `Dogs` twice in one module, …).
 
-43.00 adds a new source: modules that contain reflected assets are now
+Epic added a new source: modules that contain reflected assets are now
 **project-wide** by default, so asset names (and asset folder names) from anywhere in
 the island can clash with your bindings and types. Rename yours, or qualify the asset
 (`(/YourIsland/Materials:)M_Glow`), or narrow the `using` path (`modules`).
 
-43.00: a field or local named `Last` (or another new extension name) is ambiguous with
-`operator'.Last'` (the new `Array.Last[]`); rename it. Verified on 43.00: `var Last:float`
+a field or local named `Last` (or another new extension name) is ambiguous with
+`operator'.Last'` (the new `Array.Last[]`); rename it. Verified: `var Last:float`
 on a class and `Last := …` inside a method both fail ("could be (…:)Last, (/Verse.org/Verse:)operator'.Last'");
 the same local in a module-level function still compiles. Use `PrevTime`, `LastLogin`, `LastSeen`.
 
@@ -179,18 +179,18 @@ need `/Verse.org/SceneGraph`; `GetPlayspace()` needs `/Fortnite.com/Playspaces`;
 `fort_character` needs `/Fortnite.com/Characters`; `animation_sequence` needs
 `/Verse.org/Assets`; `color{}` needs `/Verse.org/Colors`.
 
-42.40 variants (verified):
+Variants (verified):
 
-- "Unknown member `Subscribe` in `event(int)`" — **42.x only**: your own `event(t)` (or a
-  UMG event field) has no `Subscribe` before 43.00; await it in a loop. On 43.00 it
+- "Unknown member `Subscribe` in `event(int)`" — **only**: your own `event(t)` (or a
+  UMG event field) has no `Subscribe` in older builds; await it in a loop. Now it
   compiles (`events_subscriptions`).
   If the message adds "Did you forget to specify using { …/SomeFolder }", another
-  folder defines a `Subscribe` extension on events — 43.00 rejects that one (below).
-- **43.00 (3518):** "Multiple overloads of the function match the provided arguments (:int->void).
+  folder defines a `Subscribe` extension on events — rejects that one (below).
+- "Multiple overloads of the function match the provided arguments (:int->void).
   Could be any of: function (/Verse.org/Verse/event:)Subscribe(:int->void) in package Verse
   / function (/YourIsland/Folder:)operator'.Subscribe'(:event(t),:t->void)" — your own
   `(Event:event(t) where t:type).Subscribe(…)` extension (Epic's interim tutorial helper)
-  now clashes with the built-in at every call site (verified 43.00). Delete the
+  now clashes with the built-in at every call site. Delete the
   extension; change `event_subscription` vars to `cancelable` (`events_subscriptions`).
 - "`CentralAngle` is not an instance data-member of `fort_wedge_ability_target_query`"
   — renamed `Angle`, in radians (90° = `1.5708`).
@@ -225,24 +225,24 @@ Cause: iterating something that is not iterable, usually because a missing `usin
 left a generator call unresolved (`FindSweepHits` without SceneGraph). Fix the import
 first; then iterate arrays, maps, or `generator(t)` values only.
 
-### 3502 — "Only 6 persistent `var`s allowed (used 7)" (43.00, verified; 42.x: "Only 4 … (used 5)")
+### 3502 — "Only 6 persistent `var`s allowed (used 7)" (verified; older builds: "Only 4 … (used 5)")
 
-An island may declare at most **six** persistent `weak_map(player, …)` `var`s from
-43.00 (four on 42.x), counted across every file. Every offending line gets the error.
-Player Core + Economy + Progression + Time Tracker use four, which leaves two free on
-43.00. Fix: nest the new data as a field on an existing persistable table
+An island may declare at most **six** persistent `weak_map(player, …)` `var`s
+(four on older builds), counted across every file. Every offending line gets the error.
+Player Core + Economy + Progression + Time Tracker use four, which leaves two free.
+Fix: nest the new data as a field on an existing persistable table
 (`sys_owned_weapons` shows the pattern) rather than adding maps. The offline LSP still
 quotes "Only 4"; the build's number is the real one.
 
-### 3502 — "`Self` in an instance variable initializer is not yet implemented" (43.00)
+### 3502 — "`Self` in an instance variable initializer is not yet implemented"
 
-A field initializer wrote `Self.Field`. 43.00 lets an initializer read an earlier
+A field initializer wrote `Self.Field`. Epic lets an initializer read an earlier
 `<final>`, non-`@editable` field by its **bare name** (`WarnAt:float = RoundSeconds - 10.0`);
 drop `Self.` (`classes`).
 
-### 3506 — 43.00 material inheritance on re-upload (from the upgrade notes, not probed here)
+### 3506 — material inheritance on re-upload (from the upgrade notes, not probed here)
 
-43.00 turns on Verse material inheritance: material instances now inherit from a common
+Epic turned on Verse material inheritance: material instances now inherit from a common
 base material class. Rare compile errors when you re-upload:
 
 - **Qualified member access** `Value.(M_Child)Member` fails with "unknown member" when
@@ -251,20 +251,20 @@ base material class. Rare compile errors when you re-upload:
   other conflict. If they're identical, delete the child's; if not, rename one. Tip: rename
   them all to surface every call site, and fix children before parents.
 
-### Type mismatch (likely 3509, not probed) — 43.00 `agent_group.AddMember` / `RemoveMember` return `result(void, …)`
+### Type mismatch (likely 3509, not probed) — `agent_group.AddMember` / `RemoveMember` return `result(void, …)`
 
-42.x: `AddMember(Agent, Info):result(comparable, add_member_error)`; 43.00 (`/Verse.org/AgentGroup`):
+Older builds: `AddMember(Agent, Info):result(comparable, add_member_error)`. Now (`/Verse.org/AgentGroup`):
 `result(void, add_member_error)` (same for `RemoveMember`). Code that **bound or compared** the old
 `comparable` success value (`Key := Group.AddMember(...).GetSuccess[]` then used as a map key or
 `=`) gets a type mismatch (3509). Fix: keep your own key (the agent itself), and use
 `.GetSuccess[]` only as a yes/no check: `if (Group.AddMember(A, Info).GetSuccess[]):`. Calls in
 statement position (chat channels, conversations, text chat pages) are unaffected.
 
-### 3506 — 43.00 Progression API renames (quest code from 42.x)
+### 3506 — Progression API renames (quest code on older builds)
 
 The quest API was rewritten when it left Experimental. Old names fail with 3506:
 
-| 42.x | 43.00 |
+| Older builds | Now |
 | --- | --- |
 | `JoinQuest(Quest, Participant, Info)` / `AbandonQuest(…)` | `Quest.Join(Participant, Info)` / `Quest.Abandon(Participant)` |
 | `join_quest_error` / `abandon_quest_error` | `quest_error` |
@@ -280,20 +280,20 @@ without it the archetype fails with "`Name` is not an instance data-member"
 
 ### 3509 (variant) — "expects a value of type tuple(agent,tuple()), but this argument is … tuple(entity,tuple())"
 
-Since 42.40 `ability_context.Instigator` and `fort_projectile_component.GetInstigator[]`
+Since `ability_context.Instigator` and `fort_projectile_component.GetInstigator[]`
 are entities. Cast before using agent members: `agent[Context.Instigator?]`
 (scenegraph `custom_abilities`).
 
 ### 3502 (variant) — "Using a value of type … as a value of type … is not yet implemented"
 
 A function-typed **parameter** passed to `Subscribe` on an interface-typed
-`listenable(t)` parameter. Pass a named function or method instead (verified 42.40).
+`listenable(t)` parameter. Pass a named function or method instead.
 
 ### 3000 — "Error getting text contents of snippet `…/Verse/X/file.verse`"
 
 A `.verse` file was deleted on disk while UEFN was open; the build still lists it. Put
 the file back, then delete it through Epic `VerseToolset.VerseToolset.Delete` (it
-tells the build), or restart the editor. Verified 42.40.
+tells the build), or restart the editor. Verified.
 
 ### 3509 (variant) — "The assignment's left hand expression type … cannot be assigned to"
 
@@ -304,7 +304,7 @@ copy the bound value into a `var` before mutating.
 ### "Invalid access of internal function … from control scope" (verified)
 
 An Epic API marked `<epic_internal>` cannot be called from creator code, even
-though the digest lists it. Confirmed case on 42.10:
+though the digest lists it. Confirmed case:
 `TickEvents.PrePhysics.Subscribe(...)` — `execution_listenable` is
 `class<epic_internal>`, so per-frame work must use `OnSimulate` + `loop` +
 `Sleep(0.0)` with a measured `GetSimulationElapsedTime` delta (scenegraph
@@ -340,7 +340,7 @@ unbalanced `{` `}` or `(` `)`, or a stray `:` at the end of a one-line `if`.
 An Assets-digest module that is not in this project. The asset folder must exist
 under `Content/` and the project must have been built once so the digest lists it.
 
-### Messages to recognise (verified with verse-lsp, 42.40)
+### Messages to recognise (verified with verse-lsp)
 
 | Message | Cause | Fix |
 |---------|-------|-----|

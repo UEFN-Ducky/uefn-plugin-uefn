@@ -1,5 +1,5 @@
 ---
-description: "Fortnite template abilities (out of Experimental in 42.40) — Scene Graph item prefabs with fort_item_ability_component, fort_template_ability (not parametric; Verse optional), Targets arrays (Friendly/Neutral/Hostile, open enum), fort_self_ability_target_query, wedge Angle in radians, status-effect AbilityElements (burn/pepper/removal), attribute modifier point/span (in Verse since 42.40), animation spans, input triggers (IA_Sprint), and hotbar grant"
+description: "Fortnite template abilities (out of Experimental) — Scene Graph item prefabs with fort_item_ability_component, fort_template_ability (not parametric; Verse optional), Targets arrays (Friendly/Neutral/Hostile, open enum), fort_self_ability_target_query, wedge Angle in radians, status-effect AbilityElements (burn/pepper/removal), attribute modifier point/span (in Verse), animation spans, input triggers (IA_Sprint), and hotbar grant"
 metadata:
   order: 9
   label: "Template abilities"
@@ -17,7 +17,7 @@ Sprint input applies burn DoT + pepper speed at once.
 Not Armory firearms (`custom_weapons`). Not a Creative Item Granter. Not a
 custom item whose “ability” is only a Verse component (`custom_items`).
 
-**42.40:** template abilities are out of Experimental — islands that use them can
+Template abilities are out of Experimental — islands that use them can
 publish. Verse-authored abilities (`ability(context, effect)`, `Use()` from Verse):
 `custom_abilities`.
 
@@ -60,7 +60,7 @@ Confirm every member you set in Details (`ItemAbilities`, `InputTrigger`,
 ## Mental model
 
 ```
-Verse (optional since 42.30)
+Verse (optional)
 └── template_ability := class(fort_template_ability):
         → only gives the ability its own type name; MakeContext / MakeAbility /
           ActiveEffects are built in. Or pick fort_template_ability itself.
@@ -86,7 +86,7 @@ Level
 **Do not** put `fort_inventory_weapon_hotbar_component` on the **item**. That
 type lives on the **player**. Grant queries it from the player.
 
-## Scene Graph + inventory rules (checked on 43.x)
+## Scene Graph + inventory rules
 
 - **Template abilities go on the prefab, in Details. Verse cannot add one.**
   `AddItemAbility` / `AddItemEquippedAbility` take `ability(ability_context, ability_effect)`;
@@ -135,7 +135,7 @@ via the `custom_items` Python step; by hand: Prefab Editor):
 4. Index[0] type = `spicy_sprint_ability` (your compiled class) or `fort_template_ability`. Expand it:
    - **InputTrigger** → `Assets_input_action` → `IA_Sprint`
    - **TargetQuery** → `fort_self_ability_target_query` (Epic's quickstart still says
-     `self_ability_target_query` — 42.40 renamed it)
+     `self_ability_target_query` — older-build renamed it)
    - **AbilityElements** two entries:
      - `[0]` `fort_ability_status_effect_burn_point` (periodic health damage)
      - `[1]` `fort_ability_status_effect_pepper_point` (movement speed)
@@ -174,7 +174,7 @@ WaitForHotbar(Agent : agent)<suspends> : logic =
         set Tries += 1
         Sleep(0.1)
 
-# Not parametric since 42.30; MakeContext / MakeAbility / ActiveEffects are built in.
+# Not parametric; MakeContext / MakeAbility / ActiveEffects are built in.
 # Subclass only to give the prefab its own type name (or pick fort_template_ability itself).
 spicy_sprint_ability := class(fort_template_ability):
 
@@ -221,25 +221,25 @@ ability_item_granter_device := class(creative_device):
             GrantTo(FirstPlayer)
 ```
 
-Checked with the Verse checker on a 43.x island: 0 errors. Drop `TuneAbilities()` to keep
+Checked with the Verse checker on a current island: 0 errors. Drop `TuneAbilities()` to keep
 the values set in Prefab Details. The offline checker skips effect checks, so
 `workspace_compile_verse` with UEFN open is still the final word. If they disagree,
 **digest wins** — `get_verse_api` and fix. Do not patch `*.digest.verse`.
 
-## 42.30 changes (digest-verified)
+## Changes (digest-verified)
 
-| Before 42.30 | 42.30 |
+| In older builds | Older builds |
 | --- | --- |
 | `class(fort_template_ability(ability_context, fort_template_ability_effect))` + three overrides | `class(fort_template_ability):` — or no Verse at all (pick `fort_template_ability` as the ItemAbilities type) |
-| `TargetQuery.Target := fort_target_query_affiliation.Any` | `Targets := array{…}` on `fort_reticle_ability_target_query` (+ `Range`) and `fort_wedge_ability_target_query` (+ `Radius`, `CentralAngle` → `Angle` in 42.40); enum `fort_target_query_affiliation` = `Friendly`, `Neutral`, `Hostile` (`Any` removed — list every affiliation you want) |
+| `TargetQuery.Target := fort_target_query_affiliation.Any` | `Targets := array{…}` on `fort_reticle_ability_target_query` (+ `Range`) and `fort_wedge_ability_target_query` (+ `Radius`, `CentralAngle` → `Angle`); enum `fort_target_query_affiliation` = `Friendly`, `Neutral`, `Hostile` (`Any` removed — list every affiliation you want) |
 | animation span `Animation` + `fort_ability_anim_layer` | `fort_ability_animation_element_span`: `AnimationSequence:animation_sequence`, `AnimationLayer:play_animation_layer`, `EaseIn`, `EaseOut` — re-pick the animation in old spans |
 | — | `fort_ability_status_effect_removal_point` — `StatusEffects:[]concrete_subtype(fort_ability_status_effect_point)` removes those effects from the target |
 | — | `fort_ability_status_effect_burn_point.DamagePerSecond:float` |
-| — | **Attribute Modifier** point / span (Add / Multiply / Override `MaxHealth`, `MaxShields`, `Speed`, `Gravity`) — editor-only in 42.30; **in the digest since 42.40** (below) |
+| — | **Attribute Modifier** point / span (Add / Multiply / Override `MaxHealth`, `MaxShields`, `Speed`, `Gravity`) — editor-only; **in the digest** (below) |
 
-## 42.40 changes (digest-verified, compiled 0 errors / 0 warnings)
+## Changes (digest-verified, compiled 0 errors / 0 warnings)
 
-| 42.30 | 42.40 |
+| Older builds | Older builds |
 | --- | --- |
 | everything `@experimental` (2304 warning, can't publish) | no `@experimental` on any ability type — publishable |
 | `fort_wedge_ability_target_query.CentralAngle` (degrees) | **`Angle`, radians**, 0 – 2π (90° = `1.5708`). `CentralAngle` is Script error 3506 |
@@ -250,23 +250,23 @@ the values set in Prefab Details. The offline checker skips effect checks, so
 | — | `fort_projectile_component.LifetimeAfterStop` + `SetLifetimeAfterStop(Seconds)`; `GetInstigator[]` returns an `entity` |
 | `ability_context.Instigator : ?agent` | `?entity` — cast with `agent[...]` (`custom_abilities`) |
 
-42.40 fixes: `Use()` with a player instigator works; ability animations replicate and
+Fixes: `Use()` with a player instigator works; ability animations replicate and
 looped ones loop; a rejected use no longer runs its timeline; `Cancel` stops the
 timeline and end events fire once; unequipping mid-use still fires end events; target
 queries return entities for players, NPCs and actors that have them; burn VFX shows on
 the player.
 
-> [!WARNING] 43.00 known issue (fixed in 43.10)
+> [!WARNING] Known issue on older builds
 > A `fort_wedge_ability_target_query` does **not find Scene Graph entities that have no
 > actor**, so wedge/cone abilities don't damage them (built-in damage on entities is new in
-> 43.00 via the health pipeline). Until 43.10, damage actor-less entities yourself from Verse
+> via the health pipeline). In older builds, damage actor-less entities yourself from Verse
 > (`skill_read_subskill("verse", "sys_health_pipeline")`) or test another target query in a
 > session first. Players, NPCs and actors are still found.
 
-43.00: ability item prefabs subclass their parent class in Verse and the item templates are
+Ability item prefabs subclass their parent class in Verse and the item templates are
 no longer `<final>` (`custom_weapons` → prefab inheritance).
 
-Target queries and modifiers in Verse (compiled in 42.40):
+Target queries and modifiers in Verse:
 
 ```verse
 using { /Fortnite.com/Abilities }

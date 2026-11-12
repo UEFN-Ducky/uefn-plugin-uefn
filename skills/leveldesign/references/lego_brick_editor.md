@@ -1,8 +1,8 @@
 ---
-description: "LEGO® Brick Editor (v42.40) — the UEFN editor mode for building brick-by-brick LEGO static meshes: Brick Gallery, colors, Snap / Kragle / Separate, 16-unit snapping, no scaling or material changes, memory and triangle rules, what agents can and can't do with MCP, 42.40: 50 new bricks, brick-type categories, LOD, primitive bricks change type when Kragled"
+description: "LEGO® Brick Editor — the UEFN editor mode for building brick-by-brick LEGO static meshes: Brick Gallery, colors, Snap / Kragle / Separate, 16-unit snapping, no scaling or material changes, memory and triangle rules, what agents can and can't do with MCP, older builds: 50 new bricks, brick-type categories, LOD, primitive bricks change type when Kragled"
 metadata:
   order: 15
-  label: "LEGO Brick Editor (v42.40)"
+  label: "LEGO Brick Editor"
   default_enabled: false
   load_condition: "LEGO islands, the LEGO Brick Editor, building with LEGO bricks, Kragle / kragled meshes, Separate, brick colors or the brick index"
 ---
@@ -17,7 +17,7 @@ made from a LEGO template (Project Browser → Brand Templates). Practice island
 ## What agents can do
 
 The mode is driven by hand in its left-hand panel; no MCP tool or Epic toolset drives
-it (42.40 toolsets checked live). Agents can:
+it (toolsets checked live). Agents can:
 
 - explain the steps below and what to click;
 - place a **kragled** mesh like any static mesh (`spawn_actor` with its asset path, or
@@ -30,7 +30,7 @@ it (42.40 toolsets checked live). Agents can:
 | --- | --- |
 | Tools | **Snap** (bricks snap with the chosen Snap Mode), **Kragle** (glue the selected bricks into one optimized static mesh), **Separate** (unglue a kragled mesh back into bricks to edit it) |
 | Brick Color | Active color, **Read Brick Color** (copy from a selected brick), **Apply Brick Color** (paint the selection). A placed brick's color is also in Details |
-| Brick Search and Index | Every available brick; search by name. **42.40:** the library is grouped into categories by brick type |
+| Brick Search and Index | Every available brick; search by name. The library is grouped into categories by brick type |
 
 Rules: only the preset LEGO colors, no material changes, **no scaling** (studs and tubes
 must line up). Duplicate a selection with **Ctrl+D**. Double-click selects a brick and
@@ -62,7 +62,7 @@ everything stud-connected to it.
 - Pivot = bottom center. Changing the pivot (Modeling Mode → Edit Pivot) or the collision
   is allowed but lost on re-kragle; keep LEGO/LEGO interpenetration detection intact.
 - To recolor a kragled build: Separate, recolor, Kragle again.
-- **42.40:** a primitive brick pulled straight from the library turns into a different
+- A primitive brick pulled straight from the library turns into a different
   brick type once it is Kragled; a wider LOD system renders large builds faster.
 
 ## Limits
@@ -78,4 +78,4 @@ everything stud-connected to it.
   flag kragled meshes whose simplified collision cuts through empty space — split the mesh.
 - Brick-built data is editor-only but makes files bigger on disk.
 
-**42.40:** 50 new bricks (decorative and small-scale detail pieces).
+50 new bricks (decorative and small-scale detail pieces).

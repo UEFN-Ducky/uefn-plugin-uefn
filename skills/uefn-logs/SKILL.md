@@ -5,7 +5,7 @@ description: Read the real UEFN Output Log (Verse Print / LogVerse lines from pl
 license: MIT
 metadata:
   label: UEFN Logs
-  version: 2
+  version: 3
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true

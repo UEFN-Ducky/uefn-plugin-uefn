@@ -5,7 +5,7 @@ description: "UEFN Island Settings — CORE gameplay session setup: MaxPlayers, 
 license: MIT
 metadata:
   label: UEFN Island Settings
-  version: 10
+  version: 11
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true

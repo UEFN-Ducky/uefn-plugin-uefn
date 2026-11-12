@@ -1,7 +1,7 @@
 {
   "id": "uefn",
   "kind": "plugin",
-  "version": "1.2.13",
+  "version": "1.2.14",
   "label": "UEFN",
   "description": "Everything for the UEFN editor in one plugin: actors, assets, data tables, editor control, level design and worldgen, materials, modeling, Niagara VFX, Scene Graph, Verse (digests, compile, UMG, New-file templates), animation and retargeting, MetaHuman, physics, Virtual Pointer, testing, UEFN Logs and NPC AI recipes. Bundles every UEFN skill. Serial editor ops (one MCP call per turn).",
   "min_app_version": "1.2.412",
@@ -202,6 +202,7 @@
         "list_verse_devices",
         "search_verse_digest",
         "get_verse_api",
+        "verse_digest_changes",
         "list_verse_modules",
         "inspect_verse_device",
         "resize_verse_array",
@@ -342,6 +343,7 @@
         "list_verse_devices",
         "search_verse_digest",
         "get_verse_api",
+        "verse_digest_changes",
         "list_verse_modules",
         "inspect_verse_device",
         "list_verse_property_hashes",
@@ -1416,7 +1418,7 @@
         "id": "llm_npc",
         "name": "LLM NPC Conversation",
         "icon": "\ud83d\udde3\ufe0f",
-        "description": "An NPC you talk to by voice (UEFN 42.30 conversations): persona personality and voice from Verse, a voice channel with the players, structured output (RegisterAction) when you agree a deal, a one-shot structured Prompt, captions from CommitSayEvent. Put llm_npc_behavior on an NPC Character Definition with a Persona Modifier. Compile-verified in 42.30.",
+        "description": "An NPC you talk to by voice (conversations): persona personality and voice from Verse, a voice channel with the players, structured output (RegisterAction) when you agree a deal, a one-shot structured Prompt, captions from CommitSayEvent. Put llm_npc_behavior on an NPC Character Definition with a Persona Modifier. Compile-verified.",
         "folder": "LLMNPC",
         "files": [
           {
@@ -1430,7 +1432,7 @@
         "id": "team_text_chat",
         "name": "Team Text Chat",
         "icon": "\ud83d\udcac",
-        "description": "One text chat channel per team (UEFN 42.40 text_channel): team color and a [Team N] label, players join on arrival and leave on exit, read-only players (SetCanType), per-player labels (SetLabel), channel on/off. Verse can't send or read messages. Compile-verified in 42.40.",
+        "description": "One text chat channel per team (text_channel): team color and a [Team N] label, players join on arrival and leave on exit, read-only players (SetCanType), per-player labels (SetLabel), channel on/off. Verse can't send or read messages. Compile-verified.",
         "folder": "TeamTextChat",
         "files": [
           {
@@ -1664,7 +1666,7 @@
         "id": "umg_widget",
         "name": "UMG Widget Device",
         "icon": "\ud83d\uddb1\ufe0f",
-        "description": "creative_device skeleton for driving a UW_* User Widget (Verse fields + field events awaited in a race-to-stop watcher; no Subscribe until 43.00) when the project has no Verse UI Kit; with the kit, use its driver pattern (skill verse_ui_kit). Uncomment the WIDGET lines after the widget exists in the Assets digest.",
+        "description": "creative_device skeleton for driving a UW_* User Widget (Verse fields + field events awaited in a race-to-stop watcher) when the project has no Verse UI Kit; with the kit, use its driver pattern (skill verse_ui_kit). Uncomment the WIDGET lines after the widget exists in the Assets digest.",
         "folder": "UMGWidget",
         "files": [
           {
@@ -1678,7 +1680,7 @@
         "id": "custom_movement",
         "name": "Custom Entity Movement (Experimental)",
         "icon": "\ud83d\udeb6",
-        "description": "Fully custom player locomotion on a Scene Graph entity: 42.10 Move input action, editable speed/accel/friction/gravity/jump, OnSimulate delta loop (TickEvents.Subscribe is Epic-internal), Scene Graph orbit camera via fort_orbit_camera_modifier on the camera's modifier stack (AddModifier = parens) plus camera_director_component.AddCamera[...] (brackets), stock character parked in stasis. Experimental: cannot publish.",
+        "description": "Fully custom player locomotion on a Scene Graph entity: Move input action, editable speed/accel/friction/gravity/jump, OnSimulate delta loop (TickEvents.Subscribe is Epic-internal), Scene Graph orbit camera from modifier pieces on the camera's modifier stack (attach to entity, boom arm, collision push; AddModifier = parens) plus camera_director_component.AddCamera[...] (brackets), stock character parked in stasis. Experimental: cannot publish.",
         "folder": "CustomMovement",
         "files": [
           {

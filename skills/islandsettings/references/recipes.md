@@ -132,7 +132,7 @@ save_current_level()   # once, after the whole recipe
 
 After any recipe: re-read the keys you set with Epic `GetDeviceProperties`; if a key comes back `readonly_override`, stop and tell the user. Confirm Player Spawn Pad count (Epic DeviceToolset query, or `get_all_actors(label_filter="Spawn Pad", limit=500)`) == `MaxPlayers`.
 
-## Player Movement Device caps (v42.20)
+## Player Movement Device caps
 
 Speed / sprint / accel are **Player Movement Device** ToyOptions, not Island
 Settings keys. `GetDeviceProperties` → `SetDeviceProperty` — **never scale**

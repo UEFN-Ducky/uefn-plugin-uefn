@@ -1,18 +1,18 @@
 ---
-description: "Text chat channels (v42.40) — /Verse.org/Chat text_channel: team / faction / role chat, has_text_member_info CanSend (read-only) and a per-member MessageStyle, text_message_style colors + [context] labels, SystemMessageColor, AddChatChannel / RemoveChatChannel / GetTextChannels, the 100-member cap, one group for voice + text; Verse cannot send or read messages"
+description: "Text chat channels — /Verse.org/Chat text_channel: team / faction / role chat, has_text_member_info CanSend (read-only) and a per-member MessageStyle, text_message_style colors + [context] labels, SystemMessageColor, AddChatChannel / RemoveChatChannel / GetTextChannels, the 100-member cap, one group for voice + text; Verse cannot send or read messages"
 metadata:
   order: 14
-  label: "Text chat channels (v42.40)"
+  label: "Text chat channels"
   default_enabled: false
   load_condition: "Custom text chat: team / faction / role chat, who can type, read-only or muted players, chat colors or [labels] after names, system message color, listing text channels, or voice and text chat for the same group"
 ---
 
-## Text chat channels (v42.40)
+## Text chat channels
 
 `text_channel` lets Verse put players into their own text chat channels, decide who
 may type, and color and label their messages. Everything on this page is from the
-42.40 `Verse.digest.verse` `/Verse.org/Chat` module and **compiled with 0 errors,
-0 warnings in UEFN 42.40** (ExampleProject1, Oct 16 2026). Ready-made device:
+`Verse.digest.verse` `/Verse.org/Chat` module and **compiled with 0 errors,
+0 warnings in UEFN** (ExampleProject1, Oct 16 2026). Ready-made device:
 `verse_template_apply("team_text_chat")`. Voice channels and the shared model:
 `sys_chat_channels`.
 
@@ -30,10 +30,10 @@ using { /Verse.org/Simulation }
 using { /Fortnite.com/Devices }   # GetSimulationEntity on creative_device
 ```
 
-`@available {MinUploadedAtFNVersion := 4240}` on every text type: an island uploaded
-before 42.40 cannot use them. `AddChatChannel` / `RemoveChatChannel` are older (4000).
+`@available` on every text type: an island uploaded
+in older builds cannot use them. `AddChatChannel` / `RemoveChatChannel` are older.
 
-### API map (42.40 digest)
+### API map
 
 | Symbol | Kind | What it is |
 | --- | --- | --- |
@@ -129,7 +129,7 @@ made), typed with the base `has_text_member_info`.
 ### Voice and text for the same group
 
 One member class can implement both interfaces, so one `agent_group` drives a voice
-channel and a text channel (compiled 42.40):
+channel and a text channel:
 
 ```verse
 squad_member := class(has_voice_member_info, has_text_member_info):
@@ -157,7 +157,7 @@ session. Say so if the user asks, and test in a session before promising a look.
 
 | Wrong | Right |
 | --- | --- |
-| "Verse can't do text chat" / a HUD-only chat | `text_channel` (42.40) |
+| "Verse can't do text chat" / a HUD-only chat | `text_channel` |
 | Sending, reading, filtering or logging messages from Verse | Not possible — no message API or event |
 | `Channel.AddMember(...)` | `Group.AddMember(Agent, member{})` |
 | `AddChatChannel` on a player | on `GetSimulationEntity[]` (any entity in the simulation) |

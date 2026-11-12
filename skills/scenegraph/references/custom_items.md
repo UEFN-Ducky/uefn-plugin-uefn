@@ -15,7 +15,7 @@ device type.” Behavior = whatever you attach and run while the entity is
 simulating / equipped. Always confirm members with `get_verse_api` /
 `search_verse_digest` before shipping.
 
-**Asked for a custom item → build it.** Every step is an MCP call (43.00):
+**Asked for a custom item → build it.** Every step is an MCP call:
 create the prefab, add the components, set text / category / icon / mesh,
 save, place, grant. Never answer with "open the prefab and add components in
 the Details panel" — that was the old limit and is gone. The recipe is
@@ -101,9 +101,9 @@ Tab placement for *your* item uses `item_component.Categories` (below).
 3. Expect the **new inventory UI** (BR-style tabs) when Custom Items are on —
    that HUD is what surfaces custom currencies / resources / ammo / world items.
 
-## Build it over MCP (verified 43.00)
+## Build it over MCP
 
-Verified Nov 2 2026 on UEFN 43.00: every step below ran through Epic's MCP; the
+Verified Nov 2 2026 on UEFN: every step below ran through Epic's MCP; the
 saved prefab kept all five components, the text, the category, the icon, a KFM
 component and a Verse spin component, and a Verse grant of the prefab compiled.
 
@@ -130,7 +130,7 @@ call per message.
 | 8 | Entity `CreateEntity` `{"entityClass": {"refPath": "<generatedClass>"}, "transform": {…}, "name": "Cat"}`, then `save_current_level` | A pickup in the level (XYZ, Unreal axes; scale here sizes the pickup). Confirm with `FindEntities` `{"nameFilter": "Cat"}`. |
 | 9 | Verse `BuildAll`, then grant from Verse (below) | `EP_Cat{}` exists in Verse only after a build. |
 
-Component classes (`componentClass.refPath`, 43.00):
+Component classes (`componentClass.refPath`):
 
 | Component | Class path |
 |-----------|-----------|
@@ -221,7 +221,7 @@ element; **Save**. Say which call failed and with what error.
 | UI label (tutorial) | Digest component | Role |
 |---------------------|------------------|------|
 | Item | `item_component` | Marks entity as an item. Add a **Categories** element in Details when you need a tab. |
-| Fort item pickup | `fort_item_pickup_interactable_component` | World pickup/drop. **Do not skip** — tutorials forget this and pickups break. Needs sibling `item_component` + `mesh_component`. Gated FN ≥ 4040. |
+| Fort item pickup | `fort_item_pickup_interactable_component` | World pickup/drop. **Do not skip** — tutorials forget this and pickups break. Needs sibling `item_component` + `mesh_component`. Gated. |
 | Item details | `description_component` | `Name`, `Description`, `ShortDescription` (`message`). Short copy is the interact / hover prompt before pickup. |
 | Item icon | `icon_component` | `Icon:texture` — transparent PNG so rarity color shows through. |
 | Mesh | `mesh_component` | **Dropped** appearance only for now (held mesh not reliable). **Collidable = false**. |
@@ -248,8 +248,8 @@ the matching inventory UI tab, not the weapon hotbar.
 
 | Component | API notes |
 |-----------|-----------|
-| `rarity_component` | `var Rarity:rarity` — one rarity per entity. Instances in `/Fortnite.com/Itemization/FortniteRarities` (`Common` … `Exotic`). Gated FN ≥ 4000. |
-| `basic_stackable_component` | Extends `stackable_component`: `StackSize`, `MaxStackSize`, `SetStackSize`, `SetMaxStackSize`, `Split`, `CanMergeInto`, `MergeInto`, stack change events. Set `split_prefab_type` to your prefab class. Grant with `?AllowMergeItems := true`. Gated FN ≥ 4000. |
+| `rarity_component` | `var Rarity:rarity` — one rarity per entity. Instances in `/Fortnite.com/Itemization/FortniteRarities` (`Common` … `Exotic`). Gated. |
+| `basic_stackable_component` | Extends `stackable_component`: `StackSize`, `MaxStackSize`, `SetStackSize`, `SetMaxStackSize`, `Split`, `CanMergeInto`, `MergeInto`, stack change events. Set `split_prefab_type` to your prefab class. Grant with `?AllowMergeItems := true`. Gated. |
 | `keyframed_movement_component` | Dropped spin / bob / scale — drive from a Verse component (`movement_transforms`). |
 
 ## Custom mesh / icon pipeline
@@ -272,12 +272,12 @@ the matching inventory UI tab, not the weapon hotbar.
 
 Cross-links: `modeling`, `materials`; optional `blender` / meshy.
 
-**43.00 prefab classes:** a prefab whose parent is a class other than `entity` (a template
+**prefab classes:** a prefab whose parent is a class other than `entity` (a template
 such as `held_item_template` or `assault_rifle_template`, or your own entity subclass) is
 generated as a **subclass of that parent** in the Assets digest, so `parent[E]` casts and
 parent fields work. Built-in entity classes are no longer `<final>`; you may subclass
 them in Verse. Plain entity prefabs still derive from `entity`. Need a hold stance for
-the item → `held_items` (pose modifier). Since 43.00 editables on Verse class objects stay
+the item → `held_items` (pose modifier). Now editables on Verse class objects stay
 independent per prefab instance, and assigning a device to an optional `@editable` on a
 Verse component no longer crashes UEFN.
 
@@ -302,7 +302,7 @@ Same Scene Graph motion path as any entity —
 
 The keys are built in Verse, so the whole spin is two `AddComponent` calls and
 one number — no keyframe array to fill in the Details panel (compiled and
-attached over MCP on 43.00):
+attached over MCP):
 
 1. Write this component (`Content/Verse/Items/item_spin_component.verse`) and
    Verse `BuildAll`:
@@ -457,15 +457,15 @@ a `spawn` result.
 For systems outside the item (shops, quests, HUD): subscribe on the player’s
 `inventory_component` to `AddItemEvent` / `RemoveItemEvent` / `EquipItemEvent` /
 `UnequipItemEvent` — see `itemization`. Find inventory with
-`Agent.FindDescendantComponents(inventory_component)`. 42.30 fixed
+`Agent.FindDescendantComponents(inventory_component)`. Epic fixed
 `RemoveItemEvent`'s `RemovedAmount` (it was always 0) and equipping from Verse
 no longer leaves the player unable to aim or shoot.
 
 ## Verse grant / equip / clear / has
 
 Same parenting check as `custom_weapons`. Items are found **by prefab type**
-(`FindDescendantEntities(EP_Cat)`) — no tag to add to the prefab. Compiled on
-43.00 against an MCP-built prefab:
+(`FindDescendantEntities(EP_Cat)`) — no tag to add to the prefab. Compiled
+against an MCP-built prefab:
 
 ```verse
 using { /Fortnite.com/Devices }
@@ -529,7 +529,7 @@ Rules:
 - On add failure: `RemoveFromParent()`.
 - `EP_Cat` is the prefab's asset name; `get_verse_api({"name": "EP_Cat"})`
   after a build. The full module path in `using` compiled without a `<public>`
-  folder declaration (43.00); a 3593 error → `custom_weapons`.
+  folder declaration; a 3593 error → `custom_weapons`.
 - No inventory yet right after join → retry later (a button press is late
   enough); a join-time grant polls like `custom_weapons`.
 - **Footgun:** bulk-granting many stock weapons + custom items in one tight

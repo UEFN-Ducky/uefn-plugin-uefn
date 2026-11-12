@@ -5,7 +5,7 @@ description: "DataTable assets in UEFN — inspect row structs, read rows, creat
 license: MIT
 metadata:
   label: UEFN Data Tables
-  version: 5
+  version: 6
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -72,7 +72,7 @@ save_current_level()
 The fill tools save the asset themselves; still `save_current_level()` if
 anything in the level references the table.
 
-## Epic table toolsets (43.00 names)
+## Epic table toolsets
 
 When `epic_mcp_online`, Epic also edits tables in the editor:
 `EditorToolset.DataTableToolset` (`Create`, `GetSchema`,
@@ -80,8 +80,8 @@ When `epic_mcp_online`, Epic also edits tables in the editor:
 `ImportFile`, `SearchRowStructs`, `Diff`) and
 `EditorToolset.CurveTableToolset` (`Create`, `AddRow`,
 `AddKey`, `GetKeys`, `SetKeys`, `ListRows`, `RemoveRow`, `RenameRow`,
-`ImportFile`, `Diff`). The 42.x `editor_toolset.toolsets.data_table` / `curve_table` names fail
-in 43.00. Prefer them for single-row edits (`SetRows`) over a full
+`ImportFile`, `Diff`). The `editor_toolset.toolsets.data_table` / `curve_table` names fail
+now. Prefer them for single-row edits (`SetRows`) over a full
 `fill_data_table_from_json`; `unreal__describe_toolset` first for argument names.
 
 ## Reference files

@@ -1,5 +1,5 @@
 ---
-description: "Verse build wait, digest vs VM relink, VERSE_DEAD, the 9002/9000 digest-deadlock recovery, the 42.40 VerseVM session toggle (Verse Reload off), deleted .verse files (3000), 43.00 asset redirectors into Verse (Reflect UE Redirectors into Verse Manifest), Data Recovery placeholders that block saving, diagnostics for incrementally skipped packages"
+description: "Verse build wait, digest vs VM relink, VERSE_DEAD, the 9002/9000 digest-deadlock recovery, the older-build VerseVM session toggle (Verse Reload off), deleted .verse files (3000), asset redirectors into Verse (Reflect UE Redirectors into Verse Manifest), Data Recovery placeholders that block saving, diagnostics for incrementally skipped packages"
 metadata:
   order: 9
   label: "Verse build lifecycle"
@@ -130,7 +130,7 @@ Ducky entity tools no longer exist.
 `save_directory` every 5–10 prefabs. Never `execute_python` loops that
 package many prefabs in one script — that freezes UEFN.
 
-## VerseVM session toggle (42.40)
+## VerseVM session toggle
 
 The **Session** menu has a toggle that runs your sessions on the new **VerseVM**
 instead of the BPVM, to test an island against it early (Epic's "New Virtual Machine",
@@ -149,7 +149,7 @@ disk while UEFN was open. Put it back, then delete it through Epic
 `VerseToolset.VerseToolset.Delete` (it tells the build), or restart UEFN. Epic
 `VerseToolset.WriteFile` / `Delete` keep the build's file list right.
 
-## Asset redirectors into Verse (43.00)
+## Asset redirectors into Verse
 
 Enable **Project Settings → Reflect UE Redirectors into Verse Manifest**. Then UEFN checks
 Verse code and prefabs before an asset change:
@@ -164,9 +164,9 @@ Verse code and prefabs before an asset change:
   gets one, aliases keep the target's access specifier, and renames detect generated Verse
   types used by other packages.
 
-Without the setting the 42.10 behavior applies (redirector, rebuild, re-search the digest).
+Without the setting the older behavior applies (redirector, rebuild, re-search the digest).
 
-## Data Recovery placeholders block saving (43.00)
+## Data Recovery placeholders block saving
 
 When a placed object's **Verse class can't be found** (class renamed, moved, deleted, or
 Verse doesn't compile), UEFN keeps the object as a **placeholder** with its saved values
@@ -179,10 +179,10 @@ Agent order: "can't save" / save refused after a Verse change → `workspace_lis
 on relink. Only if the class is really gone, ask the user before replacing or deleting the
 object in Data Recovery (never pick for them). Never force a level save around it.
 
-## Incremental build diagnostics (43.00)
+## Incremental build diagnostics
 
 Verse build diagnostics are now also shown for packages that incremental compilation
-skipped. Errors that appear after 43.00 in untouched files were there before — fix them,
+skipped. Errors that appear after in untouched files were there before — fix them,
 don't revert your edit.
 
 ## Related

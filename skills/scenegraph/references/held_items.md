@@ -1,26 +1,26 @@
 ---
-description: "Held items (v42.30, 43.00 poses) — /Fortnite.com/Armory held_item_template: carryable non-weapon prefabs (torch by default → lantern, tool, banner, prop), fort_item_owner_pose_modifier_component hold poses (torch, flashlight, map, small/large consumable), Entity Prefab setup, reskin, Verse grant/equip, ADS toggles on weapons"
+description: "Held items (poses) — /Fortnite.com/Armory held_item_template: carryable non-weapon prefabs (torch by default → lantern, tool, banner, prop), fort_item_owner_pose_modifier_component hold poses (torch, flashlight, map, small/large consumable), Entity Prefab setup, reskin, Verse grant/equip, ADS toggles on weapons"
 metadata:
   order: 8
-  label: "Held items + hold poses (42.30, 43.00)"
+  label: "Held items + hold poses"
   default_enabled: false
   load_condition: "Something the player carries or holds that is not a weapon (torch, lantern, flashlight, tool, banner, sign, bucket, prop in hand), held_item_template, Custom Weapons: Held Items, reskinning the torch, how the character holds the item (hold pose, stance, animation while equipped, fort_item_owner_pose_modifier_component, SetEquippedPose)"
 ---
 
-# Held items (v42.30)
+# Held items
 
-42.30 adds a fourth kind of Armory prefab: a **carryable item that is not a
+Epic added a fourth kind of Armory prefab: a **carryable item that is not a
 weapon**. `held_item_template` (`/Fortnite.com/Armory`,
-`@available {MinUploadedAtFNVersion := 4230}`) is a ready-to-customize Entity
+`@available`) is a ready-to-customize Entity
 Prefab — it ships with a **torch** mesh and icon. Reskin it into a lantern, a
 tool, a banner, a flashlight, any prop the player equips and holds.
 
 It sits next to the weapon templates (`pistol_template`, `assault_rifle_template`,
 `shotgun_template`, `sub_machine_gun_template` — `custom_weapons`) and follows
 the same workflow. Verified: `held_item_template{}` + `AddItemDistribute` +
-`Equip()` compiles in 42.30 (Tycoony, Oct 1 2026). 42.40 adds the template's mesh class
-to the digest: `torch_mesh := class<final>(mesh_component)` (`/Fortnite.com/Armory`,
-4240) — the default torch; swap the mesh in the prefab, don't subclass it.
+`Equip()` compiles (Tycoony, Oct 1 2026). Epic added the template's mesh class
+to the digest: `torch_mesh := class<final>(mesh_component)` (`/Fortnite.com/Armory`)
+— the default torch; swap the mesh in the prefab, don't subclass it.
 
 ## Pick the right path
 
@@ -29,7 +29,7 @@ to the digest: `torch_mesh := class<final>(mesh_component)` (`/Fortnite.com/Armo
 | Hold a prop / tool / light in hand | **this file** |
 | A gun with fire/reload | `custom_weapons` |
 | An item with your own behavior (no hold pose needed) | `custom_items` |
-| Change how the character holds it (43.00) | **Hold pose** below |
+| Change how the character holds it | **Hold pose** below |
 | Stock Fortnite items | `itemization` |
 
 ## Project gates
@@ -42,7 +42,7 @@ empty — `islandsettings` `recipes`).
 
 1. `ValkyrieToolset.PrefabToolset` `CreatePrefab` `{"folderPath": "Prefabs",
    "assetName": "Lantern", "parentClass": {"refPath":
-   "/Armory/_Verse/VNI/ArmoryRuntime.held_item_template"}}`. Verified 43.00: the
+   "/Armory/_Verse/VNI/ArmoryRuntime.held_item_template"}}`. Verified: the
    new prefab already has `item_component`, the pickup, description, icon,
    rarity, `torch_mesh`, `fort_item_owner_pose_modifier_component` and
    `fort_held_item_component` on its `rootEntity` — nothing to add.
@@ -60,7 +60,7 @@ lose the template's components) — use `CreatePrefab` with `parentClass`. Copie
 existing one: `duplicate_prefab(source_prefab="/MyIsland/Prefabs/Lantern.Lantern",
 prefab_name="Flashlight")` keeps all the template's components.
 
-## Hold pose (43.00)
+## Hold pose
 
 `held_item_template` now ships a **`fort_item_owner_pose_modifier_component`**
 (`/Fortnite.com/Itemization`, `class<final>`, not experimental). It sets the stance
@@ -88,7 +88,7 @@ SetHoldPose(Item:entity):void =
 `EquippedPose` is `var<private>` (read it, don't `set` it) — always go through
 `SetEquippedPose(?fort_character_pose_modifier)`. The pose classes are `<final>`;
 the base `fort_character_pose_modifier` is `epic_internal`, so no custom poses —
-only these five. Compiled 0 errors / 0 warnings in 43.00.
+only these five. Compiled 0 errors / 0 warnings.
 
 ## Grant and equip from Verse
 
@@ -112,7 +112,7 @@ held_item_granter_device := class(creative_device):
     OnGrant(Agent:agent):void =
         if (Inventory := GetHeldInventory[Agent]):
             # Your prefab from the Held Item template (Assets.digest name), e.g. Lantern{}.
-            # 43.00: Lantern is a subclass of held_item_template, so held_item_template[E] casts work.
+            # Lantern is a subclass of held_item_template, so held_item_template[E] casts work.
             Item := held_item_template{}
             if (IC := Item.GetComponent[item_component]):
                 Inventory.AddItemDistribute(Item)
@@ -130,12 +130,12 @@ Do not `case` the `AddItemDistribute` result to decide Equip — check
 `GetParentInventory[]`, else `PickUp[Inventory]`, else clean up (same as
 `custom_weapons`). On join, poll until the inventory exists (`custom_weapons`).
 
-## Also new in 42.30 (weapons)
+## Also new (weapons)
 
 `fort_trace_weapon_component` gained two editable toggles with setters:
 `AllowAimDownSightsInAir` / `SetAllowAimDownSightsInAir(Val:logic)` and
 `AllowAimDownSightsDuringReload` / `SetAllowAimDownSightsDuringReload(Val:logic)`.
 
-42.30 fixes that matter here: equipping an item from Verse no longer leaves the
+Fixes that matter here: equipping an item from Verse no longer leaves the
 player unable to aim or shoot, and `RemoveItemEvent`'s `RemovedAmount` is no
 longer always 0.

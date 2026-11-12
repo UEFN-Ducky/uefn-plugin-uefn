@@ -1,13 +1,13 @@
 ---
-description: "UEFN profiling tools and budgets (v43.00): Game Performance widget, Spatial Profiler, Timing Insights, Verse Insights, Memory Snapshot, mobile profiling, Creator Portal Technical tab; frame budgets 16.7 ms / 33.3 ms, the 300 MB publish memory limit, and the Epic MCP profiling toolsets"
+description: "UEFN profiling tools and budgets: Game Performance widget, Spatial Profiler, Timing Insights, Verse Insights, Memory Snapshot, mobile profiling, Creator Portal Technical tab; frame budgets 16.7 ms / 33.3 ms, the 300 MB publish memory limit, and the Epic MCP profiling toolsets"
 metadata:
   order: 30
-  label: "Profiling tools + budgets (43.00)"
+  label: "Profiling tools + budgets"
   default_enabled: false
   load_condition: "The user asks how to profile an island, what a profiling tool shows, what the frame time / memory budgets are, or mentions Timing Insights, Verse Insights, Memory Snapshot, Spatial Profiler, Game Performance, hitches, lag or memory over budget"
 ---
 
-# Profiling an island (43.00)
+# Profiling an island
 
 Every profiling tool reads a **live session**: Launch Session first (MCP:
 `ValkyrieFortniteToolset.SessionToolset.StartSession`). No session, no data.
@@ -19,7 +19,7 @@ comparing traces): `verse_insights`.
 
 ## Which tool answers what
 
-| Tool | Answers | Use when | MCP toolset (43.00) |
+| Tool | Answers | Use when | MCP toolset |
 | --- | --- | --- | --- |
 | **Game Performance** widget (editor, bottom right) | Is anything over budget now? Frame time, GPU time, memory go yellow/red. It is the source of the in-game performance warning | Always on while you test. **Take a Look** opens the Spatial Profiler | `SpatialProfilerToolset.ProfilerToolset` `GetMonitorPerformanceEnabled` (Monitor Performance) |
 | **Spatial Profiler** | **Where** on the map a metric goes over budget: a top-down grid, sampled where the player stands; blue = in budget, red = over | Find the area first, then dig in there | `SpatialProfilerToolset.ProfilerToolset` (`GetMetricStats`, `GetMetricHotspots`) |
@@ -59,7 +59,7 @@ budget with `ListMetrics` / `GetMetricStats` (`thresholdValue`, in the metric's
    timer itself is the cost. Big inclusive + small exclusive = look at what it calls.
 4. **Callees panel**: follow the hot path (flame icon), the most expensive call at
    each level (also called top-down).
-5. **Quick Find** (43.00): search the Timing Profiler for a timer or event by name.
+5. **Quick Find**: search the Timing Profiler for a timer or event by name.
 
 What a capture holds (`GetRecordedChannels`):
 - **Client:** `csv` CPU scopes on the game and render threads + `frame`. Shipping
@@ -76,7 +76,7 @@ What a capture holds (`GetRecordedChannels`):
   has the `verse` channel. Server capture needs secure tracing on both ends:
   check `CanCapture` first, since a fresh server may not have reported yet.
 - Verse Insights needs the **Use Verse VM** launch option: turn it on in Launch
-  Options **before** you launch the session (VerseVM session toggle, 42.40).
+  Options **before** you launch the session (VerseVM session toggle).
 - Editor path: **Tools → Profile → Timing Insights**, target **Server**, Save to
   File on before Start. How to read it and fix what it finds: `verse_insights`.
 - Hot Verse function → see verse `runtime_pitfalls` (work every tick, polling
@@ -101,7 +101,7 @@ What a capture holds (`GetRecordedChannels`):
   (it shows up in `ListClients` / `ListTargets`).
 - Memory is the usual mobile failure: textures first (see `profiling_fixes`).
 
-## MCP toolsets (live, 43.00)
+## MCP toolsets
 
 | Toolset | Tools |
 | --- | --- |

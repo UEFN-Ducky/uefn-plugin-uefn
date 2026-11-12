@@ -5,7 +5,7 @@ description: "MetaHuman for UEFN — create and edit in MetaHuman Creator, Mesh 
 license: MIT
 metadata:
   label: UEFN MetaHuman
-  version: 7
+  version: 8
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC

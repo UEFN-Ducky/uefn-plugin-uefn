@@ -61,15 +61,15 @@ after Fortnite v33.00 — if parameters stop applying, retest with a plain mater
 swap to isolate, and check the Epic forums thread "Setting Materials with
 parameters from verse Not working after v33.00".
 
-### Verse material inheritance (43.00)
+### Verse material inheritance
 
-From 43.00 UEFN generates material **instances as subclasses of their parent
+From UEFN generates material **instances as subclasses of their parent
 material class** in the Assets digest (MI_Red derives from M_Base). Effects:
 
 - A function taking the parent type accepts every instance: write one
   `SetTint(M:M_Base)` helper instead of one per instance.
 - Less runtime memory for islands that use many material properties from Verse
-  (counts from the 43.00 upload on).
+  (counts from the current upload on).
 - Check the real class chain in the project's Assets digest after a build
   (`search_verse_digest("M_Base")`) — never assume it.
 

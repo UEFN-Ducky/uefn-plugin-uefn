@@ -173,7 +173,7 @@ roguelike_enemy_behavior<public> := class(npc_behavior):
         if:
             Agent := GetAgent[]
             NpcChar := Agent.GetFortCharacter[]
-            Actions := GetEntity[].GetComponent[npc_actions_component]   # 43.00: replaces GetNavigatable / GetFocusInterface
+            Actions := GetEntity[].GetComponent[npc_actions_component] # replaces GetNavigatable / GetFocusInterface
             Anim := NpcChar.GetPlayAnimationController[]
         then:
             loop:
@@ -220,7 +220,7 @@ roguelike_enemy_behavior<public> := class(npc_behavior):
 3. In range → `race { Actions.Focus(…, ?LockFocus := true) ; PlayAndAwait + hit helper + cooldown }`
 4. Out of range → `Actions.NavigateTo`(spread or strafe) raced with `Actions.Focus` + retarget Sleep
 
-**43.00 API change:** `GetNavigatable` / `navigatable`, `GetFocusInterface` / `MaintainFocus`,
+**API change:** `GetNavigatable` / `navigatable`, `GetFocusInterface` / `MaintainFocus`,
 `GetFortLeashable`, the `movement_types` module and the `navigation_result` enum are **deprecated**.
 Use `npc_actions_component`: `NavigateTo(Target, ?MovementType := movement_type.Running, ?ReachRadius, ?AllowPartialPath)`
 returns `result(navigation_action_success_type, navigation_action_error_type)`; `Focus(Entity or

@@ -1,8 +1,8 @@
 ---
-description: "Custom abilities in Verse (/UnrealEngine.com/Abilities, out of Experimental in 42.40) — ability(context, effect), ability_context (Instigator is ?entity since 42.40), ability_effect prefab + ability_effect_component lifecycle (OnBeginUse, OnSimulate, OnEndUse, EndUse, Cancel / CanCancel, cancel_reason), Use() is no_rollback, BeginUseEvent / EndUseEvent, granting to players with input, a compiled heal-over-time example"
+description: "Custom abilities in Verse (/UnrealEngine.com/Abilities, out of Experimental) — ability(context, effect), ability_context (Instigator is ?entity), ability_effect prefab + ability_effect_component lifecycle (OnBeginUse, OnSimulate, OnEndUse, EndUse, Cancel / CanCancel, cancel_reason), Use() is no_rollback, BeginUseEvent / EndUseEvent, granting to players with input, a compiled heal-over-time example"
 metadata:
   order: 10
-  label: "Custom abilities (Verse, v42.40)"
+  label: "Custom abilities (Verse)"
   default_enabled: false
   load_condition: "Writing a gameplay ability in Verse — spells, powers, heal over time, channelled or cancellable effects, ability(…) / ability_context / ability_effect / ability_effect_component, Use() / CanUse / Cancel, cooldowns or stacking rules, or reading who used an ability (Instigator)"
 ---
@@ -16,12 +16,12 @@ Two ways to make an ability:
 | Input → timeline of effects (animation, VFX, sound, damage, heal, status effects, attribute modifiers, projectiles) with no Verse logic | **Template abilities** — `template_abilities` |
 | Your own rules: channelling, stacking limits, custom targets, cancel on jump, per-tick logic | **This page** — subclass `ability(context, effect)` |
 
-**42.40:** the ability types lost `@experimental` (no 2304 warning when they compile),
+The ability types lost `@experimental` (no 2304 warning when they compile),
 so islands that use them can publish. Epic's "Create Your First Ability" page still
 says to enable **Scene Graph Experimental Features**; if `get_verse_api({"name":
 "ability"})` finds nothing on the island, enable it and build Verse.
 
-## The four parts (42.40 digest)
+## The four parts
 
 ```verse
 using { /UnrealEngine.com/Abilities }
@@ -50,7 +50,7 @@ class(cancel_reason){}`; built-ins `ability_ended`, `ability_removed_from_scene`
 Lifetimes: ability = persistent; context = per activation (copy lives with the effect);
 effect and component = until the effect ends.
 
-## 42.40 changes
+## Changes
 
 - `ability_context.Instigator` is `?entity` (was `?agent`). Assigning an agent still
   works (`agent` is a subclass of `entity`): `Instigator := option{PlayerAgent}`.
@@ -80,7 +80,7 @@ effect and component = until the effect ends.
 
 ## Example — heal over time, cancelled by a jump
 
-Compiled with 0 errors / 0 warnings in UEFN 42.40 (Epic's tutorial ability with
+Compiled with 0 errors / 0 warnings in UEFN (Epic's tutorial ability with
 `MakeAbility` returning a bare `ability_effect{}` — swap in your prefab).
 
 ```verse
@@ -194,7 +194,7 @@ that, for each player (and on `PlayerAddedEvent()`), makes an empty `entity{}`, 
 ## Using a template ability from Verse
 
 `fort_template_ability` is an `ability(ability_context, fort_template_ability_effect)`,
-so the same call works — and works with a player instigator since 42.40:
+so the same call works — and works with a player instigator:
 
 ```verse
 TryUse(Ability:fort_template_ability, Agent:agent):logic =

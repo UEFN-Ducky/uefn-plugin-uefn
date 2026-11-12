@@ -1,8 +1,8 @@
 ---
-description: "My island has frame drops / hitches / lag / stutter / low FPS / memory over budget / runs badly on mobile: profile it and fix it through the Epic UEFN MCP (v43.00). The agent loop: running session, baseline capture (Spatial Profiler stats, Timing Insights trace, Memory Snapshot), read it, propose fixes, ask, apply, push, re-capture and compare. Symptom to tool table and the exact InsightsToolset / SpatialProfilerToolset calls"
+description: "My island has frame drops / hitches / lag / stutter / low FPS / memory over budget / runs badly on mobile: profile it and fix it through the Epic UEFN MCP. The agent loop: running session, baseline capture (Spatial Profiler stats, Timing Insights trace, Memory Snapshot), read it, propose fixes, ask, apply, push, re-capture and compare. Symptom to tool table and the exact InsightsToolset / SpatialProfilerToolset calls"
 metadata:
   order: 31
-  label: "Profile + fix via MCP (43.00)"
+  label: "Profile + fix via MCP"
   default_enabled: false
   load_condition: "The user says the island has frame drops, hitches, lag, stutter, low FPS, a performance warning, memory over budget, runs badly on mobile or a slow server, or asks the agent to profile / optimize the island"
 ---
@@ -51,7 +51,7 @@ MCP rules (check every result, serial calls) are in `epic_mcp`.
 | Verse hot function / runtime errors | `SessionToolset.GetVerseOutput` | server Timing capture | per-tick loops, runtime error spam |
 | Publish blocked on memory | Game Performance report (memory on cook, 300 MB) | Memory Snapshot | per-asset MB |
 
-## Recipes (exact 43.00 calls)
+## Recipes (exact calls)
 
 **Targets.** `InsightsToolset.InsightsTargetToolset.ListTargets {}`. The first
 call (and the first after idle minutes) **fails while discovery starts**: call it
@@ -64,9 +64,9 @@ again. Each entry has `instanceId`, `displayName` and `bIsServer`. The client is
    About 20 s is enough. `GetCaptureStatus {instanceId}` shows `elapsedSeconds`.
 4. `StopCapture {instanceId}` → `.utrace` path. `InsightsTargetToolset.ListCaptures {}`
    lists this session's captures; `ListSavedCaptures {}` lists older ones.
-5. Read it: no `unreal__*` tool analyzes a trace in 43.00. `InsightsTargetToolset`
+5. Read it: no `unreal__*` tool analyzes a trace. `InsightsTargetToolset`
    has only `ListTargets`, `ListCaptures`, `ListSavedCaptures` (its description
-   mentions a trace analyzer; no tool exposes one). The 43.00 Verse Insights video
+   mentions a trace analyzer; no tool exposes one). The Verse Insights video
    shows Claude Code calling a separate MCP server its user named **`unreal-insights`**
    (status line *"Called unreal-mcp, unreal-insights 13 times"*). It is not part of
    UEFN, and no public package by that name exists (checked Nov 2026; the closest,

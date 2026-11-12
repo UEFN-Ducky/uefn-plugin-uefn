@@ -18,7 +18,7 @@ TraceFromClick(Player : player, ClickX : float, ClickY : float)<reads>:deproject
     Player.DeprojectViewportToWorld(vector3{Left := ClickX, Up := ClickY, Forward := 0.0})
 ```
 
-- `(Player:player).DeprojectViewportToWorld(ViewportPosition:vector3)<reads>:deproject_results` in `/Verse.org/Input` (FN ≥ 4100).
+- `(Player:player).DeprojectViewportToWorld(ViewportPosition:vector3)<reads>:deproject_results` in `/Verse.org/Input`.
 - Input is screen **cm**: `Left` rightward from top-left, `Up` upward. `Forward` ignored.
 - `deproject_results.Origin` = world position of the **camera eye** (not the near plane). `Direction` = normalized ray.
 - Because Origin is the eye, the ray can hit geometry between camera and near plane (e.g. the player pawn). Filter those hits or start the sweep further along `Direction`.

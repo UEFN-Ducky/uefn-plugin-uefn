@@ -1,41 +1,41 @@
 ---
-description: "Verse fields in UMG (38.00+) — declare fields on a User Widget, bind with View Bindings, set from a creative_device, supported types, worked Style1/Style2 example"
+description: "Verse fields in UMG — declare fields on a User Widget, bind with View Bindings, set from a creative_device, supported types, worked Style1/Style2 example"
 metadata:
   order: 61
-  label: "UMG Verse fields (38.00+)"
+  label: "UMG Verse fields"
   default_enabled: false
-  load_condition: "Driving a UMG User Widget from Verse with Verse fields — Progress, message, material, texture, logic — or following the Epic 38.00 Verse fields tutorial"
+  load_condition: "Driving a UMG User Widget from Verse with Verse fields — Progress, message, material, texture, logic — or following the Epic Verse fields tutorial"
 ---
 
-## UMG Verse fields (38.00+)
+## UMG Verse fields
 
-Starting with **Fortnite / UEFN 38.00**, you can define **Verse fields** directly on a UMG User Widget. They appear in the Variables panel, bind to widget properties via **View Bindings**, and reflect into the **Assets digest** so Verse can `set MyWidget.Field = value`.
+You can define **Verse fields** directly on a UMG User Widget. They appear in the Variables panel, bind to widget properties via **View Bindings**, and reflect into the **Assets digest** so Verse can `set MyWidget.Field = value`.
 
-One-way for the initial release: **Verse → widget**. Widget → Verse clicks need **Verse field events** (39.40+) — see `umg_verse_field_events`.
+One-way for the initial release: **Verse → widget**. Widget → Verse clicks need **Verse field events** — see `umg_verse_field_events`.
 
 ### Author the fields
 
 `add_verse_field(widget_path, field_name, field_type, default_value, event_parameters=[], mutable=True, visibility="public")`.
-Types (42.30, `list_verse_field_types`): `bool` (`logic`), `int`, `float`, `string`, `message`, `color`,
-`color_alpha`, `texture`, `material`, `event`. 42.30 changed the editor's AddVerseField to a nested
+Types (`list_verse_field_types`): `bool` (`logic`), `int`, `float`, `string`, `message`, `color`,
+`color_alpha`, `texture`, `material`, `event`. Epic changed the editor's AddVerseField to a nested
 `spec`; the tool sends it (and the old flat call on older builds). The result has `compiled` /
 `compile_error` — a field is not done until `compiled` is true.
 
 Change fields with `edit_verse_field` (retype, default, `mutable`, `visibility`, `new_name`),
 `duplicate_verse_field`, `remove_verse_field`.
 
-`event` fields (42.30: creatable, ≤1 bool/int/float parameter) are for clicks — `umg_verse_field_events`. They reflect as `event(tuple())` / `event(tuple(int))`: on 43.00 `.Subscribe(Handler)` them (returns a `cancelable`); on 42.x await them — no `Subscribe` there (`events_subscriptions`).
+`event` fields (older builds: creatable, ≤1 bool/int/float parameter) are for clicks — `umg_verse_field_events`. They reflect as `event(tuple())` / `event(tuple(int))`: now `.Subscribe(Handler)` them (returns a `cancelable`); on older builds await them — no `Subscribe` there (`events_subscriptions`).
 
 Name fields the kit's way (`verse_ui_kit` — Naming): bools `Is<Adjective>`, text ends `Text`, textures end `Texture`, events `On<Event>`; on a screen start with the child's name (`IsToggleButton1Active`, `Button1LabelText`). Keep fields to the minimum the screen needs. Default values of `message` fields are set in the Details panel — a manual step for the user.
 
 Bind with `bind_verse_field` (`umg_view_bindings`). Confirm with `list_verse_fields` and, after a Verse build, `get_verse_api` / `list_verse_types(digest="assets", name_filter="UW_")`.
 
-**42.30 (verified):** fields reach the Assets digest only once the widget's asset editor has been
+**(verified):** fields reach the Assets digest only once the widget's asset editor has been
 opened in the editor session — before that Verse gets E3506 "Unknown member". The field tools open
 and close the editor once per session for you (`verse_ready` in the result). Fields made another way:
 `open_asset_in_uefn` on the widget, then build Verse.
 
-**43.00:** a Verse file that `set`s a field made in the same pass fails the first build (3506) because
+A Verse file that `set`s a field made in the same pass fails the first build (3506) because
 the digest still lacks the field; that build regenerates it, so build Verse a **second** time before
 debugging the code.
 

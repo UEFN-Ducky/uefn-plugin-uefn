@@ -11,7 +11,7 @@ metadata:
 
 Use the helper and loop from `agent_driving`. Find every control by its label in a fresh capture.
 
-Each recipe says what was run by mouse on UEFN 43.00. Test meshes were a 10 m road tile and a boulder.
+Each recipe says what was run by mouse on UEFN. Test meshes were a 10 m road tile and a boulder.
 
 ### Every recipe starts
 

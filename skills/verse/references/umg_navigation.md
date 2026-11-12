@@ -13,7 +13,7 @@ Every interactive screen works on gamepad, keyboard and mouse: focus lands on it
 
 ### Focus
 
-1. Set the screen's **Desired Focus Widget** (Class Defaults) to its first control: `set_widget_property(widget_path, "<package>.Default__<Name>_C", {"DesiredFocusWidget": {"widgetName": "<first control>"}})` on the class default object (verified in UEFN 42.30: survives compile, save and reload). Older Ducky builds: Epic's `ObjectTools` call in `verse_ui_kit` — Editor steps. Can't set it → list it as a manual step.
+1. Set the screen's **Desired Focus Widget** (Class Defaults) to its first control: `set_widget_property(widget_path, "<package>.Default__<Name>_C", {"DesiredFocusWidget": {"widgetName": "<first control>"}})` on the class default object (verified in UEFN older builds: survives compile, save and reload). Older Ducky builds: Epic's `ObjectTools` call in `verse_ui_kit` — Editor steps. Can't set it → list it as a manual step.
 2. Show the screen, **then** focus it: kit `Helper.FocusWidgetForPlayer(Player, Widget)` after the widget is on screen. Without the kit, `PlayerUI.SetFocus(Widget)` after `AddWidget`.
 3. After anything that changes which controls exist (tab, page, filter), focus again — or focus can sit on a control that just disappeared.
 4. Focus order follows reading order. Hover and gamepad focus look the same (the kit's shared highlight does both; without the kit, bind `OnButtonHighlight` / `OnButtonUnhighlight` to the same highlight animation — `umg_animations`).

@@ -92,12 +92,12 @@ Consumers wire phase advancement to the finished event:
 | A countdown or stopwatch | a deadline on `GetSimulationElapsedTime()` (`<transacts>`, resets each session), checked ~10 times a second |
 | Motion every frame | nothing in Verse — keyframed movement (scenegraph `movement_transforms`) |
 | Real-world time across sessions (logins, offline earnings) | `GetSecondsSinceEpoch()` (`<reads>`) → `sys_time_tracking` |
-| A pausable count up/down with a speed knob (43.00, **Experimental**) | `timer` (below) |
+| A pausable count up/down with a speed knob (**Experimental**) | `timer` (below) |
 
 Never count `Sleep(1.0)` passes as seconds: each pass runs a little long, so the
 count drifts. Measure against the clock instead.
 
-### `clock` and the experimental `timer` (43.00)
+### `clock` and the experimental `timer`
 
 `/Verse.org/Verse` (no `using`) now has a `clock` interface (`GetSeconds()<reads>:float`)
 and a global `SecondsSinceEpochClock:clock`. `timer := class(clock, playable)` counts from
@@ -118,7 +118,7 @@ count_demo := class:
         Print("left {T.GetSeconds()}")
 ```
 
-Compiled 0 errors on 43.00, with warning 2304 "`timer` is experimental, and its use will
+Compiled 0 errors, with warning 2304 "`timer` is experimental, and its use will
 prevent you from publishing your project". `playable` gives `Play`, `Pause`, `Resume`,
 `Stop`, `IsPlaying` / `IsPaused`, and `PlayEvent`, `PauseEvent`, `ResumeEvent`,
 `StopEvent` (payload `playable_stop_reason`: `Explicit` or `Finished`). `SetSeconds(S)`
@@ -157,7 +157,7 @@ RunTimer()<suspends> : void =
   for logic that must react within a frame, and never with UI work inside.
 - A per-player countdown also races the player's stop event (`async`).
 
-### Per-agent interaction cooldowns (43.00)
+### Per-agent interaction cooldowns
 
 `basic_interactable_component.CooldownPerAgent` (`interactable_cooldown_per_agent`,
 `/Verse.org/SceneGraph`) has read/write per agent: `SetRemainingDurationForAgent(Agent,
@@ -176,7 +176,7 @@ cooldown_tools := class:
         Cooldown.GetRemainingDurationForAgent(Agent)
 ```
 
-Compiled 0 errors on 43.00. The shared `interactable_cooldown` still uses
+Compiled 0 errors. The shared `interactable_cooldown` still uses
 `var RemainingDuration:float`.
 
 ### Countdowns you don't need to hand-roll

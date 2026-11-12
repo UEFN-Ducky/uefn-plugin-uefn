@@ -146,7 +146,7 @@ settings_screen := class:
             Hide(Player)
 ```
 
-`Helper.SubscribeToEvent` is the kit's helper — UMG event fields themselves have no `Subscribe` on 42.x; on 43.00 `event(t)` is subscribable, so `Widget.OnX.Subscribe(Handler)` also works (`events_subscriptions`). Without the kit, await them in a loop (`umg_verse_field_events`).
+`Helper.SubscribeToEvent` is the kit's helper — UMG event fields themselves have no `Subscribe` on older builds; now `event(t)` is subscribable, so `Widget.OnX.Subscribe(Handler)` also works (`events_subscriptions`). Without the kit, await them in a loop (`umg_verse_field_events`).
 
 **Show a toast:** `ui_feedback_toast{}.ShowSuccessToast(Player, Heading, Body)` with `using { VerseUIKit.Verse.Feedback }`. `ShowToast` takes `toast_settings` for icon, colour, duration and placement.
 
@@ -172,12 +172,12 @@ Ducky's UMG tools wrap Epic's editor toolsets and compile + save each widget the
 |-----|------------|-----------|
 | Read a widget before changing it | `get_widget_blueprint_info`, `list_verse_fields`, `list_widget_bindings` | `GetWidgets`, `ListVerseFields`, `ListWidgetViewBindings` |
 | Screens that use a kit widget | `get_referencers` | — |
-| Set a property | `set_widget_property` (lists the real names first) | `EditorToolset.ObjectToolset`: `ListProperties`, then `SetProperties` (43.00 names) |
-| Save | `save_asset(path)` for each asset you changed | `EditorToolset.AssetToolset` `SaveAsset` per path (42.x `save_assets`: an **empty list saved every unsaved asset in the project**) |
+| Set a property | `set_widget_property` (lists the real names first) | `EditorToolset.ObjectToolset`: `ListProperties`, then `SetProperties` |
+| Save | `save_asset(path)` for each asset you changed | `EditorToolset.AssetToolset` `SaveAsset` per path (older-build `save_assets`: an **empty list saved every unsaved asset in the project**) |
 | Build Verse | `workspace_compile_verse` | `VerseToolset` `BuildAll` |
 | Asset validation | `validate_uefn_asset` | — |
 
-Verified in UEFN 42.30 (Oct 16 2026) with the Ducky tools, on stand-in kit buttons (a Custom Button inside a child widget): text, desired focus and the click bindings in the recipe all survive compile, save and reload.
+Verified in UEFN (Oct 16 2026) with the Ducky tools, on stand-in kit buttons (a Custom Button inside a child widget): text, desired focus and the click bindings in the recipe all survive compile, save and reload.
 
 - Read property names first: `set_widget_property` returns `listed_properties` with each name's value format. A wrong name fails the call ("could not be set: <name>").
 - Some overrides save and compile but fail asset validation: `isFocusable` on buttons, `Margin` on text blocks. Pad the slot instead.
@@ -205,7 +205,7 @@ Verified in UEFN 42.30 (Oct 16 2026) with the Ducky tools, on stand-in kit butto
 
 Some values can only be set in the UEFN editor's panels. Do everything else, then list each one for the user with the widget, the binding and the value. Check first whether your tools can set it now.
 
-- The number each child sends on a shared event (`Param0` in View Bindings; new bindings send 0). No tool can set it: the event's saved pins are read-only to Python and to ObjectTools (verified 42.30). Name each binding from `list_widget_bindings` → `events` and the number it must send.
+- The number each child sends on a shared event (`Param0` in View Bindings; new bindings send 0). No tool can set it: the event's saved pins are read-only to Python and to ObjectTools. Name each binding from `list_widget_bindings` → `events` and the number it must send.
 - Conversion-function values, e.g. `Conv_IntegerToBoolInterval` bounds or a `Conv_SetScalarParameter` parameter name (View Bindings).
 - Default values of `message` fields (Details panel).
 - Keyframes in widget animations (Animations panel) when `add_animation_keys` can't reach the track.

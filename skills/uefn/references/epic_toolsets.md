@@ -33,10 +33,13 @@ toolsets (that tool sits outside its registry), so describe first, then script.
 
 ## Gotchas
 
+- **Fab**: Epic MCP has a Fab toolset (search Fab and the user's Fab library, listing details and license prices, install a listing in UEFN). Find its current name with `unreal__list_toolsets` (it contains `Fab`) and `unreal__describe_toolset` before the first call; installing a paid listing is the user's decision, ask first.
+- **Playsets**: the playset editor subsystem can regenerate the open playset level's playset and read what it places, from Python and MCP.
+
 - **Pictures:** for a picture of the level call Ducky's `take_high_res_screenshot` (works in every
   agent, needs no Epic toolset); `uefn_window_capture` for the editor window itself. Through Epic
   it is the scene capture toolset or the editor app's viewport capture. No toolset is named
-  "scene" or "SceneTools": that 42.40 name answers "Toolset … not found".
+  "scene" or "SceneTools": that name answers "Toolset … not found".
 - **Place Creative content from its class, never from its asset:** placing a `/Game/Creative/**`
   Blueprint from the asset makes a static mesh actor that fails to cook.
 - **PCG:** Epic ships a PCG graph skill (read it through the agent skill toolset) and leveldesign

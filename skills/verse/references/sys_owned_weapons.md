@@ -257,7 +257,7 @@ the respawn event.
 ### Save Point device — not for custom weapons
 
 The Creative **Save Point** device saves and restores **stock** loadouts. It
-does not restore custom Armory weapons correctly: reported on 41.00, a saved
+does not restore custom Armory weapons correctly: reported, a saved
 custom AR came back as the bare template — grey, and invisible when held. Owned
 custom guns load only through persist + `GrantOwnedWeapon`. If an island also
 uses Save Point for stock items, test that it does not hand back a broken copy

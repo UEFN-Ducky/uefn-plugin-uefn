@@ -1,4 +1,4 @@
-# LLM NPC conversation (UEFN 42.30, compile-verified).
+# LLM NPC conversation (UEFN, compile-verified).
 #
 # Put this behavior on an NPC Character Definition that has a Persona Modifier
 # (NPC Character Behavior → Verse Behavior → llm_npc_behavior), drag the definition

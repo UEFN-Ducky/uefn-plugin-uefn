@@ -4,7 +4,7 @@ description: "UEFN Physics Beta — enable project physics, FortPhysics props, c
 license: MIT
 metadata:
   label: UEFN Physics
-  version: 13
+  version: 14
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -21,7 +21,7 @@ metadata:
 4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
 5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
 6. **One house code style** (verse `code_style`).
-7. **Names come from the digest** (verse `digests`).
+7. **Names come from the digest of the installed build** (verse `digests`). The digest wins over every skill page: after a Fortnite update, or when a name does not compile, call `verse_digest_changes()`; an `@experimental` line above a name means it blocks publishing.
 8. **Done means played** — build, then one live run; two players for multiplayer (verse `runtime_pitfalls`).
 
 **CRITICAL — editor mutations are SERIAL:** wire Volume / Prop Mover / Trigger
@@ -99,7 +99,7 @@ Details: load `verse_physics`.
 
 `device_graph_audit` on wired volumes / movers. Enable Physics via the project tool — do not send Project Settings homework.
 
-## 42.30 notes
+## Notes
 
 - Rocket Launchers now push characters on impact and Shockwave Grenades launch
   characters and physics props correctly on physics-enabled islands (they used to

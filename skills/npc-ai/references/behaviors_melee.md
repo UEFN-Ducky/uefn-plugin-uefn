@@ -56,7 +56,7 @@ enemy_melee_behavior<public> := class(npc_behavior):
         if:
             Agent := GetAgent[]
             Char := Agent.GetFortCharacter[]
-            Actions := GetEntity[].GetComponent[npc_actions_component]   # 43.00: replaces GetNavigatable / GetFocusInterface
+            Actions := GetEntity[].GetComponent[npc_actions_component] # replaces GetNavigatable / GetFocusInterface
             Anim := Char.GetPlayAnimationController[]
         then:
             loop:

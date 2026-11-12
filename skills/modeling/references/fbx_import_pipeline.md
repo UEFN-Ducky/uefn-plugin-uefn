@@ -94,7 +94,7 @@ in a LOD chain (`modeling` SKILL.md). Generate LODs via
 - Missing morphs → re-export with shape keys + import morph option on.
 - Wrong skeleton → animation pack retargeting / don't force mismatched bones.
 
-## USD and glTF import (43.00)
+## USD and glTF import
 
 | Format | Route | Brings in |
 | --- | --- | --- |

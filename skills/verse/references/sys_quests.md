@@ -1,20 +1,20 @@
 ---
-description: "Quests — the 43.00 Progression API (publishable): make a quest in the Fortnite quest UI (BR-style toast, Quests tab, tracking), quest / basic_quest / objective / progress_objective, quest_collection / fort_quest_collection, participants and quest_participant_info (Contribute / Observe / Receive), per-player vs group progress, quest_reward + GrantEvent, categories, chaining quests, a compiled coin quest, the traps, and how quests sit next to the XP / economy packs"
+description: "Quests — the Progression API (publishable): make a quest in the Fortnite quest UI (BR-style toast, Quests tab, tracking), quest / basic_quest / objective / progress_objective, quest_collection / fort_quest_collection, participants and quest_participant_info (Contribute / Observe / Receive), per-player vs group progress, quest_reward + GrantEvent, categories, chaining quests, a compiled coin quest, the traps, and how quests sit next to the XP / economy packs"
 metadata:
   order: 25
-  label: "Game systems — quests (Progression API, 43.00)"
+  label: "Game systems — quests (Progression API)"
   default_enabled: false
   load_condition: "Making a quest, quest line, objective, mission, achievement or challenge; showing quests in the Fortnite quest UI / Quests tab / quest toast; quest rewards; anything with quest, objective, quest_collection, basic_quest, progress_objective, fort_quest_collection"
 ---
 
-## Quests — the Progression API (43.00)
+## Quests — the Progression API
 
-43.00 takes the Progression API out of Experimental, so islands that use it **publish**.
+Epic took the Progression API out of Experimental, so islands that use it **publish**.
 Quests show in the real Fortnite quest UI: a toast top-left when progress changes or a
 quest completes, and the island's own section in the **Quests** tab (category icon, name,
 description, sub-categories, each quest with progress and rewards, trackable on the HUD).
-Every name below is from the 43.00 digests; the coin quest compiled with 0 errors in UEFN
-43.00 (Nov 1 2026). 42.x quest code does not compile on 43.00 (renames: `compile_errors`).
+Every name below is from the digests; the coin quest compiled with 0 errors in UEFN
+(Nov 1 2026). Quest code from older builds does not compile now (renames: `compile_errors`).
 
 ### The pieces
 
@@ -44,7 +44,7 @@ Nothing to place for the quest itself — no quest device. Put the code on a Ver
 pickups, guard spawners, `scene_event`s from child entities). Imported **textures** are
 only needed for icons (`has_icon.Icon:texture` has no default — see Traps).
 
-### Example — a BR-style coin quest in the Fortnite quest UI (compiled, 43.00)
+### Example — a BR-style coin quest in the Fortnite quest UI
 
 One quest **per player** (each has their own counter), listed in the Quests tab, toast
 on each pickup and on completion. Each coin is a `trigger_device` (set its "Times Can
@@ -113,7 +113,7 @@ in the archetype → `Join` → `Activate`. `basic_quest` activates the objectiv
 ### Icons, categories, toast and tracking
 
 With an imported texture (`Textures.T_Coin`), add `has_quest_presentation` and a category.
-This shape compiled on 43.00 with the texture passed at construction:
+This shape compiled with the texture passed at construction:
 
 ```verse
 QuestsCategoryName<localizes>:message = "Island Quests"
@@ -202,7 +202,7 @@ not persistable**: on leave, quest state is gone. To resume, store a `QuestID` +
 float in the player's persistable table (`persistence`) and rebuild the quest with
 `SetProgress` on rejoin.
 
-### Traps (from the 43.00 build and Epic-style tutorials)
+### Traps (from the build and Epic-style tutorials)
 
 - `has_description` / `has_icon` need `using { /Verse.org/Presentation }` / `/Verse.org/Assets`.
 - `has_icon.Icon` is `var Icon:texture` with **no default**: every category, presented quest
@@ -210,8 +210,8 @@ float in the player's persistable table (`persistence`) and rebuild the quest wi
 - The Verse LSP flags every `listenable.Await()` (`GrantEvent`, `DeactivateEvent`,
   `TriggeredEvent` …) as "Unknown member `Await`"; the UEFN build accepts it. Trust
   `workspace_compile_verse` (`compile_errors`).
-- `Entity.AwaitRoundStart()` (seen in tutorials) is not a 43.00 API — a project helper.
+- `Entity.AwaitRoundStart()` (seen in tutorials) is not an API — a project helper.
 - `Entity.FindDescendantComponents(t)` is a generator: iterate it, or `first(X : Gen) { X }`.
 - Persist progress yourself; re-give quests on rejoin, not on every respawn.
-- Old 42.x names (`JoinQuest`, `progress_quest_objective`, `SetRequiredCount`, `GrantReward`)
+- Old older-build names (`JoinQuest`, `progress_quest_objective`, `SetRequiredCount`, `GrantReward`)
   are gone (`compile_errors` 3506 table).

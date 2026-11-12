@@ -5,7 +5,7 @@ description: "UEFN level design — spatial awareness, blockout, player flow, co
 license: MIT
 metadata:
   label: UEFN Level Design
-  version: 32
+  version: 33
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -22,7 +22,7 @@ metadata:
 4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
 5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
 6. **One house code style** (verse `code_style`).
-7. **Names come from the digest** (verse `digests`).
+7. **Names come from the digest of the installed build** (verse `digests`). The digest wins over every skill page: after a Fortnite update, or when a name does not compile, call `verse_digest_changes()`; an `@experimental` line above a name means it blocks publishing.
 8. **Done means played** — build, then one live run; two players for multiplayer (verse `runtime_pitfalls`).
 
 Big levels: fewer, larger pieces; build or stream at most one piece per tick; move one parent, not many children (verse `runtime_pitfalls`).
@@ -233,7 +233,7 @@ Load with `skill_read_subskill("leveldesign", "<id>")`:
 | Id | When |
 |----|------|
 | `area_management` | **Always-on** — per-area terrains, 100k slots, `Areas/<id>/` folders |
-| `content_catalog` | Find Fortnite Props / Prefabs / Devices via MCP (Content Drawer map); 43.00 Frenzy Fields galleries/prefabs; Gaussian splats (PLY/SPZ photoreal captures, Experimental, visual only) |
+| `content_catalog` | Find Fortnite Props / Prefabs / Devices via MCP (Content Drawer map); Frenzy Fields galleries/prefabs; Gaussian splats (PLY/SPZ photoreal captures, Experimental, visual only) |
 | `full_game_director` | Build a complete mode / whole island game loop |
 | `blockout_playtest` | Greybox fly-through, fail before dressing |
 | `player_flow` | Critical path, wayfinding, hubs |
@@ -247,10 +247,10 @@ Load with `skill_read_subskill("leveldesign", "<id>")`:
 | `design_styles` | Genre layout sketches |
 | `cinematic_composition` | Vistas, reveals, framing |
 | `lighting` | Sun/sky/local lights, Day Sequence (stars → materials `starfield_recipe`) |
-| `procedural_generation` | PCG in UEFN 43.00 (MCP `PCGToolset`, PCG Library, reusable PCG tools; forests / cities / POIs, seeds) / seeded mass placement. PCG Mode draw tools (splines, paint, volumes) → `pcg` skill |
+| `procedural_generation` | PCG in UEFN (MCP `PCGToolset`, PCG Library, reusable PCG tools; forests / cities / POIs, seeds) / seeded mass placement. PCG Mode draw tools (splines, paint, volumes) → `pcg` skill |
 | `landscape_foliage` | Terrain + foliage scatter |
 | `landscape_splines` | Landscape spline roads: few control points (ends, junctions, curves, slope changes), mesh axis, materials that show, terrain layer, generate-and-paste recipe |
-| `lego_brick_editor` | LEGO islands: Brick Editor mode, Kragle / Separate, brick rules (42.40) |
+| `lego_brick_editor` | LEGO islands: Brick Editor mode, Kragle / Separate, brick rules |
 | `urban_design` | **Cities start here** — real→uu conversion, Lynch/Jacobs/Gehl, city anti-patterns, router |
 | `urban_masterplan` | Lay out a whole city/town: 12-step build order, game-scale parameters |
 | `urban_procedural_city` | Generate any settlement from a seed (city, village, colony, station, ruins; grid / organic / radial / vertical): network → blocks → lots → structures → plan file, batch placement, per-match variety |

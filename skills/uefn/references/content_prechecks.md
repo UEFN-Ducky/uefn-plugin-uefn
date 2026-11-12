@@ -1,13 +1,13 @@
 ---
-description: "In-editor Content Pre-Checks (v42.30) — moderation flags during cook: the notification, Show Violations → Message Log, yellow triangle in the Content Browser, what to do, never blocks publish"
+description: "In-editor Content Pre-Checks — moderation flags during cook: the notification, Show Violations → Message Log, yellow triangle in the Content Browser, what to do, never blocks publish"
 metadata:
   order: 12
-  label: "Content Pre-Checks (v42.30)"
+  label: "Content Pre-Checks"
   default_enabled: false
   load_condition: "Content Pre-Check, moderation warning, violation notification, yellow warning triangle on an asset, Moderation Message Log, content guidelines, or an asset flagged before publish"
 ---
 
-# Content Pre-Checks (v42.30)
+# Content Pre-Checks
 
 UEFN now checks assets against the **Epic Games Developer Rules** and the Content
 Guidelines **while you build** (during cook), instead of only at upload.
@@ -34,7 +34,7 @@ wrong, publish to the Creator Portal for the full review.
 
 ## For Ducky
 
-- Read flags from the editor log: `get_editor_log` / Epic `ConsoleToolset.LogsToolset.GetLogEntries` (43.00; was `EditorToolset.LogsToolset`)
+- Read flags from the editor log: `get_editor_log` / Epic `ConsoleToolset.LogsToolset.GetLogEntries` (was `EditorToolset.LogsToolset`)
   (pattern on the asset name or "violation"). Report which assets and why; do not
   delete user assets without asking.
 - Never try to hide or work around a flag (Developer Rules — includes the 1.22

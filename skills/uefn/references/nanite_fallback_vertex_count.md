@@ -1,5 +1,5 @@
 ---
-description: "ValkyrieValidator_StaticMesh 'Vertex count of LOD0 of this Static Mesh's render data is too high (30,000)' blocks launch even with Nanite on — the Nanite fallback mesh is counted; set fallbackTarget PercentTriangles with EditorToolset.ObjectToolset.SetProperties (43.00; was ObjectTools.set_properties), find every offender with one execute_tool_script"
+description: "ValkyrieValidator_StaticMesh 'Vertex count of LOD0 of this Static Mesh's render data is too high (30,000)' blocks launch even with Nanite on — the Nanite fallback mesh is counted; set fallbackTarget PercentTriangles with EditorToolset.ObjectToolset.SetProperties (was ObjectTools.set_properties), find every offender with one execute_tool_script"
 metadata:
   order: 22
   label: "Validator: Vertex count of LOD0 too high (Nanite)"
@@ -22,7 +22,7 @@ heavy as the source.
 
 ## Fix: shrink the fallback
 
-No visual change: Nanite still renders the full mesh. Epic MCP (43.00 names; 42.40 used
+No visual change: Nanite still renders the full mesh. Epic MCP (older builds used
 `ObjectTools.set_properties` / `StaticMeshTools.get_vertex_count` / `AssetTools.*`), per offending StaticMesh:
 
 1. `EditorToolset.ObjectToolset.SetProperties` on the StaticMesh (`instance` = its ref) with

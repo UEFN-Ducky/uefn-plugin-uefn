@@ -1,17 +1,44 @@
 ---
-description: "What changed in UEFN / Fortnite 43.00 (Nov 2026) and which skill covers each item — PCG in UEFN, Progression API (quests) publishable + renamed, Health & Damage Pipeline, subscribable events, clock/timer/playable, Last[], tags on creative objects, held-item poses, Teleporter props, vehicle fuel, Scene Graph cameras in radians, weak_map 6, MCP rename to EditorToolset.* + profiling / PCG / Sequencer / MetaSound / Prefab / Scene Capture toolsets, Creator Portal Technical tab, Verse asset redirectors, Data Recovery, Gaussian splats, USD import, breaking changes and known issues"
+description: "What changed recently in UEFN / Fortnite and which skill covers each item — how to see the changes of the installed build (verse_digest_changes), then: loot pools, perception, camera modifier pieces, modifier order, Day Sequence device from Verse, movement components, input actions, Fab toolset, PCG, quests (Progression API), Health & Damage Pipeline, subscribable events, clock / timer / playable, tags on creative objects, held-item poses, Teleporter props, vehicle fuel, Epic MCP toolset names + profiling / PCG / Sequencer / MetaSound / Prefab / Scene Capture toolsets, Creator Portal Technical tab, Verse asset redirectors, Data Recovery, Gaussian splats, USD import, breaking changes and known issues"
 metadata:
   order: 0
-  label: "43.00 patch (Nov 2026, current)"
+  label: "Recent changes and where they are covered"
   default_enabled: false
-  load_condition: "The user asks what is new or what changed in UEFN / 43.00 / the latest update / patch notes, or something the 43.00 notes changed (PCG, quests / Progression, health pipeline, Subscribe on events, timers, tags, cameras FieldOfView / radians, MCP toolset names, profiling, Creator Portal Technical, redirectors, Data Recovery, a new 43.00 Verse compile error)"
+  load_condition: "The user asks what is new or what changed in UEFN / Fortnite / the latest update / release notes, pastes release notes, or asks about something a recent update changed (loot pools, perception, camera modifiers, day sequence, PCG, quests / Progression, health pipeline, Subscribe on events, timers, tags, MCP toolset names, profiling, Creator Portal Technical, redirectors, Data Recovery, a new Verse compile error after an update)"
 ---
 
-# UEFN 43.00 (current)
+# Recent changes and where they are covered
 
-Checked against the 43.00 Verse digests (diffed with 42.40) and every Epic MCP toolset
-described live in UEFN 43.00 (**56 toolsets / 826 tools**, 42.40: 30 / 388). Where the notes
-and the digest disagree, the digest wins; rows marked *not in the notes* came from the diff.
+**The installed build is the truth, not this page.** This page is written by hand and goes
+stale with every Fortnite update.
+
+1. `verse_digest_changes()` lists what the newest build on this PC added, removed and changed
+   in the Verse API, and what is no longer experimental. Use it first, every time.
+2. `get_verse_api("<name>")` for a definition; `unreal__list_toolsets` /
+   `unreal__describe_toolset` for the Epic MCP tools that exist right now.
+3. A name with `@experimental` above it in the digest blocks publishing. No page here decides
+   that: the digest does.
+4. When the user pastes release notes, map each item to a row below or to a skill with
+   `skill_search`; if none covers it, read the digest and build from that.
+
+## Newest
+
+| Change | What it is | Skill |
+| --- | --- | --- |
+| **Loot pools** | Weighted loot tables in Verse that return item entities; nested pools; Fortnite's own chest / ammo box / supply drop / food box loot | verse `sys_loot_pools` |
+| **Perception** | Entities that see, hear and feel touch: emitter + detector components, filtered subscriptions | scenegraph `perception` |
+| **Camera modifier pieces** | Attach to entity, boom arm, offset, collision push, dampen translation / rotation, set translation / rotation, panning and dolly framing. The orbit / fixed angle / fixed point modifiers are gone: build them from the pieces | scenegraph `cameras`, `custom_player_controller` |
+| **Modifier stacks run in the order added** | `AddModifier(Modifier)` takes the modifier only; positions are gone (cameras and the damage pipeline) | scenegraph `cameras`; verse `sys_health_pipeline` |
+| **Day Sequence device from Verse** | `day_sequence_device`: `Enable` / `Disable` / `FadeIn` / `FadeOut`, time of day, sun, fog, skylight, sky and clouds | verse `devices` |
+| Character movement components | `fort_jump_component`, `fort_crouch_component`, `fort_glide_component`, `fort_skydive_component`, `fort_swim_component`, `fort_down_but_not_out_component`: read each with `get_verse_api` | scenegraph `components` |
+| Input actions | `Move`, `Interact` and `InteractMapping`; `PointerRotate` (two-finger rotate on touch): check each for `@experimental` | verse `sys_input_devices`; `virtualpointer` |
+| HUD Controller touch buttons | **Respect Player Transform** (with Apply Canvas Transform on: your position is the default, a player's own placement wins) and **Override Touch Control Pickup Button** | `virtualpointer` `touch_layout_override`; uefn `creative_devices` |
+| Fab toolset in Epic MCP | search Fab and the user's Fab library, listing details and prices, install a listing in UEFN | uefn `epic_toolsets` |
+| Playset regenerate | regenerate the open playset level's playset and read what it places, from Python and MCP | uefn `epic_toolsets` |
+| Brand content | **Project > Change Brand** opens Add Branded Content or Switch Brand (was a dropdown in Project Settings) | uefn `creator_portal` |
+| Shadows of the Abbey | Feature Example island: high-fidelity environment kits that share textures and materials to save memory | leveldesign `content_catalog` |
+| Damage pipeline | a zero damage or heal still returns a result and signals `OnDamaged` / `OnHealed` | verse `sys_health_pipeline` |
+| Wedge target query | finds Scene Graph entities with no actor behind them | scenegraph `template_abilities` |
 
 ## Build with it
 
@@ -20,14 +47,14 @@ and the digest disagree, the digest wins; rows marked *not in the notes* came fr
 | **Progression API out of Experimental** | Quests and objectives publishable: `/Verse.org/Progression` `quest`, `objective`, `quest_participant`, `quest_membership`; `/UnrealEngine.com` `basic_quest`, `has_quest_rewards`, `has_quest_presentation`, `progress_objective` | verse `sys_quests` (linked from `sys_progression`, `sys_architecture`) |
 | Progression renames (*not in the notes*) | `JoinQuest` → `Quest.Join(Participant, Info)` returning `result(quest_membership, []quest_error)`; `AbandonQuest` → `Quest.Abandon`; `quest_objective` → `objective`, `SetRequiredCount` → `SetRequiredProgress`; `quest_reward` → `Grant` / `Preview` / `CanReceive`; participant info `Contributes/Observes/Receives` → `Contribute/Observe/Receive`. Old experimental code stops compiling | verse `sys_quests` § migrating, `compile_errors` |
 | **Health & Damage Pipeline** (Experimental, blocks publish) | `/UnrealEngine.com/HealthPipeline` `health_component`, pools, damage/healing events and modifiers; Fortnite shield/overshield pools; built-in weapons damage entities; 9 known issues | verse `sys_health_pipeline` (from `sys_damage_health`) |
-| **Events are subscribable** | `event(t)` implements `listenable(t)` (`@available 4300`) — `MyEvent.Subscribe(Handler)` works; a hand-written `Subscribe` extension now clashes (delete it). New `proxy_listenable` / `MakeProxyListenable` | verse `events_subscriptions`, `async`, `umg_verse_field_events`, `whats_new` |
+| **Events are subscribable** | `event(t)` implements `listenable(t)` (`@available`) — `MyEvent.Subscribe(Handler)` works; a hand-written `Subscribe` extension now clashes (delete it). New `proxy_listenable` / `MakeProxyListenable` | verse `events_subscriptions`, `async`, `umg_verse_field_events`, `whats_new` |
 | **clock / timer / playable** | `clock`, `SecondsSinceEpochClock`, `playable` (Play / Pause / Resume / Stop + events, `playable_stop_reason`), `timer` (ReferenceClock, PlayRate, Start/EndSeconds, Get/SetSeconds) | verse `sys_rounds_timers`, `sys_time_tracking` |
 | `Last[]` | `Array.Last[]`, `Last[OffsetFromLast]` (`<computes><decides>`) | verse `datatypes` |
 | Preceding `<final>` field init | a field initialiser may read a preceding `<final>` field (8 limits) | verse `classes` |
-| Tags on creative objects | `has_tags` (`@available 4300`; islands uploaded before 43.00 don't get it), `AddTag` / `RemoveTag` / `ContainsTag` …; `GetTags`, `tag_view`, `tag_search_criteria` deprecated → `FindCreativeObjectsWithTag(tag)` | verse tags page, `devices` |
+| Tags on creative objects | `has_tags` (`@available`; islands uploaded in older builds don't get it), `AddTag` / `RemoveTag` / `ContainsTag` …; `GetTags`, `tag_view`, `tag_search_criteria` deprecated → `FindCreativeObjectsWithTag(tag)` | verse tags page, `devices` |
 | `timeline_element` per-agent duration (*not in the notes*) | `SetRemainingDurationForAgent` / `GetRemainingDurationForAgent`; class now `<abstract>` | verse `sys_rounds_timers` |
 | `AddMember` / `RemoveMember` (*not in the notes*) | return `result(void, …)` instead of `result(comparable, …)` | verse `compile_errors` |
-| `BeginFire` / `EndFire` / `IsFiring[]` (*not in the notes*) | `@available 4300` firing control | scenegraph `custom_weapons` |
+| `BeginFire` / `EndFire` / `IsFiring[]` (*not in the notes*) | `@available` firing control | scenegraph `custom_weapons` |
 | **Held item poses** | `fort_item_owner_pose_modifier_component` on `held_item_template`: fire torch (default), flashlight, map, small / large consumable | scenegraph `held_items` |
 | Prefabs inherit their parent class | `pistol_template`, `assault_rifle_template`, `sub_machine_gun_template`, `shotgun_template`, `held_item_template` are no longer `<final>`; a prefab is its parent's subclass in Verse | scenegraph `custom_weapons`, `custom_items`, `held_items` |
 | **Teleporter + props** | `Teleport` / `Activate` with a `creative_prop`, `TeleportPropEvent`, `EnterPropEvent`, `enableable`, physics props | verse `devices`; uefn `creative_devices` |
@@ -38,7 +65,7 @@ and the digest disagree, the digest wins; rows marked *not in the notes* came fr
 | Scene Graph handles (*not in the notes*) | `entity_handle`, `component_handle(t)`, `mesh_part_handle`; Source/TargetMeshHandle on hit and overlap results | scenegraph `components`, `movement_transforms` |
 | Same-frame overlap / sweep | results valid the same frame — drop the `Sleep(0.0)` workaround | scenegraph `movement_transforms` |
 | No proxy actors | the editor works with entities directly; advice that finds entities through proxy actors is stale | scenegraph `editor_tools` |
-| **Scene Graph performance** | cheaper bulk spawning, cheaper moves, the server skips unmoved entities, less reinstancing on compile / push, faster mass deletes, less client memory for many Verse objects / material properties, better memory tracking. Some gains need a **new cook** | scenegraph `SKILL` (43.00 performance), uefn `profiling` |
+| **Scene Graph performance** | cheaper bulk spawning, cheaper moves, the server skips unmoved entities, less reinstancing on compile / push, faster mass deletes, less client memory for many Verse objects / material properties, better memory tracking. Some gains need a **new cook** | scenegraph `SKILL` (performance), uefn `profiling` |
 | `weak_map` limit 4 → 6 | per island persistent `weak_map`s | verse `persistence` |
 | Asset modules default to project-wide | Verse modules with reflected assets are project-accessible by default | verse `modules` |
 | NPC actions (*not in the notes*) | `npc_actions_component` (`NavigateTo`, `Focus`, `Idle`, …), `guard_actions_component` (`Tether`) replace deprecated NPC calls | npc-ai pack; verse `devices` § NPC |
@@ -112,12 +139,11 @@ in-place ops returned None, `>=` acted like `>` (uefn `epic_mcp_ops`).
 
 | Issue | Workaround | Skill |
 | --- | --- | --- |
-| Scene Graph cameras don't activate on play servers; `GetComponent[camera_director_component]` fails (fixed 43.10) | private-only `using { /Fortnite.com/SceneGraphCameras }`; Third Person Controls device for interaction | scenegraph `cameras` |
-| Wedge target query misses actor-less entities, so wedge abilities don't damage them (fixed 43.10) | use another target query | scenegraph `template_abilities` |
+| Scene Graph camera director not found on a play server; `GetComponent[camera_director_component]` fails | private-only `using { /Fortnite.com/SceneGraphCameras }`; Third Person Controls device for interaction | scenegraph `cameras` |
 | Health Pipeline: rockets ricochet, lightweight projectiles, some non-ballistic weapons, lingering AoE once, physics collisions, healing items, hit FX, no team filtering, zero-delta entries | see the page | verse `sys_health_pipeline` |
 | Adding a component that already belongs to another entity logs a warning (future error) | remove it first or create a new one | scenegraph `components` |
 
-## Upgrade notes (breaking on 43.00)
+## Upgrade notes (breaking)
 
 | Break | Fix | Skill |
 | --- | --- | --- |
@@ -129,7 +155,7 @@ in-place ops returned None, `>=` acted like `>` (uefn `epic_mcp_ops`).
 | Experimental Progression code (`JoinQuest`, `quest_objective`, …) | migrate to the renamed API | verse `sys_quests` |
 | Touch values 50× larger | retune thresholds | `virtualpointer` |
 | MetaHuman normals are no longer recalculated automatically when you assemble a character from MetaHuman Creator | if the existing normals are wrong, assemble again (the separate Interchange DNA Import Settings option only turns normal recalculation off) | metahuman `assemble_uefn_export` |
-| Epic MCP 42.40 toolset / tool names | 43.00 names | uefn `epic_toolsets` |
+| Epic MCP older-build toolset / tool names | current names | uefn `epic_toolsets` |
 
 Compile-probe error codes for each break: verse `compile_errors`. Roadmap: Epic's UEFN roadmap
-page (New Virtual Machine still listed for Q4 2026 in 42.40).
+page.

@@ -19,7 +19,7 @@ that does. Pick by what is animating:
 | An NPC's locomotion + attacks | **AnimPreset + NPCCharacterDefinition** | Yes |
 | A Creative prop's transform (platform, door) | Verse `animation_controller` | Yes |
 | Editor preview only | Skeletal mesh actor's **Animation to Play** | n/a — not a runtime trigger |
-| Scene Graph entities | Verse `PlaySkeletalAnimation` | **No — still `@experimental`** on 42.10 |
+| Scene Graph entities | Verse `PlaySkeletalAnimation` | **No — still `@experimental`** |
 
 ## Animated Mesh device (the default answer)
 
@@ -44,9 +44,9 @@ save_current_level()
 - If `configure_animated_mesh` reports a field it could not match, it returns the
   device's real option keys — set those with Epic `DeviceToolset` `SetDeviceProperty`.
 
-### Scene Graph `PlaySkeletalAnimation` (Experimental, FN ≥ 4100)
+### Scene Graph `PlaySkeletalAnimation` (Experimental)
 
-Digest signature, confirmed on 42.10 — still `@experimental`, so it blocks publishing:
+Digest signature, confirmed — still `@experimental`, so it blocks publishing:
 
 ```verse
 (Entity:entity).PlaySkeletalAnimation(
@@ -56,7 +56,7 @@ Digest signature, confirmed on 42.10 — still `@experimental`, so it blocks pub
 )<transacts><decides>:play_skeletal_animation_result
 ```
 
-It is failable — call it inside an `if`. 42.10 fixed looping Scene Graph animations
+It is failable — call it inside an `if`. Epic fixed looping Scene Graph animations
 appearing frozen at their end pose on clients (they played correctly on the server),
 and re-exposed `EaseOut` as experimental. For anything publishable use the Animated
 Mesh device, an AnimPreset, or `GetPlayAnimationController` on the player instead.
@@ -130,9 +130,9 @@ Animated Mesh device, the Cinematic Sequence device, an AnimPreset, or player
 | Island fails validation / cannot publish | Built on the experimental Scene Graph animation API |
 | Memory warnings | Device references a whole animation pack — trim to baked clips |
 
-## Verse Skeletal Animation status (42.30)
+## Verse Skeletal Animation status
 
-Verse Skeletal Animation (Experimental since 41.00) **stays Experimental**. Epic is
+Verse Skeletal Animation (Experimental) **stays Experimental**. Epic is
 building a **new API** to replace it and will not fix bugs in the current one; the
 current API will be deprecated later, so code built on it will need updating.
 For anything that must publish now, use the Animated Mesh device / Sequencer paths

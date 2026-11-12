@@ -59,14 +59,14 @@ Verse AI loops: `skill_read_subskill("verse", "sys_npc_ai")`.
 
 ## Verse behavior (turns / chase / play clips)
 
-`npc_behavior` subclass `OnBegin` loop typically uses (43.00 digest-verified):
+`npc_behavior` subclass `OnBegin` loop typically uses:
 
 - `Actions := GetEntity[].GetComponent[npc_actions_component]` (`using { /Verse.org/SceneGraph }`)
 - `Actions.Focus(TargetEntity, ?LockFocus := true)` — look / turn toward the player
   (bind `TargetEntity := Target.GetEntity[]` in the `if`; it is `<decides>`)
   (raced; a position is `FromVector3(Pos)`)
 - `Actions.NavigateTo(MakeNavigationTarget(Agent), ?MovementType := movement_type.Running)` — chase / strafe
-- 43.00 **deprecated** `GetFocusInterface` / `MaintainFocus`, `GetNavigatable`, `GetFortLeashable` and
+- Epic **deprecated** `GetFocusInterface` / `MaintainFocus`, `GetNavigatable`, `GetFortLeashable` and
   `movement_types` — don't write them in new code.
 - `GetPlayAnimationController[]` → `PlayAndAwait(Clip)` — play custom
   `animation_sequence` (attack, gesture, emote)

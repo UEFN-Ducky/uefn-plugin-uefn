@@ -1,13 +1,13 @@
 ---
-description: "Verse Insights (v43.00): profile the server's Verse code in a live session. Use Verse VM, Tools → Profile → Timing Insights on the Server target, Save to File and naming traces, the Frames / Timing View / Timers panels (Game Frame vs Instance mode, Incl vs Excl, native and bytecode), isolate a timer, find the Verse path, the spawn-burst fix (spread work across frames with Mod + Sleep, one AddEntities per batch), before/after trace comparison, and the agent flow through unreal-insights"
+description: "Verse Insights: profile the server's Verse code in a live session. Use Verse VM, Tools → Profile → Timing Insights on the Server target, Save to File and naming traces, the Frames / Timing View / Timers panels (Game Frame vs Instance mode, Incl vs Excl, native and bytecode), isolate a timer, find the Verse path, the spawn-burst fix (spread work across frames with Mod + Sleep, one AddEntities per batch), before/after trace comparison, and the agent flow through unreal-insights"
 metadata:
   order: 33
-  label: "Verse Insights: read + fix (43.00)"
+  label: "Verse Insights: read + fix"
   default_enabled: false
   load_condition: "The user asks how to use or read Verse Insights, which Verse function makes the server hitch or lag, why a spawn / reset / build spikes the server frame, or how to compare two Timing Insights traces"
 ---
 
-# Verse Insights (43.00)
+# Verse Insights
 
 Verse Insights records **which Verse functions run on the server in each game
 frame and how long each took**. Use it for server hitches, spikes when something
@@ -73,7 +73,7 @@ for (F := 0..Len - 1, L := 0..Width - 1):
     if (Mod[C, SleepMod] = SleepMod - 1). Sleep(0.0)   # yield one frame
 ```
 
-- Compiles on 43.00 (needs `/Verse.org/SceneGraph` and `/Verse.org/Simulation`).
+- Compiles (needs `/Verse.org/SceneGraph` and `/Verse.org/Simulation`).
 - `Mod[X, Y]` is `<decides>` (`Verse.digest`), so it goes in `if (...)` with brackets.
 - `Sleep(0.0)` yields one frame. Make `SleepMod` an `@editable` so you can tune
   it without code changes (10 per frame took the spike frame to **18 ms**).
@@ -102,7 +102,7 @@ the next fix.
 - Read: in the video, Claude Code read the `.utrace` through a separate MCP
   server the creator registered as **`unreal-insights`**, next to `unreal-mcp`. It
   reported the worst frame, the timeline, the time per function and the Verse file
-  behind them. That server is not shipped with UEFN 43.00 and has no public
+  behind them. That server is not shipped with UEFN and has no public
   package (see `profiling_mcp` step 5); Epic's `unreal__*` toolsets capture traces
   but do not read them. If the person has a trace-reader MCP connected, list its
   tools (`ducky_get_tools`) and use those names; tool names were collapsed on

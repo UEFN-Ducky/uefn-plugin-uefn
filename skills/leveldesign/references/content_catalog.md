@@ -1,5 +1,5 @@
 ---
-description: "Map Content Drawer (All → Fortnite → Props / Prefabs / Devices) to real MCP search paths — walls, floors, prop kits, Creative devices, Verse digests that list every device API; 43.00 Frenzy Fields galleries/prefabs, Gaussian splats (PLY/SPZ, Experimental, visual only)"
+description: "Map Content Drawer (All → Fortnite → Props / Prefabs / Devices) to real MCP search paths — walls, floors, prop kits, Creative devices, Verse digests that list every device API; Frenzy Fields galleries/prefabs, Gaussian splats (PLY/SPZ, Experimental, visual only)"
 metadata:
   order: 2
   label: "Content catalog (Props / Prefabs / Devices)"
@@ -49,9 +49,9 @@ Devices: `PlaceDevice` only. Then `save_current_level`.
 | Building greebles | `/Game/Creative/Items/Building_Parts` | `search="Ring"` |
 | Themed kits (castle, military, houses…) | `/Game/Creative/Sets/<Theme>` | e.g. `ArtDeco_Bank` floors/walls/stairs (`AD_Bank_*_C`), `GrayBox`, `MilitaryBase` |
 | Prop-set packs | `/Game/Creative/Sets/PropSets` | `Playgrounds`, `Primitives`, … |
-| **Harrowville** (v42.10, horror) | `search_assets(search="Harrowville")` | Floor/Stair/Roof, Wall, Prop, Cliff galleries + `Harrowville House`; pairs with the Harrowville: Environment template |
-| **Stone Sanctum** (v42.20, temple) | `search_assets(search="Stone Sanctum")` | Temple + Floor / Wall / Roof / Prop / Foundation galleries. Place `_C` via `LevelToolset.AddToSceneFromClass` |
-| **Cluster Coast** (v42.10, coastal) | `search_assets(search="Cluster Coast")` | Floor, Wall, Roof, Prop galleries + `Duck Yacht`, `Salty Duck` |
+| **Harrowville** (horror) | `search_assets(search="Harrowville")` | Floor/Stair/Roof, Wall, Prop, Cliff galleries + `Harrowville House`; pairs with the Harrowville: Environment template |
+| **Stone Sanctum** (temple) | `search_assets(search="Stone Sanctum")` | Temple + Floor / Wall / Roof / Prop / Foundation galleries. Place `_C` via `LevelToolset.AddToSceneFromClass` |
+| **Cluster Coast** (coastal) | `search_assets(search="Cluster Coast")` | Floor, Wall, Roof, Prop galleries + `Duck Yacht`, `Salty Duck` |
 | Trees / hedges | `/Game/Creative/Environments` | `search="Tree"` / `ApolloTrees` / `ApolloHedges` / `AthenaHedges` |
 
 **First pass:** search `/Game/Creative/**` → keep only `BlueprintGeneratedClass` `_C`.
@@ -160,7 +160,7 @@ Custom project assets in Content Browser (weapons, imported meshes): `search_ass
 
 If zero hits: broaden keyword **or** step up one folder (e.g. Walls → BuildingActors → Creative), never jump to inventing cube greybox unless the user asked for greybox.
 
-## v42.10 additions worth knowing
+## Additions worth knowing
 
 - **Horror audio:** 166 Audio Control Buses under Content Drawer Horror — search Creative audio devices, not BR environment meshes.
 - **Foliage:** `search_assets(search="Tree", directory="/Game/Creative/Environments")` then spawn only `…_C` Blueprint hits. Skip `StaticMesh` / BakeData / HLOD.
@@ -169,13 +169,13 @@ If zero hits: broaden keyword **or** step up one folder (e.g. Walls → Building
 - New Rare/Epic/Legendary **Striker Burst AR** variants for loadouts.
 - Themes: horror → Harrowville set + Horror audio; temple / stone ruin → Stone Sanctum; coastal/beach → Cluster Coast set.
 
-## New in 43.00
+## New
 
 | Content | Kind | Where / name |
 | --- | --- | --- |
 | **Frenzy Fields** | Floor, Wall, Roof and Props **galleries**; **Fields** prefab and **Barn** prefab | Content Browser → Fortnite → Galleries / Prefabs, search "Frenzy Fields". Farm / barnyard / countryside themes. Place the `*_C` Blueprint you find (`LevelToolset.AddToSceneFromClass`), never the meshes inside it |
 
-### Gaussian splats (Experimental, 43.00)
+### Gaussian splats (Experimental)
 
 Photoreal captures of real places (a room, building, landscape) used as an
 environment or backdrop.
@@ -192,7 +192,7 @@ environment or backdrop.
   where players walk; never expect gameplay to hit it.
 - **Use for:** backdrops and set pieces. Gameplay geometry stays meshes/props.
 
-## New in 42.40
+## New
 
 | Content | Kind | Verse / catalog name |
 | --- | --- | --- |
@@ -200,16 +200,16 @@ environment or backdrop.
 | **Reality Reign** | Prefabs + Floor / Wall / Prop galleries, Processor Base, Display Tower | Content Browser → Fortnite → Prefabs / Galleries, search "Reality Reign". `search_assets("RealityReign" / "Reign")` under `/Game/Creative` found nothing on Oct 16 2026 — browse the folders and place the `*_C` you find there |
 | **LEGO bricks** | 50 new bricks in the LEGO Brick Editor (LEGO islands) | `lego_brick_editor` |
 
-## New in 42.30
+## New
 
 | Content | Kind | Verse / catalog name |
 | --- | --- | --- |
-| **Lavish Lair Set** | Prefabs & galleries | In the editor: Content Browser → Fortnite → Prefabs / Galleries, search "Lavish Lair". Its asset name is not indexed under "Lavish" or "Lair" in the 42.30 registry, so browse the Prefabs/Galleries folders and place the `*_C` you find there |
+| **Lavish Lair Set** | Prefabs & galleries | In the editor: Content Browser → Fortnite → Prefabs / Galleries, search "Lavish Lair". Its asset name is not indexed under "Lavish" or "Lair" in the older-build registry, so browse the Prefabs/Galleries folders and place the `*_C` you find there |
 | **Witch Broom** (Ch6S4) | Item | `WitchBroom_BR_CH6S4_Epic` (`/Fortnite.com/Items`) |
 | **Slap Candy Corn** | Consumable (applies Slap) | `SlapCandyCorn_BR_CH7S4_Exotic` (`/Fortnite.com/Items`) |
 | **Easy Ride Pumpkin Launcher** | Exotic weapon | `EasyRidePumpkinLauncher_BR_CH7S4_Exotic` (`/Fortnite.com/Weapons`) |
 
 Grant items/weapons with `Inventory.AddItemDistribute(WitchBroom_BR_CH6S4_Epic{})`
 (scenegraph `itemization`). Racing: Rocket Racing *template* islands were
-unpublished in 42.30; build tracks with the Track Spline Tool, Boost Pads, Volume
+unpublished; build tracks with the Track Spline Tool, Boost Pads, Volume
 Hazards and vehicle spawners on a normal island (uefn `creative_devices`).

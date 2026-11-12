@@ -1,13 +1,13 @@
 ---
-description: "In-island entitlements / V-Bucks offers (v42.20) — using { /UnrealEngine.com/Marketplace }; not island Coins"
+description: "In-island entitlements / V-Bucks offers — using { /UnrealEngine.com/Marketplace }; not island Coins"
 metadata:
   order: 15
-  label: "Marketplace / entitlements (v42.20)"
+  label: "Marketplace / entitlements"
   default_enabled: false
   load_condition: "Selling entitlements, BuyOffer / GrantEntitlement, V-Bucks prices, paid offers, or migrating off /Fortnite.com/Marketplace"
 ---
 
-## Marketplace — entitlements, not island Coins (v42.20)
+## Marketplace — entitlements, not island Coins
 
 **HARD:** new code uses `using { /UnrealEngine.com/Marketplace }`.
 `/Fortnite.com/Marketplace` still aliases the same types but every digest

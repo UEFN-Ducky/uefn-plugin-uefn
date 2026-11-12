@@ -30,7 +30,7 @@ The Verse type is the Assets digest name after the asset exists. Do not write `c
 
 ### 3 — Custom Button menu
 
-Structure verified live (42.30) — names here follow the kit's naming:
+Structure verified live — names here follow the kit's naming:
 
 ```
 CanvasPanel Root_Canvas
@@ -44,9 +44,9 @@ CanvasPanel Root_Canvas
 - `Anim_Highlight` on `Fill_Image`, Opacity, keys at 0 (0.45) and 0.35 (1).
 - `Anim_Loop` on `Fill_Image`, Transform `ScaleX` and `ScaleY`, keys at 0 (1), 0.4 (1.06), 0.8 (1).
 - `add_verse_field` `IsIntroActive` type `logic` (the tool stores `bool`). Bind to `Fill_Image.RenderOpacity` when the intro should fade the fill.
-- `add_verse_field` `OnPlayClicked` and `OnCloseClicked`, type `event` (42.30). `bind_widget_event` `Play_Button` `OnButtonClicked` → `OnPlayClicked`. With the kit close button, bind both of its inner buttons to `OnCloseClicked` (`verse_ui_kit` — Input). Check `compiled`.
+- `add_verse_field` `OnPlayClicked` and `OnCloseClicked`, type `event`. `bind_widget_event` `Play_Button` `OnButtonClicked` → `OnPlayClicked`. With the kit close button, bind both of its inner buttons to `OnCloseClicked` (`verse_ui_kit` — Input). Check `compiled`.
 - Desired Focus Widget = `Play_Button` (`umg_navigation`).
-- Verse: with the kit, `Helper.SubscribeToEvent(Player, Widget.OnPlayClicked, OnPlayClicked)`; without it on 43.00, `Sub := Widget.OnPlayClicked.Subscribe(OnPlayClicked)` (cancel on close); on 42.x, where event fields have no `Subscribe`, `loop: Widget.OnPlayClicked.Await()` in one spawned watcher per widget (`umg_verse_field_events`).
+- Verse: with the kit, `Helper.SubscribeToEvent(Player, Widget.OnPlayClicked, OnPlayClicked)`; without it now, `Sub := Widget.OnPlayClicked.Subscribe(OnPlayClicked)` (cancel on close); on older builds, where event fields have no `Subscribe`, `loop: Widget.OnPlayClicked.Await()` in one spawned watcher per widget (`umg_verse_field_events`).
 - Highlight graph: `umg_animations`. Device: `umg_widget` template. Volume opens it. Add with `ui_input_mode.All`, then focus. Remove on Back and on leave.
 
 ### 4 — Shop frame

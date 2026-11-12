@@ -1,11 +1,11 @@
 ---
 source_plugin_id: uefn
 name: pcg
-description: "PCG Editor Tools in UEFN 43.00 (PCG Mode, Shift+7): where every button is and what every setting does — Spacing, Spline Mesh, Area, Place, Scatter and Volume tools, regenerate/cleanup, spawning Fortnite Blueprint props, and how an agent clicks through them or walks the person through them"
+description: "PCG Editor Tools in UEFN (PCG Mode, Shift+7): where every button is and what every setting does — Spacing, Spline Mesh, Area, Place, Scatter and Volume tools, regenerate/cleanup, spawning Fortnite Blueprint props, and how an agent clicks through them or walks the person through them"
 license: MIT
 metadata:
   label: UEFN PCG Editor Tools
-  version: 3
+  version: 4
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -14,7 +14,7 @@ metadata:
 
 # UEFN PCG Editor Tools
 
-PCG Mode is Epic's set of ready-made placement tools, new in UEFN 43.00. You draw a spline, paint or
+PCG Mode is Epic's set of ready-made placement tools. You draw a spline, paint or
 drag a volume in the viewport and PCG places meshes or actors. No graph authoring needed.
 
 ## Which route
@@ -24,7 +24,7 @@ drag a volume in the viewport and PCG places meshes or actors. No graph authorin
 | Person wants to draw or paint by hand; roads, fences, rock lines, tree clusters | **PCG Mode** (this skill) |
 | Agent builds with the real mouse | `agent_driving` + `build_recipes` |
 | Show the person where a button is | `ducky_ui_show` → `agent_driving` |
-| Agent must place by exact numbers, no viewport drawing | PCG graphs → `graph_layers` (node order, layers, traps) + `skill_read_subskill("leveldesign", "procedural_generation", section="Route A: PCG graphs (UEFN 43.00+)")` (tool calls) |
+| Agent must place by exact numbers, no viewport drawing | PCG graphs → `graph_layers` (node order, layers, traps) + `skill_read_subskill("leveldesign", "procedural_generation", section="Route A: PCG graphs")` (tool calls) |
 | Trees, rocks, street props or buildings for a Road Network world | Road Network PCG tab → `road_network_pcg_plan` → `graph_layers` |
 | Custom logic (process after raycast, custom nodes) | PCG graphs (same page). The prebuilt tools can't reorder their steps |
 

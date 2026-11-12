@@ -43,7 +43,7 @@ Preferred way to move level geometry that must **hit** physics props.
 - Place so the device intersects the prop; holographic arrow = move direction.
 - Common: Distance / Speed; **Should Move From Start** false when Switch/Volume starts it.
 - Collision behaviors (Advanced): Continue vs Stop for AI / Player / Prop.
-- **Limits (documented v42.10):** only **one** Prop Mover can be active at a time; the one
+- **Limits:** only **one** Prop Mover can be active at a time; the one
   activated last takes precedence; the active mover can **rotate or translate, not both**.
   Chain movers (Finish → next Start) instead of overlapping them.
 

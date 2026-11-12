@@ -9,7 +9,7 @@ metadata:
 
 ## Widget Animations
 
-These are `UWidgetAnimation` tracks, not `play_animation_device`. Verse cannot call `PlayAnimation` by name. Playback is a View Binding (`umg_view_bindings`) or a Verse `logic` / float field the binding watches. Preview in the UMG editor (42.20). Do not Launch Session to check a button animation.
+These are `UWidgetAnimation` tracks, not `play_animation_device`. Verse cannot call `PlayAnimation` by name. Playback is a View Binding (`umg_view_bindings`) or a Verse `logic` / float field the binding watches. Preview in the UMG editor. Do not Launch Session to check a button animation.
 
 Kit buttons already carry the kit's shared highlight, so hover and gamepad focus look the same. Animate your own screen's widgets (or the images you put in a kit widget's named slots), never the kit widgets themselves.
 
@@ -35,7 +35,7 @@ Keys are `{time, value}` in seconds. Two keys minimum (start pose, end pose). A 
 |--------------|---------|
 | `OnButtonHighlight` | Play `Anim_Highlight` forward, and play `Anim_Loop` looped (template uses 999 loops, speed 1.0) |
 | `OnButtonUnhighlight` | Reverse `Anim_Highlight`, stop `Anim_Loop` |
-| `OnButtonClicked` | Signal the screen's click event, e.g. `OnPlayClicked` (`umg_verse_field_events`; `OnClicked` fails to compile in 42.30) |
+| `OnButtonClicked` | Signal the screen's click event, e.g. `OnPlayClicked` (`umg_verse_field_events`; `OnClicked` fails to compile) |
 
 `bind_widget_event` writes the event → Verse field link. Queue Play / Queue Stop pins (forward, reverse, loop count, speed) are View Binding pins. When that destination is not a field path, keep the animation keys in the asset and trigger them by the field the binding already watches (`IsIntroActive` bool). Auto Play only for motion that starts on construct. Keyframes the tools can't reach are a manual step for the user (Animations panel).
 
@@ -55,7 +55,7 @@ Sleep(AnimSeconds)
 PlayerUI.RemoveWidget(Popup)
 ```
 
-`AddWidget` / `set` / `RemoveWidget` and the `Sleep` sequence compile on 43.00 (inside a
+`AddWidget` / `set` / `RemoveWidget` and the `Sleep` sequence compile (inside a
 `<suspends>` function, `PlayerUI:player_ui`); `UW_FindShopkeeperPopup` and `PopupState` stand
 for your widget's Assets digest class and its float field. A new field is missing from Verse
 until the Assets digest regenerates: build once after making

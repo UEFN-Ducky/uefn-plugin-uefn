@@ -1,13 +1,13 @@
 ---
-description: "Health and damage pipeline (43.00, Experimental — blocks publishing) — /UnrealEngine.com/HealthPipeline + /Fortnite.com/FortHealthPipeline: health_component on any Scene Graph entity, custom health pools (health_pool_entry + health_pool_tag), Fortnite pools fort_health / fort_shield / fort_overshield, per-hit rules with health_adjustment_modifier stacks (event / pool / component layers), damage types (damage_tag subclasses), dealing damage or healing from Verse with damage_event / healing_event + SendUp, who hit me (OnReceive), OnDamaged / OnHealed / OnDied, a compiled destructible prop, the known issues, and when to use the classic fort_character damage API instead"
+description: "Health and damage pipeline (Experimental — blocks publishing) — /UnrealEngine.com/HealthPipeline + /Fortnite.com/FortHealthPipeline: health_component on any Scene Graph entity, custom health pools (health_pool_entry + health_pool_tag), Fortnite pools fort_health / fort_shield / fort_overshield, per-hit rules with health_adjustment_modifier stacks (event / pool / component layers), damage types (damage_tag subclasses), dealing damage or healing from Verse with damage_event / healing_event + SendUp, who hit me (OnReceive), OnDamaged / OnHealed / OnDied, a compiled destructible prop, the known issues, and when to use the classic fort_character damage API instead"
 metadata:
   order: 13
-  label: "Health & damage pipeline (43.00, Experimental)"
+  label: "Health & damage pipeline (Experimental)"
   default_enabled: false
   load_condition: "Destructible props or objects that take weapon damage, custom health pools / armor / barriers / stacking shields, damage types with resistances or immunities, damage over time, lifesteal, damage amplification, damaging or healing Scene Graph entities, health_component, damage_event, HealthPipeline, FortHealthPipeline"
 ---
 
-## Health & damage pipeline (43.00)
+## Health & damage pipeline
 
 > **Experimental — islands that use it can't be published yet.** Every name warns 2304
 > "… is experimental, and its use will prevent you from publishing your project". It
@@ -18,8 +18,8 @@ What it gives you: your own health pools instead of working around Overshield / 
 Health; your own rules on every hit; damage and healing for **anything in the scene**, not
 just players. Fortnite characters use the same pipeline, so most Fortnite weapons, abilities
 and explosions follow your rules. Built-in weapon damage now hits Scene Graph entities, and
-damage you deal from Verse behaves like built-in damage. All names below are from the 43.00
-digests. The destructible prop compiled with 0 errors in UEFN 43.00 (Nov 1 2026).
+damage you deal from Verse behaves like built-in damage. All names below are from the digests
+digests. The destructible prop compiled with 0 errors in UEFN (Nov 1 2026).
 
 ```verse
 using { /UnrealEngine.com/HealthPipeline }     # your entities: components, pools, events, modifiers
@@ -46,7 +46,7 @@ the rest unwinds and continues to the next pool; what's left lands in `Result.Ex
 Example: 70 damage against a 50-point shield with a 2× pool rule and a 3× event rule →
 420 applied, the shield absorbs 50, 370 unwinds to about 61.7 for the next pool.
 
-### Example — destructible prop (compiled, 43.00)
+### Example — destructible prop
 
 Put `destructible_component` on an entity with a `mesh_component`. Weapons, explosions and
 `DealFire` all damage it, non-fire hits are halved, and it disappears at 0.
@@ -79,7 +79,7 @@ destructible_component<public> := class<final_super>(component):
         Health := GetOrAddHealth()
         if (Health.GetHealthPools().Length = 0):
             Health.AddHealthPool(health_pool_entry{MaxValue := MaxHealth, CurrentValue := MaxHealth, Tag := crate_hp_tag{}})
-        Health.DamageModifiers.AddModifier(armor_modifier{}, Health.DamageModifiers.LastPosition)
+        Health.DamageModifiers.AddModifier(armor_modifier{})      # modifiers run in the order added
         Health.OnDamaged.Subscribe(OnDamaged)
         Health.OnDied.Subscribe(OnDied)
 
@@ -148,7 +148,7 @@ ReadShield(Target:entity)<decides><transacts>:float =
 - The offline LSP flags `Health.OnDamaged.Await()` / `OnDied.Await()` as "Unknown member
   `Await`"; the build accepts it (`compile_errors`).
 
-### Known issues (43.00 release notes)
+### Known issues
 
 - Rockets ricochet off entities without dealing direct-hit damage.
 - Weapons that fire lightweight projectiles (for example Ares' Modular Warforged Assault
@@ -163,7 +163,7 @@ ReadShield(Target:entity)<decides><transacts>:float =
   or `OnReceive`.
 - A health adjustment entry with a zero delta produces no result entry.
 - Abilities with a wedge target query don't find Scene Graph entities without an actor, so wedge
-  abilities don't damage them (fixed in 43.10).
+  abilities don't damage them.
 
 ### This page or the classic one?
 

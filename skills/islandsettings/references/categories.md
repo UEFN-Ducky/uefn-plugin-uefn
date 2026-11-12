@@ -50,7 +50,7 @@ Also: `MatchmakingType`, `MatchmakingPrivacy`, `CreativeMatchmakingPrivacy`, `bU
 
 `VoiceChat`, `TextChatScope`, `bIsProximityChatEnabled`, `ProximityChatDistanceInMeters`, `BubbleChat`, `BubbleChatStyle`, `BubbleChatMaximumRange`, `BubbleMinimumLifetime`, `BubbleMaximumLifetime`, `OccludeBubble`, `bDisableSquadQuickChat`, `EnableJam`
 
-`VoiceChat` / `TextChatScope` set the session-wide default. Per-group chat in Verse: voice `voice_channel` (verse `sys_chat_channels`), text `text_channel` (42.40, verse `sys_text_chat`).
+`VoiceChat` / `TextChatScope` set the session-wide default. Per-group chat in Verse: voice `voice_channel` (verse `sys_chat_channels`), text `text_channel` (verse `sys_text_chat`).
 
 ## Persistence (edit / playtest)
 

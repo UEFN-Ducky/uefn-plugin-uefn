@@ -44,8 +44,8 @@ validator limit (`nanite_fallback_vertex_count`), simple collision
 
 ## Combat feel and loot
 
-- A damage number on every hit, a health bar on the aimed enemy (43.00 Health &
-  Damage pipeline, `patch_43_00`; HUD through the UI kit).
+- A damage number on every hit, a health bar on the aimed enemy (Health &
+  Damage pipeline, `recent_changes`; HUD through the UI kit).
 - Many enemies: spread spawns over frames (`verse_insights` spawn-burst fix).
 - Loot drops are 3D items; the inventory gives each item **as many slots as its
   shape**, and every item changes the hero (fire damage, life, cast speed). The

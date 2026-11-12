@@ -1,5 +1,5 @@
 ---
-description: "Project structure — module declarations, using {} imports (engine paths vs project modules), how folders map to modules, making nested and asset folders <public> (Script error 3593; 43.00: asset modules are project-wide by default, new 3588 name clashes), module-level var rules, parse order for generic classes, moving files, and cross-file references"
+description: "Project structure — module declarations, using {} imports (engine paths vs project modules), how folders map to modules, making nested and asset folders <public> (Script error 3593; asset modules are project-wide by default, new 3588 name clashes), module-level var rules, parse order for generic classes, moving files, and cross-file references"
 metadata:
   order: 11
   label: "Modules, using & file layout"
@@ -83,10 +83,10 @@ Rules of thumb:
 | `/Fortnite.com/Characters` | `fort_character`, elimination/damage events |
 | `/Fortnite.com/UI` + `/UnrealEngine.com/Temporary/UI` | canvas & widgets |
 | `/UnrealEngine.com/Temporary/SpatialMath` | `vector3`, `rotation`, `Distance` |
-| `/UnrealEngine.com/Marketplace` | entitlements, `MakePriceVBucks`, `BuyOffer`, `GrantEntitlement` (v42.20 — **not** island Coins; `/Fortnite.com/Marketplace` is deprecated aliases) |
+| `/UnrealEngine.com/Marketplace` | entitlements, `MakePriceVBucks`, `BuyOffer`, `GrantEntitlement` (**not** island Coins; `/Fortnite.com/Marketplace` is deprecated aliases) |
 
-`/UnrealEngine.com/Conversations` (module since 40.00; mainstream in 42.30) — `persona_component`, `ai_session`, `prompt_binding_definition`, voices, `ai_error`s, `@ai_description` (`sys_conversations`).
-| `/Verse.org/Chat` | `voice_channel` (v42.20), `text_channel` + `text_message_style` (v42.40), `AddChatChannel` / `GetTextChannels` on the simulation entity — `sys_chat_channels`, `sys_text_chat` |
+`/UnrealEngine.com/Conversations` (module; mainstream) — `persona_component`, `ai_session`, `prompt_binding_definition`, voices, `ai_error`s, `@ai_description` (`sys_conversations`).
+| `/Verse.org/Chat` | `voice_channel`, `text_channel` + `text_message_style`, `AddChatChannel` / `GetTextChannels` on the simulation entity — `sys_chat_channels`, `sys_text_chat` |
 | `/Verse.org/Random` | `GetRandomInt`, random selection |
 | `/Verse.org/Colors` (+ `/NamedColors`) | `color`, named colors |
 
@@ -136,16 +136,16 @@ SceneGraph<public> := module:
 - Never put the declaration inside the folder it names — a file in
   `Verse/PlayerCore/` declaring `PlayerCore<public> := module:` creates
   `PlayerCore.PlayerCore`.
-- **Asset folders (42.x needed it; 43.00 mostly doesn't).** On 42.x Assets.digest
+- **Asset folders (older builds needed it).** On older builds Assets.digest
   generates every asset folder module with no access specifier
   (`Materials := module:`), so a nested folder of materials, meshes or prefabs
   (`EP_*`) gives 3593 from your code until each folder on its path is declared
-  `<public>`. **43.00:** Verse modules that contain reflected assets default to
+  `<public>`. Verse modules that contain reflected assets default to
   **project-wide accessibility**, so you no longer need to declare accessibility for
   them and those 3593s go away. A `<public>` declaration you already have is harmless.
   Your own nested **code** folders still need it. The asset classes themselves are
   `<scoped>` to the whole island and need nothing. Custom weapons: `sys_owned_weapons`.
-- **43.00 side effect: name clashes.** More asset identifiers are now visible across
+- **side effect: name clashes.** More asset identifiers are now visible across
   the project, so a binding or type named like an asset or asset folder (`Materials`,
   `T_Coin`, `M_Glow`) can become 3588 "Ambiguous identifier". Fix: rename yours, or
   qualify the asset (`(/YourIsland/Materials:)M_Glow`), or narrow the `using` path
@@ -173,7 +173,7 @@ AllPlayers := MyPlayerManager.GetAllGamePlayers()
   `weak_map(session, …)` only when there is no device to hold it.
 - Imported module-level `var`s are shared global state. Keep them `<public>` only
   when other systems truly need them; persistent ones count toward the
-  persistent-map cap (6 from 43.00, 4 on 42.x; `persistence`).
+  persistent-map cap (6 now, 4 on older builds; `persistence`).
 
 ### Parse order — generic classes first
 
@@ -184,7 +184,7 @@ the generic class fails with 3502 "Can't access a function from a preceding type
 that sorts first (`Content/Archetypes/`, declared `<public>` like any folder
 beside `Verse/`), helpers below the classes in the same file (`classes`). A
 function that only uses one inside its body is not affected. (Verified with
-verse-lsp, 42.40: a user folder named `AUser` broke a generic class in `ZGen`; the
+verse-lsp, older builds: a user folder named `AUser` broke a generic class in `ZGen`; the
 same files with the folders swapped built clean.)
 
 ### Moving files

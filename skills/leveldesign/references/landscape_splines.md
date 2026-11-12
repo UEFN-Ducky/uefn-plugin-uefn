@@ -9,7 +9,7 @@ metadata:
 
 ## Landscape spline roads — design rules
 
-Tested in UEFN 43.00 on a 3.9 km island with ~90 km of road.
+Tested in UEFN on a 3.9 km island with ~90 km of road.
 
 ### 1. Control points: as few as possible (HARD)
 

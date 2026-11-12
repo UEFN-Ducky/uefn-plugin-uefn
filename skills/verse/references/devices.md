@@ -1,5 +1,5 @@
 ---
-description: "creative_device pattern — @editable fields, OnBegin, subscribing to device/player events, what each event sends (handler payload table), agents vs players, GetPlayspace, never moving a placed device file, and the wrapper helpers. 43.00: vehicle fuel (fort_vehicle Get/SetFuelRemaining, GetFuelCapacity, per-state usage SetFuelUsageDriving/Boosting/Idle, refuel example), Teleporter props (Teleport/Activate a creative_prop, TeleportPropEvent, EnterPropEvent, enableable), SprintedEvent fix, has_tags on creative objects, GetSequenceLength"
+description: "creative_device pattern — @editable fields, OnBegin, subscribing to device/player events, what each event sends (handler payload table), agents vs players, GetPlayspace, never moving a placed device file, and the wrapper helpers. vehicle fuel (fort_vehicle Get/SetFuelRemaining, GetFuelCapacity, per-state usage SetFuelUsageDriving/Boosting/Idle, refuel example), Teleporter props (Teleport/Activate a creative_prop, TeleportPropEvent, EnterPropEvent, enableable), SprintedEvent fix, has_tags on creative objects, GetSequenceLength"
 metadata:
   order: 7
   label: "Devices, @editable & events"
@@ -98,7 +98,7 @@ guessing.
 The handler takes **exactly** the payload type — a missing parameter is "expects
 agent->void, but this argument is of type tuple->void", a wrong one is 3509.
 
-| Payload | Events (42.40 digest) | Handler |
+| Payload | Events | Handler |
 |---------|-----------------------|---------|
 | `agent` | `button_device.InteractedWithEvent`, `conditional_button_device.ActivatedEvent`, `item_granter_device.ItemGrantedEvent`, `volume_device` / `capture_area_device.AgentEntersEvent`, `player_spawner_device.SpawnedEvent`, `timed_objective_device.CompletedEvent`, `elimination_manager_device.EliminatedEvent` | `(Agent : agent)` |
 | `?agent` (may be empty) | `trigger_device.TriggeredEvent`, `timer_device.SuccessEvent` / `FailureEvent`, `elimination_manager_device.EliminationEvent`, `sentry_device.EliminatedEvent` | `(MaybeAgent : ?agent)`, then `if (Agent := MaybeAgent?)` |
@@ -110,7 +110,7 @@ agent->void, but this argument is of type tuple->void", a wrong one is 3509.
 To wait for a single occurrence instead of subscribing, use `.Await()` in a
 `<suspends>` context (see the `async` reference).
 
-### 43.00 device API changes (from the 43.00 digest)
+### Device API changes
 
 **Vehicle fuel** — `fort_vehicle` (`/Fortnite.com/Vehicles`; get one with
 `FortChar.GetVehicle[]`):
@@ -137,11 +137,11 @@ Refuel(Agent:agent):void =
 (a prop entered). Physics props teleported from Verse are supported.
 
 **Sprint** — `fort_character.SprintedEvent():listenable(tuple(fort_character, logic))` now fires
-when **sprint input** changes (`true` = started sprinting). Before 43.00 it fired when movement
+when **sprint input** changes (`true` = started sprinting). In older builds it fired when movement
 started or stopped; drop any workaround that filtered that noise.
 
 **Tags on creative objects** — `creative_object_interface` (props and devices) now inherits
-`has_tags` (`@available 4300`, so only for islands uploaded on 43.00+): `Key := Obj.AddTag(my_tag{})`,
+`has_tags` (`@available`, so only for islands uploaded now): `Key := Obj.AddTag(my_tag{})`,
 `Obj.RemoveTag[Key]`, `Obj.ContainsTag[my_tag]`, `ContainsAnyTag[array{…}]`,
 `ContainsAllTags[array{…}]`, `RemoveAllTags[my_tag]`. Find tagged objects with
 `FindCreativeObjectsWithTag(my_tag)` (pass the tag **type**). `GetTags()`, `tag_view` and
@@ -152,6 +152,35 @@ started or stopped; drop any workaround that filtered that noise.
 **Interactables** — `basic_interactable_component.OnStarted` now runs when a hold **starts**
 (and `StartedEvent` fires once per hold). Move on-completion logic to `SucceededEvent`;
 `Cooldown` now also runs when an Interactable Duration is set (scenegraph pack).
+
+### Day Sequence device — time of day, sun, fog, sky from Verse
+
+`day_sequence_device` exposes its whole Details panel: `Enable()`, `Disable()`,
+`IsEnabled[]`, `FadeIn()`, `FadeOut()`, and `var` fields for the day/night cycle, priority,
+fade speed, volume and blend settings, sunlight, fog, skylight, sky and clouds
+(`get_verse_api("day_sequence_device")` lists them all). Values set from Verse reach every
+player and replace the Details panel settings until the round ends.
+
+```verse
+night_fall_device := class(creative_device):
+
+    @editable
+    Sky : day_sequence_device = day_sequence_device{}
+
+    OnBegin<override>()<suspends> : void =
+        set Sky.DayNightCycleMode = day_night_cycle_mode.FixedTime    # or Default, StartAtSpecifiedTime, RandomFixedTime, RandomStartTime, LocalFixedTime
+        set Sky.DayNightCycleTime = 22.0
+        set Sky.ShouldOverrideFog = true
+        set Sky.IsFogEnabled = true
+        set Sky.FogDensity = 0.05
+        set Sky.FogColor = color{R := 0.05, G := 0.07, B := 0.12}      # using { /Verse.org/Colors }
+        Sky.Enable()
+        Sky.FadeIn()
+```
+
+A group of settings only applies when its override switch is on (`ShouldOverrideSunlight`,
+`ShouldOverrideFog`, `ShouldOverrideSkylight`, `ShouldOverrideSky`, `ShouldOverrideCloud`).
+With `IsVolumeEnabled`, `BlendMode` is `day_sequence_blend_mode.Global`, `Volume` or `Time`.
 
 ### agent vs player vs fort_character
 

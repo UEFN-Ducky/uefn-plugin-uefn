@@ -9,7 +9,7 @@ metadata:
 
 ## Damage, health, shields & elimination
 
-> **43.00:** custom health pools, per-hit rules, damage types and **damage on Scene Graph
+> Custom health pools, per-hit rules, damage types and **damage on Scene Graph
 > entities and props** (weapons hit them) live in the new health and damage pipeline:
 > `sys_health_pipeline`. It is Experimental (blocks publishing). This page's
 > `fort_character` API stays the publishable path for player health and eliminations.

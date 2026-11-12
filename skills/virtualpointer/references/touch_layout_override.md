@@ -1,7 +1,7 @@
 ---
-description: "Developer touchscreen layouts (v42.40) — move, restyle, re-icon or hide Fortnite's default touch buttons with a UMG layout (Canvas root + Touch Control Layout Override widgets = DeveloperLayoutButtonProxy) on a HUD Controller device; Apply Canvas Transform for icon-only overrides; hiding buttons from Verse by removing input mappings or cancelling subscriptions; 42.40 fixes"
+description: "Developer touchscreen layouts — move, restyle, re-icon or hide Fortnite's default touch buttons with a UMG layout (Canvas root + Touch Control Layout Override widgets = DeveloperLayoutButtonProxy) on a HUD Controller device; Apply Canvas Transform for icon-only overrides; hiding buttons from Verse by removing input mappings or cancelling subscriptions"
 metadata:
-  label: "Touch layout override (HUD Controller, v42.40)"
+  label: "Touch layout override (HUD Controller)"
 ---
 
 # Developer touchscreen layouts
@@ -23,7 +23,7 @@ Virtual Pointer input — that is the rest of this skill.
    Another HUD Controller with another widget = another layout; enable the one you want
    (e.g. per game mode). No active override → the default Fortnite layout.
 
-Properties (read live from the 42.40 class with `ObjectTools.list_properties`; set them
+Properties (read live from the class with `ObjectTools.list_properties`; set them
 with `set_widget_property`):
 
 | Property | Default | Meaning |
@@ -31,11 +31,12 @@ with `set_widget_property`):
 | `action` | `Jump` | Which button: `Jump`, `Shoot`, `Crouch`, `Reload`, `SecondaryAbility`, `Sprint`, `VehicleBoost`, `VehicleHorn`, `VehicleJump`, `VehicleReverse`, `VehicleSecondaryAbility`, `VehicleSprint`, `VehicleSwitchSeat`, `VehicleThrottle`, `Backpack`, `MapPing`, `ToggleAutofire`, `ToggleMap`, `MoveStick`, `Interact`, `AlternateUse` |
 | `bHideFromLayout` | false | Hide the button. Touch players can't use a hidden action — never hide one the game needs |
 | `bOverrideIcon` + `iconBrush` | false | Replace the icon; the brush tint is the color override |
-| `bApplyCanvasTransform` | **true** | **New in 42.40.** Uncheck for an *icon-only* override: position and size are ignored, so each player's own button layout stays where they put it |
+| `bApplyCanvasTransform` | **true** | Uncheck for an *icon-only* override: position and size are ignored, so each player's own button layout stays where they put it |
+| **Respect Player Transform** (only with Apply Canvas Transform on) | off | Off: your position always applies. On: your position is the starting point, and a player's own placement wins if they moved the button; their changes apply right away, mid-game. Read the exact property name with `ListProperties` before setting it |
 
 ## Hide buttons from Verse
 
-The engine hides a default button whose action the island doesn't use (compiled 42.40):
+The engine hides a default button whose action the island doesn't use:
 
 ```verse
 using { /Fortnite.com/Input }
@@ -74,7 +75,7 @@ buttons without duplicates; any `input_events` event (`BeginDetectEvent`,
 `DetectionOngoingEvent`, `EndDetectEvent`, `CancelActivationEvent`) counts as using
 the action.
 
-## 43.00 changes
+## Changes
 
 - **Apply Canvas Transform is per button.** Turn it on for a button to place it at your
   position, which then wins over the player's own layout. Leave it off to keep the
@@ -84,10 +85,10 @@ the action.
 - **Interact and Pickup** are now overridable. They share one contextual action, so an
   override applies to both and is static.
 - **Button scale:** layout data in a custom HUD layout now affects button scale.
-- Keep custom touch UI inside the safe area with the 43.00 UMG **`SafeZone`** widget
+- Keep custom touch UI inside the safe area with the UMG **`SafeZone`** widget
   (verse `umg_layout`).
 
-## 42.40 fixes
+## Fixes
 
 - Items that turn Jump / Sprint into **Up** / **Boost** (e.g. the Mandalorian Jetpack)
   now work with an override layout.

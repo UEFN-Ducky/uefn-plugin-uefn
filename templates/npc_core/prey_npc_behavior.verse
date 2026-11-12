@@ -1,6 +1,6 @@
 # SETUP: Assign this class on prey NPCDefs via set_npc_definition_behavior.
 # Duplicate react/die clips into this folder, then swap the Sleep fallbacks for Play(AS_…).
-# 43.00: movement and focus go through npc_actions_component (GetNavigatable / GetFocusInterface are deprecated).
+# Movement and focus go through npc_actions_component (GetNavigatable / GetFocusInterface are deprecated).
 using { /Fortnite.com/AI }
 using { /Fortnite.com/Animation/PlayAnimation }
 using { /Fortnite.com/Characters }

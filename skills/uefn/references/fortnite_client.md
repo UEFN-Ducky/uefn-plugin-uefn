@@ -1,5 +1,5 @@
 ---
-description: "The real Fortnite client a UEFN session launches — fortnite_client_status/wait/capture/move tools and uefn.client.* workflow nodes; never touch a loading client; prove movement from before/after captures; 43.00 compact connectivity HUD"
+description: "The real Fortnite client a UEFN session launches — fortnite_client_status/wait/capture/move tools and uefn.client.* workflow nodes; never touch a loading client; prove movement from before/after captures; compact connectivity HUD"
 metadata:
   order: 6
   label: "Fortnite client"
@@ -29,7 +29,7 @@ Capture and move refuse until the client is in play mode. Loading the client and
 one GPU can still stall it ("GPU timeout" in `%LOCALAPPDATA%/FortniteGame/Saved/Logs`);
 if the client stops responding, report it, do not send more input.
 
-**Connectivity HUD (43.00).** The top-left connectivity HUD in iteration sessions is now a
+**Connectivity HUD.** The top-left connectivity HUD in iteration sessions is now a
 compact semi-transparent tile in Edit Mode and Game Mode. It expands only when something
 needs attention (disconnected from the UEFN editor, a performance warning), then shrinks
 again. An expanded HUD in a capture is a signal: disconnected → check `GetSessionStatus`;

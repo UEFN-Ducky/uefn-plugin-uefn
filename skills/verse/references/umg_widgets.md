@@ -47,7 +47,7 @@ All of them end the same way: `GetPlayerUI[Player].AddWidget(...)` (the kit's `H
 
 **Via tools:** `list_widget_classes` → `build_widget_tree` (omit `folder` so the listener pins `{content_root}/UI`). Then animations, fields, and bindings from `umg_mcp_tools`. Read back with `get_widget_blueprint_info`. Verse cannot call `PlayAnimation` by name — key the animation and bind it (`umg_animations`).
 
-**Preview in editor (v42.20):** interact with the widget in the UMG designer —
+**Preview in editor:** interact with the widget in the UMG designer —
 do not Launch Session just to check animation / button text. Multiple in-world
 instances of the same `UW_*` class now all show Verse-bound values.
 
@@ -115,9 +115,9 @@ Agents keep meeting a "display UMG from Verse" snippet that is partly obsolete. 
 | Myth / bad pattern | Truth (verified) |
 |--------------------|------------------|
 | `MyUMGWidget := class:` empty placeholder + `@editable myUMGWidget : ?MyUMGWidget` | **Wrong.** Type is the real `UW_*` from Assets digest. Instantiate with `UW_X{}`. |
-| "Verse cannot get a named button from a UMG widget" | **Obsolete since 39.40.** Use **Verse field events** on the widget (`event()` fields bound to the Custom Button's `OnButtonClicked`; creatable by tool since 42.30). |
+| "Verse cannot get a named button from a UMG widget" | **Obsolete.** Use **Verse field events** on the widget (`event()` fields bound to the Custom Button's `OnButtonClicked`; creatable by tool). |
 | A parent listens to a child widget's Verse event | **No.** Bind the child's inner native button (`ToggleButton1.Main_Button.OnButtonClicked`) to a shared int event on your screen (`verse_ui_kit` — Clicks). |
-| `Widget.OnCloseClicked.Subscribe(...)` on a UMG event field | **43.00: works** (returns a `cancelable`). **42.x: no `Subscribe`** — use the kit's `Helper.SubscribeToEvent`, or `Await` in a loop (`umg_verse_field_events`). |
+| `Widget.OnCloseClicked.Subscribe(...)` on a UMG event field | **works** (returns a `cancelable`). **older builds: no `Subscribe`** — use the kit's `Helper.SubscribeToEvent`, or `Await` in a loop (`umg_verse_field_events`). |
 | Must wrap UMG in a Verse `canvas` to show it | **Optional.** `player_ui.AddWidget(Widget)` / `AddWidget(Widget, player_ui_slot{…})` is enough. |
 | `canvas.GetSlots()` / `canvas.SetSlot(...)` | **Do not exist.** Digest: `canvas` has `Slots` (init), `AddWidget(Slot)`, `RemoveWidget(Widget)` only. |
 | `SizeToContent` / `ZOrder` on `canvas_slot` | **Real** — both exist on `canvas_slot` in UnrealEngine digest. |

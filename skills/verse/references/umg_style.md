@@ -22,7 +22,7 @@ Widget JSON on `build_widget_tree` `properties`. These are the keys `_apply_widg
 | `brush_material` | Material or instance path. Image calls `set_brush_from_material` |
 | `brush_texture` | Texture path |
 
-**Text is localizable.** Player-facing text typed in UMG goes in a text block as localizable text. `build_widget_tree` `text` does that; to change it later: `set_widget_property(widget_path, <text widget ref>, {"Text": "NSLOCTEXT(\"\", \"<unique 32-hex key>\", \"Play\")"})`. Verified in UEFN 42.30: the key is saved with the text, so Export Localization finds it. A plain string has no key and is never gathered. A `notes` entry "text: saved as a plain string, not localizable" (or an older Ducky) means set it again this way (`verse_ui_kit` — Editor steps). Text set from Verse is a `<localizes>` message through a `message` field. Never bake words into textures.
+**Text is localizable.** Player-facing text typed in UMG goes in a text block as localizable text. `build_widget_tree` `text` does that; to change it later: `set_widget_property(widget_path, <text widget ref>, {"Text": "NSLOCTEXT(\"\", \"<unique 32-hex key>\", \"Play\")"})`. Verified in UEFN older builds: the key is saved with the text, so Export Localization finds it. A plain string has no key and is never gathered. A `notes` entry "text: saved as a plain string, not localizable" (or an older Ducky) means set it again this way (`verse_ui_kit` — Editor steps). Text set from Verse is a `<localizes>` message through a `message` field. Never bake words into textures.
 
 Visibility swaps a layer without deleting the tree. `Collapsed` frees layout (and lets navigation skip the row). `Hidden` keeps the slot. `HitTestInvisible` paints and ignores hits.
 

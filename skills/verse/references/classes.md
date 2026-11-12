@@ -38,7 +38,7 @@ Specifiers and what each buys you:
 | Specifier | Meaning / when to use |
 |-----------|-----------------------|
 | `class(creative_device)` | **A placed device.** Subclass of `creative_device`; gets `OnBegin`, shows in UEFN with `@editable` fields. `player_manager := class(creative_device):` |
-| `class(tag)` | A **tag** for `FindCreativeObjectsWithTag(collectable_coins)` (pass the tag **type**; `GetCreativeObjectsWithTag` and the tag-instance overload are deprecated in 42.40). Write it `collectable_coins := class(tag){}`. 43.00: add/remove tags at runtime with `has_tags` (below) |
+| `class(tag)` | A **tag** for `FindCreativeObjectsWithTag(collectable_coins)` (pass the tag **type**; `GetCreativeObjectsWithTag` and the tag-instance overload are deprecated on older builds). Write it `collectable_coins := class(tag){}`. add/remove tags at runtime with `has_tags` (below) |
 | `class()` / `class:` | Plain class — a helper/manager you `new` yourself. `save_service := class():` |
 | `<concrete>` | **Every field has a default**, so it can be made with `{}` and used as an `@editable` struct or array element. `tower_data := class<concrete>():` |
 | `<unique>` | **Reference identity** — instances compare with `=` / `<>` and can be map keys; needed for stateful helper objects. `game_player := class<unique>():` (devices are **not** comparable — track them by index, 3509) |
@@ -71,7 +71,7 @@ top_hud_system := class<unique>():
   is both editor-exposed **and** mutable.
 - One-line methods: `ResetKills<public>(): void = set KillCount = 0`.
 
-#### A field initializer that reads an earlier field (43.00)
+#### A field initializer that reads an earlier field
 
 ```verse
 round_config := class:
@@ -79,7 +79,7 @@ round_config := class:
     WarnAt:float = RoundSeconds - 10.0     # reads the <final> field above
 ```
 
-Compiled 0 errors with `workspace_compile_verse` on 43.00. Rules (release notes):
+Compiled 0 errors with `workspace_compile_verse`. Rules (release notes):
 
 - The field you read must be **`<final>`** and **not `@editable`**.
 - Only fields declared **earlier in the same class** — not later ones, not a
@@ -148,7 +148,7 @@ team_color := enum{ Red, Blue }
 
 Never reuse an engine type name for your own type: `team := enum{…}` clashes with
 `/Verse.org/Simulation`'s `team` in every device file (3532, ambiguous — verified
-with verse-lsp, 42.40). Treat `player`, `agent` and `entity` the same way.
+with verse-lsp). Treat `player`, `agent` and `entity` the same way.
 
 Refer to a value as `game_phase.Active`; compare with `=` / `<>`; match with `case`
 (a `case` that lists every value needs no `_`; one over `int` / `string` does —
@@ -253,7 +253,7 @@ type", reported **at the generic class**, not where the cause is. Put generic
 classes in a Content-level folder that sorts first (`Content/Archetypes/`, before
 `Content/Verse/`) with helper functions below the classes in the same file. Code
 that only uses one inside a function body is not affected; plain classes are not
-affected. (Verified with verse-lsp, 42.40.) Pools and function wrappers built this
+affected. (Verified with verse-lsp.) Pools and function wrappers built this
 way: `design_patterns`, `functions`.
 
 Generic functions (`where t : type`) are in `functions`.
@@ -274,7 +274,7 @@ my_device := class(creative_device):
 See the `devices` reference for `@editable`, events, and agents/players; the
 `async` reference for what `<suspends>` unlocks.
 
-### Tags on creative objects: `has_tags` (43.00)
+### Tags on creative objects: `has_tags`
 
 Creative objects (`creative_prop`, devices) now implement `/Verse.org/Simulation/Tags`
 `has_tags`, the same interface as Scene Graph `entity`:
@@ -296,12 +296,12 @@ tag_demo := class(creative_device):
             Print("untagged")
 ```
 
-Compiled 0 errors on 43.00. Also `RemoveAllTags[T]`, `RemoveAllTagsExcept[T]` /
+Compiled 0 errors. Also `RemoveAllTags[T]`, `RemoveAllTagsExcept[T]` /
 `[array{T1, T2}]`, `ContainsAllTags[array{…}]`, `ContainsAnyTag[array{…}]` (all
-`<decides>`). **Deprecated in 43.00:** `tag_view` (`Has`, `HasAny`, `HasAll`),
+`<decides>`). **Deprecated now:** `tag_view` (`Has`, `HasAny`, `HasAll`),
 `tag_search_criteria`, and `GetTags()` on creative objects — use `has_tags`;
 search with `FindCreativeObjectsWithTag(tag_type)`.
 
-### `concrete_subtype` fields (validator enforced from v42.10)
+### `concrete_subtype` fields (validator enforced)
 
-`@editable Kinds : []concrete_subtype(entity) = array{}` lets a designer pick classes to instantiate with `Kind{}`. From v42.10 the editor validates that **every class placed in such a field is itself `<concrete>`** (all fields have defaults). A non-concrete class there fails validation when you republish, even though already-published islands keep working. Make your own prefab/item classes `class<concrete>` (or `<final><concrete>`) before exposing them this way; stock `/Fortnite.com/Weapons` and `/Fortnite.com/Items` classes already are.
+`@editable Kinds : []concrete_subtype(entity) = array{}` lets a designer pick classes to instantiate with `Kind{}`. The editor validates that **every class placed in such a field is itself `<concrete>`** (all fields have defaults). A non-concrete class there fails validation when you republish, even though already-published islands keep working. Make your own prefab/item classes `class<concrete>` (or `<final><concrete>`) before exposing them this way; stock `/Fortnite.com/Weapons` and `/Fortnite.com/Items` classes already are.

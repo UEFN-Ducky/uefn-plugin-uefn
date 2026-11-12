@@ -1,16 +1,16 @@
 ---
-description: "Events & subscriptions (43.00, with 42.x notes) — event(t) is listenable in 43.00 so event.Subscribe returns a cancelable, listenable / subscribable / awaitable / signalable, handler shapes, Await loops and race-to-cancel, UMG Verse field events, MakeProxyListenable, migrating off own Subscribe extensions, why 42.x event(t) had no Subscribe, exact compile errors"
+description: "Events & subscriptions — event(t) is listenable now so event.Subscribe returns a cancelable, listenable / subscribable / awaitable / signalable, handler shapes, Await loops and race-to-cancel, UMG Verse field events, MakeProxyListenable, migrating off own Subscribe extensions, why older-build event(t) had no Subscribe, exact compile errors"
 metadata:
   order: 5
-  label: "Events & subscriptions (42.40 → 43.00)"
+  label: "Events & subscriptions"
   default_enabled: false
-  load_condition: "Subscribing to or awaiting events, event(t) vs listenable, cancelable / unsubscribing, UMG event field clicks, 'Unknown member Subscribe in event', a Subscribe extension or event_subscription / AwaitForEvent helper, or the 43.00 subscribable-events change"
+  load_condition: "Subscribing to or awaiting events, event(t) vs listenable, cancelable / unsubscribing, UMG event field clicks, 'Unknown member Subscribe in event', a Subscribe extension or event_subscription / AwaitForEvent helper, or the subscribable-events change"
 ---
 
 ## Events & subscriptions
 
-Read from the 43.00 `Verse.digest.verse`; the `event(t).Subscribe` pattern **compiled
-with 0 errors in UEFN 43.00** (Nov 1 2026), the rest also in 42.40. Concurrency basics
+Read from the `Verse.digest.verse`; the `event(t).Subscribe` pattern **compiled
+with 0 errors in UEFN** (Nov 1 2026). Concurrency basics
 (`spawn`, `race`, `branch`): `async`.
 
 ### The five types
@@ -21,8 +21,8 @@ with 0 errors in UEFN 43.00** (Nov 1 2026), the rest also in 42.40. Concurrency 
 | `subscribable(t)` | `Subscribe(Callback)` — calls `Callback(Payload)` on every signal, returns a `cancelable` | `<transacts>` |
 | `signalable(t)` | `Signal(Val)` — resumes the awaiters, then calls the subscribers synchronously | — |
 | `listenable(t)` | `awaitable(t)` + `subscribable(t)` | |
-| `event(t)` | **43.00:** `signalable(t)` + `awaitable(t)` + `listenable(t)` — `Signal`, `Await` **and `Subscribe`**. (42.x: no `Subscribe`.) | |
-| `proxy_listenable(t)` | 43.00: `MakeProxyListenable(L)` wraps a `listenable` so callers can Subscribe/Await but not cast it back to your `event` and `Signal` it | `<reads>` |
+| `event(t)` | `signalable(t)` + `awaitable(t)` + `listenable(t)` — `Signal`, `Await` **and `Subscribe`**. (older builds: no `Subscribe`.) | |
+| `proxy_listenable(t)` | `MakeProxyListenable(L)` wraps a `listenable` so callers can Subscribe/Await but not cast it back to your `event` and `Signal` it | `<reads>` |
 
 `event()` is `event(tuple())`; `listenable()` is `listenable(tuple())`.
 `cancelable.Cancel()` (`<transacts>`) unsubscribes.
@@ -32,8 +32,8 @@ with 0 errors in UEFN 43.00** (Nov 1 2026), the rest also in 42.40. Concurrency 
 (`AddMemberEvent`), voice channels (`BeginBroadcastEvent()`) and abilities
 (`BeginUseEvent`) are **listenable** → `.Subscribe(Handler)` or `.Await()`. Your own
 `event(t)` fields and **UMG Verse field events** (`event(tuple())`,
-`event(tuple(int))`) are **event** → `.Subscribe(Handler)` or `.Await()` in 43.00
-(42.x: `.Await()` only).
+`event(tuple(int))`) are **event** → `.Subscribe(Handler)` or `.Await()` 
+(`.Await()` only).
 
 ### Subscribe (listenable)
 
@@ -54,9 +54,9 @@ OnPlayerAdded(Player:player):void = {}
 - Handlers are synchronous. To wait inside one, `spawn{ Async() }`.
 - Pass a **named** function or method. Passing a function-typed *parameter* into
   `Subscribe` on an interface-typed `listenable(t)` parameter fails: Script error
-  3502 "… is not yet implemented" (verified 42.40).
+  3502 "… is not yet implemented".
 
-### Subscribe on your own event (43.00)
+### Subscribe on your own event
 
 ```verse
 using { /Verse.org/Simulation }
@@ -80,7 +80,7 @@ event_user := class:
         Print("picked {Slot}")
 ```
 
-Compiled 0 errors on 43.00. To expose an event without letting callers `Signal` it, return
+Compiled 0 errors. To expose an event without letting callers `Signal` it, return
 `MakeProxyListenable(Picked)` from a getter typed `listenable(int)`.
 
 ### Await (event, and anything awaitable)
@@ -103,44 +103,44 @@ Fire(P:picker):void =
     P.Stop.Signal()
 ```
 
-**43.00 LSP false positive:** the Problems panel / `workspace_list_verse_errors` shows
+**LSP false positive:** the Problems panel / `workspace_list_verse_errors` shows
 "Unknown member `Await` in `listenable(…)`" on these loops, plus cascade errors ("Must be
 an array, map, or generator", "Dynamic cast $unknown"). The UEFN build compiles them with
 0 errors. Check with `workspace_compile_verse` and never rewrite a working Await loop
 because of it.
 
 Start **one** watcher per event source — a second watcher on the same widget runs the
-handler twice per click. These loops keep working after 43.00.
+handler twice per click. These loops keep working.
 
 ### UMG Verse field events
 
 A widget event field reflects as `OnBuyClicked<public>:event(tuple()) = external {}` or
-`event(tuple(int))` (read the number with `Picked(0)`). In 43.00:
+`event(tuple(int))` (read the number with `Picked(0)`). Now:
 `Widget.OnBuyClicked.Subscribe(OnBuy)` (keep the `cancelable`, `Cancel()` it when the
-widget closes). In 42.x: await it in a loop (above), or on a Verse UI Kit screen use the
+widget closes).Await it in a loop (above), or on a Verse UI Kit screen use the
 kit's `Helper.SubscribeToEvent(Player, Widget.OnBuyClicked, OnBuyClicked)` and
 `Helper.ClearAllForPlayer(Player)` on close (works on both).
 Field setup and button binding: `umg_verse_field_events`, `verse_ui_kit`.
 
-### 43.00: event(t) is subscribable — migrating 42.x code
+### Event(t) is subscribable — migrating code
 
-43.00 digest: `event<native><public>(t:type) := class(signalable(t), awaitable(t),
+Digest: `event<native><public>(t:type) := class(signalable(t), awaitable(t),
 listenable(t))` with `Subscribe<native><override>(Callback)<transacts>:cancelable`.
 `event.Subscribe` returns a `cancelable` directly (release notes: "Verse events are
 subscribable").
 
 - **Published islands keep running.** Unpublished code that defines its *own*
-  `Subscribe` on events gets ambiguous-overload / name-conflict errors when built on
-  43.00. Epic's tutorial shipped exactly such a helper: an `event_subscription` class,
+  `Subscribe` on events gets ambiguous-overload / name-conflict errors when built now.
+  Epic's tutorial shipped exactly such a helper: an `event_subscription` class,
   an `AwaitForEvent` function and the extension
   `(Event:event(t) where t:type).Subscribe(Callback(:t):void):event_subscription`
-  — it compiles on 42.40, and Epic says to remove it for 43.00.
+  — it compiles, and Epic says to remove it.
 - **Migrate:** delete the `Subscribe` extension (and `event_subscription` /
   `AwaitForEvent` if nothing else uses them). Calls like
   `Widget.OnBuyClicked.Subscribe(OnBuy)` keep compiling against the built-in one; a
   variable typed `: event_subscription` becomes `: cancelable` (`.Cancel()` is the same).
-- **Never write a `Subscribe` extension on `event`** — on 43.00 the built-in exists;
-  on a 42.x island use an Await loop. Ducky's Verse lint warns on one. Check a
+- **Never write a `Subscribe` extension on `event`** — the built-in exists;
+  on an older-build island use an Await loop. Ducky's Verse lint warns on one. Check a
   project's version with `get_verse_api({"name": "event"})`: `listenable(t)` in the
   parent list means `.Subscribe` on events is fine.
 
@@ -148,7 +148,7 @@ subscribable").
 
 | Error | Cause | Fix |
 | --- | --- | --- |
-| 3506 Unknown member `Subscribe` in `event(int)` | **42.x only:** `.Subscribe` on an `event` | 42.x: Await loop / kit helper; or move the island to 43.00. If the message adds "Did you forget to specify using { …/SomeFolder }", another folder defines a `Subscribe` extension — delete it on 43.00 |
-| ambiguous overload / name conflict on `Subscribe` | **43.00:** your own `(Event:event(t)).Subscribe` extension clashes with the built-in | delete the extension; `event_subscription` vars become `cancelable` |
+| 3506 Unknown member `Subscribe` in `event(int)` | **Older builds only:** `.Subscribe` on an `event` | older builds: Await loop / kit helper; or upload the island again on the current build. If the message adds "Did you forget to specify using { …/SomeFolder }", another folder defines a `Subscribe` extension — delete it now |
+| ambiguous overload / name conflict on `Subscribe` | Your own `(Event:event(t)).Subscribe` extension clashes with the built-in | delete the extension; `event_subscription` vars become `cancelable` |
 | 3502 "… is not yet implemented" | function-typed parameter passed to `Subscribe` | pass a named function / method |
 | 3509 parameter expects `tuple(agent, …)` but argument is `tuple(player, …)` (or the reverse) | handler type ≠ payload type | match the digest's payload type |

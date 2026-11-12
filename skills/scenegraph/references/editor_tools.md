@@ -64,7 +64,7 @@ EntityToolset `AddComponent` with `asset_path` wires a mesh/particle/sound asset
 
 Hard rules and orbit pitfalls: `skill_read_subskill("scenegraph", "prefab_only")`.
 
-- **43.00: Epic `ValkyrieToolset.PrefabToolset` `CreatePrefab`** makes the
+- **Epic `ValkyrieToolset.PrefabToolset` `CreatePrefab`** makes the
   asset and returns its `rootEntity`; edit its contents with EntityToolset
   (`AddComponent`, `SetComponentProperty`, …), then `ApplyPrefabEdits` and
   `save_asset`. Prefer this over the Ducky helpers below.
@@ -93,31 +93,31 @@ Hard rules and orbit pitfalls: `skill_read_subskill("scenegraph", "prefab_only")
   SpatialMath `translation` `[forward, left, up]`. Do not spawn
   `EntityProxyActor` by class with `spawn_actor`.
 - Placing: EntityToolset `CreateEntity` with the prefab's `generatedClass`
-  works without proxy actors (43.00). For prefab-owned content edit the
+  works without proxy actors. For prefab-owned content edit the
   `.EntityPrefab` asset over MCP (`prefab_only`). Do not treat level-instance
   edits as the source of truth.
 - Prefab overrides (per-instance property tweaks) are NOT a separate scripting
   API — prefer editing the prefab asset; level tweaks diverge other instances.
 - EntityToolset `FindEntities` filters `TRASH_*`, `REINST_*`, and EntityProxyActor shadow
   copies so each placed prefab appears once (canonical LevelEntity path).
-- **43.00: no more entity proxy actors in the editor.** UEFN works on Scene Graph entities
+- **no more entity proxy actors in the editor.** UEFN works on Scene Graph entities
   directly (faster); some entity right-click menu entries moved, same features. Don't look
   for an `EntityProxyActor` in the Outliner or `get_all_level_actors` to find an entity —
   use EntityToolset `FindEntities`. Prefabs show collapsed in the Outliner by default.
-- 43.00 editor: the actor picker can pick Scene Graph entities (also for grid align);
+- editor: the actor picker can pick Scene Graph entities (also for grid align);
   very large prefabs no longer reinitialize while you drag them in or drag Details
   sliders / the gizmo (full reinit on release); Lumen in the Prefab Editor (Show menu);
   pasting subobjects between prefabs no longer leaves a cross-package reference that
   failed cooking; Epic MCP has a **Prefab toolset** (`uefn` `epic_toolsets`).
-- **43.00 copy/paste of vectors, rotations and transforms** in Details works the same in
+- **copy/paste of vectors, rotations and transforms** in Details works the same in
   every display mode. Verse types copy as **Verse literals** (e.g.
   `vector3{Forward := 100.0, Left := 0.0, Up := 50.0}`); paste accepts a Verse literal **or**
   engine values (`X=…,Y=…,Z=…`) and converts LUF ↔ engine axes for you (Left = −Y). Use it
   to move a placed entity's transform into Verse code without hand-converting axes.
-- **Content Browser filters** (43.00): *Has Performance Validation Warnings* / *Has
+- **Content Browser filters**: *Has Performance Validation Warnings* / *Has
   Performance Validation Errors* — use them to list the assets the validator flags before
   publishing.
-- **Asset validation severity levels** (43.00): each validation issue is a **warning** or an
+- **Asset validation severity levels**: each validation issue is a **warning** or an
   **error**; fix errors first (they block), triage warnings. Validator output is a fix list,
   never a delete list.
 
@@ -155,6 +155,6 @@ reports per-actor results. Devices should stay devices.
   `instantiate_prefab` of the original asset (see `prefab_only`).
 - **Pivot won't orbit / `local_transform_error`** — add `transform_component`
   (or `SetLocalTransform` in Verse) before KFM.
-- **Prefab Editor toolbar tools missing** (42.40 fix) — when the viewport toolbar is
+- **Prefab Editor toolbar tools missing** (fix) — when the viewport toolbar is
   too narrow, the hidden tools are in its menu; the multi-viewport layout names show
   and the Maximize checkbox reflects a maximized viewport.

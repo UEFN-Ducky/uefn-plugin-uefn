@@ -73,7 +73,7 @@ If `foliage_list_sources` is empty: `search_assets(search="Tree", directory="/Ga
 - Never scale Fortnite Creative devices (buttons, triggers, volumes, barriers, pads). Actor scale breaks them. Resize via Details Width/Height/zone (`SetDeviceProperty`). Foliage scale variance is fine on props only.
 - Organize under `Generated/WorldgenDemo` and tag `WorldgenGenerated`.
 
-## 43.00 landscape changes
+## Landscape changes
 
 - **Layer Allow List is read-only in Details** on a landscape component. Edit it in
   **Landscape mode** (Paint): select the component, **`=`** adds it to the allow list,
@@ -87,9 +87,9 @@ If `foliage_list_sources` is empty: `search_assets(search="Tree", directory="/Ga
   while typing; no shader warnings entering Landscape Paint.
 - Big scatter (forests, fields) → PCG is now in UEFN: see `procedural_generation`.
 
-## 42.30 landscape changes (42.40 repeats the Layer Allow List and proxy right-click fixes)
+## Landscape changes (repeats the Layer Allow List and proxy right-click fixes)
 
-- **42.40:** WaterBodyIsland exposes its terrain properties.
+- WaterBodyIsland exposes its terrain properties.
 
 - **WaterBodyIsland** now exposes **Affects Landscape** — turn it off so the island
   stops overwriting your sculpting.

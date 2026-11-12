@@ -71,18 +71,18 @@ Rules the digest states outright:
 
 Also on `component`: `Entity` (the owner), `RemoveFromEntity()`,
 `IsInScene[]`, `IsSimulating[]`, `SendDown(event)`, `OnReceive(event)`
-(override, return `true` to consume — `MinUploadedAtFNVersion := 4000`), and
+(override, return `true` to consume — an `@available` attribute), and
 `TickEvents`.
 
-**42.30 upgrade note (HARD):** scene events are dispatched to `OnReceive` on the
+**upgrade note (HARD):** scene events are dispatched to `OnReceive` on the
 **server only**. Anything that relied on `OnReceive` running on a client is now
 ignored (a log line says so; before it could crash). Keep scene-event logic
 server-side.
 
-### Per-frame work: `OnSimulate` loop (TickEvents is Epic-only on 42.10)
+### Per-frame work: `OnSimulate` loop (TickEvents is Epic-only)
 
 **`TickEvents.PrePhysics.Subscribe(...)` does NOT compile in creator code.**
-`execution_listenable` is declared `class<epic_internal>` in the 42.10 digest, so
+`execution_listenable` is declared `class<epic_internal>` in the older digest, so
 subscribing from your own component fails the build:
 
 ```
@@ -90,7 +90,7 @@ Invalid access of internal function (/Verse.org/SceneGraph/execution_listenable:
 from control scope .../mover_component/OnBeginSimulation
 ```
 
-(Verified by compiling on FN 42.10. Re-check with
+(Verified by compiling. Re-check with
 `get_verse_api("execution_listenable")` — if Epic drops `epic_internal`, the
 subscribe form below becomes usable again.)
 
@@ -154,7 +154,7 @@ steering_component := class<final_super>(component):
     var Heading : float = 0.0
 
     OnSimulate<override>()<suspends> : void =
-        var PrevTime : float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last' (43.00)
+        var PrevTime : float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last'
         loop:
             Sleep(0.0)                      # yields exactly one frame
             if (not IsSimulating[]):
@@ -394,7 +394,7 @@ Scene Graph `button_component`), `possessable_component`, `rarity_component`,
 queries: `FindOverlapHits` / `FindSweepHits` with
 `collision_sphere/box/capsule/point`.
 
-### 43.00 changes that affect component code
+### Changes that affect component code
 
 - **Moves are visible to overlap/sweep queries the same frame** — no `Sleep` between
   `SetGlobalTransform` and `FindOverlapHits` / `FindSweepHits` (`movement_transforms`).
@@ -410,7 +410,7 @@ queries: `FindOverlapHits` / `FindSweepHits` with
   `<final>` (`custom_weapons`).
 - Editables on Verse class objects stay independent across prefab instances; assigning a
   device to an optional `@editable` on a component no longer crashes UEFN.
-- `@editable` tooltips + categories: the 43.00 Scene Graph feature example sets both on every
+- `@editable` tooltips + categories: the Scene Graph feature example sets both on every
   property — follow it as the house example for component editables.
 - Verse event `Subscribe` now works on `event(t)` (verse `events_subscriptions`).
 

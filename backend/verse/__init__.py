@@ -370,4 +370,26 @@ def register(api) -> None:
 
     _register_template_tools(api)
     _register_umg_tools(api)
+    _register_digest_tools(api)
     api.log("verse tools registered")
+
+
+def _register_digest_tools(api) -> None:
+    @api.tool(intent=r"\b(what'?s\s+new|new\s+(verse\s+)?api|changed|removed|renamed|deprecated|update|release\s+notes|digest)\b")
+    def verse_digest_changes(name_filter: str = "", max_results: int = 60) -> str:
+        """What changed in the Verse API since the previous Fortnite build on this PC.
+
+        Compares the newest Verse digests with the build before: types that are new or gone,
+        members that were added, removed or changed (a changed signature shows as one removed
+        and one added line), and names that are no longer experimental. Call it after a
+        Fortnite update, when a name from a skill does not compile, or when asked what is
+        new. name_filter narrows to names containing it ("camera", "loot"). The digest is the
+        truth for the installed build; get_verse_api(name) has each definition.
+        """
+        from .digest_changes import changes
+
+        try:
+            out = changes(name_filter=name_filter, max_results=max_results)
+        except OSError as exc:
+            out = {"ok": False, "error": f"Could not read the Verse digests: {exc}"}
+        return json.dumps(out, separators=(",", ":"))

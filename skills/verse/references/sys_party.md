@@ -1,16 +1,16 @@
 ---
-description: "Party-aware gameplay (Social Synergy API, v42.10; 43.00 fix: works in playtest / private / live) — GetLocalParty, party size, same-party checks, join/leave events, party-only access, difficulty that scales with party size"
+description: "Party-aware gameplay (Social Synergy API; works in playtest / private / live) — GetLocalParty, party size, same-party checks, join/leave events, party-only access, difficulty that scales with party size"
 metadata:
   order: 13
-  label: "Party / Social Synergy API (v42.10)"
+  label: "Party / Social Synergy API"
   default_enabled: false
   load_condition: "Anything about parties, squads of friends, party bonuses, party-only doors, scaling difficulty to group size, or detecting who joined together"
 ---
 
-## Party-aware gameplay — Social Synergy API (v42.10)
+## Party-aware gameplay — Social Synergy API
 
-Players can form parties across the Epic ecosystem; since v42.10 Verse can read a
-player's party. Everything below is verified against the 42.10 digest.
+Players can form parties across the Epic ecosystem; Verse can read a
+player's party. Everything below is verified against the digest.
 
 ```verse
 using { /UnrealEngine.com/Social }     # GetLocalParty, party_member_info
@@ -133,12 +133,12 @@ party_gameplay_device := class(creative_device):
 
 ### Gotchas
 
-- `party_member_info` has no public fields in 42.10; treat it as opaque.
+- `party_member_info` has no public fields; treat it as opaque.
 - Subscribe **once per player** and cancel on leave; the party object outlives the
   session membership.
 - `GetMemberMap()` includes the player themself; subtract one for "mates".
-- Requires FN ≥ 42.10 (`@available 4210`); older uploads will not compile it.
-- **Fixed in 43.00:** party members are detected in playtest, private and live sessions.
-  Before 43.00 it only worked in edit sessions, so party code that "did nothing" in a
-  private version was this bug. Retest there on 43.00 and remove any edit-session-only
+- Has an `@available` attribute: older uploads will not compile it.
+- **Fixed:** party members are detected in playtest, private and live sessions.
+  In older builds it only worked in edit sessions, so party code that "did nothing" in a
+  private version was this bug. Retest there now and remove any edit-session-only
   workaround.

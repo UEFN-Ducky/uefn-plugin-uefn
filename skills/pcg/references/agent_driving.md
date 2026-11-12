@@ -9,7 +9,7 @@ metadata:
 
 ## Driving PCG Mode with the mouse
 
-Everything on this page was run against UEFN 43.00 and worked unless marked **untested**.
+Everything on this page was run against UEFN and worked unless marked **untested**.
 
 ### Pick the method
 

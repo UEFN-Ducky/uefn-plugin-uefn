@@ -38,6 +38,28 @@ declaration, each with its `#` doc comment) under:
 `<Project>-Assets` digest is regenerated when you import or create assets — it's how
 you learn the **Verse identifier** of something you added in the editor.
 
+## After a Fortnite update: what changed
+
+UEFN rewrites the digests whenever Fortnite updates, so the digest always matches the
+installed build. Skill pages are written by hand and can be a build behind.
+
+- `verse_digest_changes()` compares the newest digests with the build before: types that
+  are new or gone, members that were added, removed or changed (a changed signature shows as
+  one removed and one added line), and names that are no longer experimental.
+  `verse_digest_changes("camera")` narrows it to names containing that word.
+- Call it after an update, when a name from a skill or a tutorial does not compile (3506),
+  or when the user asks what is new.
+- **The digest wins.** A name that is not in the digest does not exist in this build; use
+  what replaced it. Never keep an old name because a page here shows it.
+
+## Attributes that decide what you can ship
+
+- `@experimental` above a name: using it emits `Script warning 2304` and the island cannot
+  be published. When that line is gone, it can. No skill page decides this; read it here.
+- `@available {MinUploadedAtFNVersion := …}`: only islands uploaded on that build or newer
+  get the name. An island that has not been uploaded since does not compile it.
+- `@deprecated`: still compiles, will be removed. Use the replacement the comment names.
+
 ## What a digest entry looks like
 
 ```verse
@@ -79,9 +101,9 @@ To read one digest in full (rarely needed — prefer search), open its path with
 `workspace_read_file` only — never `workspace_write_file`. If a name appears in
 no digest, don't write it (and never invent it by editing a digest).
 
-### Digest format note (42.30)
+### Digest format note
 
-From 42.30 the digests print `<final>` inside the class specifiers:
+The digests print `<final>` inside the class specifiers:
 `fort_item_ability_component<native><public> := class<final><final_super>(component)` (was
 `fort_item_ability_component<native><final><public> := class<final_super>(component)`). Same
 meaning — a final class you cannot subclass. Read both forms the same way.

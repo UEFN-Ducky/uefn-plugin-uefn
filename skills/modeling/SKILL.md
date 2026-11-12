@@ -5,7 +5,7 @@ description: "Model and process meshes in UEFN — import FBX/glTF, LODs, collis
 license: MIT
 metadata:
   label: UEFN Modeling
-  version: 11
+  version: 12
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -131,9 +131,9 @@ Use `describe_class` to confirm method/enum names for this build before running.
 
 `get_static_mesh_info` / `validate_uefn_asset`.
 
-## 42.30 notes
+## Notes
 
-- Epic `EditorToolset.StaticMeshToolset` and `EditorToolset.PrimitiveToolset` (43.00 names)
+- Epic `EditorToolset.StaticMeshToolset` and `EditorToolset.PrimitiveToolset`
   inspect/edit static meshes and add primitive geometry when `epic_mcp_online`
   (uefn `epic_toolsets`).
 - Skinned-mesh import fixed (inverse bind matrices, bind-pose drift, multi-root files).

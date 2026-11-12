@@ -22,9 +22,9 @@ Always `anim_author_capabilities({})` first. Tool availability varies by UEFN bu
 | Camera cutscene | Level Sequence + **Cinematic Sequence device** |
 | Skeletal acting | AnimSequence / retargeted clips on bindings |
 
-## Sequencer through Epic MCP (43.00)
+## Sequencer through Epic MCP
 
-43.00 ships 7 Sequencer toolsets (Python-backed: check
+Epic ships 7 Sequencer toolsets (Python-backed: check
 `ValkyrieToolset.ValkyriePythonToolset.IsPythonReadyForMainProject` first, enable with
 `EnablePythonForMainProject`). Prefer them over `execute_python` for cameras, cuts and keys:
 
@@ -100,7 +100,7 @@ Playback is **not** "press play in Sequencer" for players — it's the device:
 Verse: trigger the device's play function after `search_verse_digest` /
 `get_verse_api` for the exact API — don't guess event names.
 
-**43.00:** `cinematic_sequence_device.GetSequenceLength()<transacts>:float` returns the
+`cinematic_sequence_device.GetSequenceLength()<transacts>:float` returns the
 sequence length in seconds — use it instead of a hard-coded `Sleep`:
 
 ```verse
@@ -133,7 +133,7 @@ PlayIntro(Agent:agent)<suspends>:void =
         Character.ReleaseFromStasis()
 ```
 
-Compiles on 43.00 (`IntroSequence` is an `@editable cinematic_sequence_device`; needs
+Compiles (`IntroSequence` is an `@editable cinematic_sequence_device`; needs
 `/Fortnite.com/Devices`, `/Fortnite.com/Characters`, `/Verse.org/Simulation`). The Problems
 panel may flag `StoppedEvent.Await()` as "Unknown member `Await`": an LSP false positive, the
 real build accepts it (`listenable` extends `awaitable`).
@@ -144,7 +144,7 @@ A cut from the gameplay camera into the cine camera is the **Camera Cut track's 
 Blend** flag plus an ease-in on the cut section, not a Fade track. Agents that can't
 find a tool for it fall back to a fade-from-black: wrong when the user wants a blend.
 
-- **Can Blend is UI-only in 43.00.** It is not an editor property: `MovieSceneCameraCutTrack`
+- **Can Blend is UI-only.** It is not an editor property: `MovieSceneCameraCutTrack`
   exposes only `display_name`, `eval_options`, `display_options`, `condition_container`,
   `decorations`, `track_row_display_names`, `track_tint` (Python stub and
   `EditorToolset.ObjectToolset.GetProperties` both fail on `bCanBlend` / `can_blend`).
@@ -161,7 +161,7 @@ trace from the camera position): orbits clip trees and walls when the orbit radi
 contains geometry (a 7.5 m orbit around a shop counter passes through the shop wall).
 Shrink the radius or add a key, then check again.
 
-## Cutscene audio: MetaSound through Epic MCP (43.00)
+## Cutscene audio: MetaSound through Epic MCP
 
 Import → MetaSound → device, all by MCP:
 

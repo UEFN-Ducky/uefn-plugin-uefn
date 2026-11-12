@@ -82,7 +82,7 @@ gets a health bar.
   no per-particle collision.
 - The projectile itself is a Scene Graph entity moved by
   `keyframed_movement_component` (hard rule 3) with the system attached; impacts
-  through the 43.00 Health & Damage pipeline.
+  through the Health & Damage pipeline.
 - Pictures: `ducky_generate_image`. Models: `tripo-api`. Blender-baked flipbooks:
   `vfx-fx` `game-fx-export`. Whole pipeline (monsters, loot, inventory):
   `uefn` `ai_game_pipeline`.

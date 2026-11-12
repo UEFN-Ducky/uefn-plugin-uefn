@@ -1,5 +1,5 @@
 ---
-description: "NPC AI in Verse — npc_behavior templates on npc_actions_component (43.00: NavigateTo / Focus / Idle / StopNavigation / MovementSpeedMultiplier; GetNavigatable, GetFocusInterface, GetFortLeashable, movement_types deprecated), guard_actions_component Tether / RoamAround, nearest-player lookup, spread/strafe movement, centralized damage, Scene Graph projectiles, and wave spawn managers"
+description: "NPC AI in Verse — npc_behavior templates on npc_actions_component (NavigateTo / Focus / Idle / StopNavigation / MovementSpeedMultiplier; GetNavigatable, GetFocusInterface, GetFortLeashable, movement_types deprecated), guard_actions_component Tether / RoamAround, nearest-player lookup, spread/strafe movement, centralized damage, Scene Graph projectiles, and wave spawn managers"
 metadata:
   order: 40
   label: "Game systems — NPC AI (npc_behavior)"
@@ -9,14 +9,14 @@ metadata:
 
 ## NPC AI — `npc_behavior` patterns
 
-> **Talking NPCs (42.30):** an NPC with a Persona Modifier answers players by voice and can drive gameplay through structured output — `sys_conversations` (template `llm_npc`).
+> **Talking NPCs:** an NPC with a Persona Modifier answers players by voice and can drive gameplay through structured output — `sys_conversations` (template `llm_npc`).
 
-The code below is verified against the **43.00** digests (the chaser and guard
+The code below is verified against the digests (the chaser and guard
 behaviors compiled with 0 errors on Nov 1 2026) — copy names and signatures as-is
 (`npc_behavior`, `npc_actions_component`, `guard_actions_component`, `PlayAndAwait`,
 `npc_spawner_device`, `Distance`); do NOT re-check them one by one.
 
-> **43.00 deprecated the old NPC interfaces.** Use `npc_actions_component` (from
+> **deprecated the old NPC interfaces.** Use `npc_actions_component` (from
 > `Char.GetEntity[].GetComponent[npc_actions_component]`) instead of:
 >
 > | Deprecated | Use |
@@ -92,7 +92,7 @@ melee_enemy_behavior<public> := class(npc_behavior):
 - `Char.GetPlayAnimationController[]` → `PlayAndAwait(Clip)` for attack swings (not deprecated).
 - Guards: `Ent.GetComponent[guard_actions_component]` adds `Tether`, `Untether`, `RoamAround`, `MoveInRangeToAttack`, `Attack(Target)`, `Crouch`, `Jump`, `Slide`.
 
-### Complete chaser (compiled, 43.00)
+### Complete chaser
 
 ```verse
 using { /Fortnite.com/AI }
@@ -304,7 +304,7 @@ then each frame: if fire held AND aim ray within `ShootDownRadius` of the projec
 stutters on clients. The keyframe moves the shot; the `Sleep(0.0)` loop only
 reads its position for the hit check (it can lag the drawn position by a frame,
 so keep `HitRadius` generous). `TickEvents.PrePhysics.Subscribe` would be the
-exact hook, but `execution_listenable` is still `class<epic_internal>` on 43.00
+exact hook, but `execution_listenable` is still `class<epic_internal>` 
 and does not compile in creator code.
 
 **Walls:** dungeon / cover colliders must be Scene Graph entities with Queryable

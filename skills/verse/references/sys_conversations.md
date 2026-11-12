@@ -1,29 +1,29 @@
 ---
-description: "LLM NPCs / conversations (v42.30) — /UnrealEngine.com/Conversations persona_component: personality, voices, voice channel + conversation target, PromptToTalk, structured output with RegisterAction + @ai_description, one-shot Session.Prompt, captions, errors, rules; Epic's docs drift (no AppendToPersonality / RegisterPromptBinding / ResponseType)"
+description: "LLM NPCs / conversations — /UnrealEngine.com/Conversations persona_component: personality, voices, voice channel + conversation target, PromptToTalk, structured output with RegisterAction + @ai_description, one-shot Session.Prompt, captions, errors, rules; Epic's docs drift (no AppendToPersonality / RegisterPromptBinding / ResponseType)"
 metadata:
   order: 15
-  label: "Conversations / LLM NPCs (v42.30)"
+  label: "Conversations / LLM NPCs"
   default_enabled: false
   load_condition: "NPCs that talk (LLM, AI-powered, persona, conversation, voiced character, quest giver that listens, haggling, negotiation, narrator, commentator), the Conversations template, Persona Modifier, structured output, @ai_description"
 ---
 
-## Conversations — LLM-powered NPCs (v42.30)
+## Conversations — LLM-powered NPCs
 
 An NPC with a **Persona Modifier** talks to players by voice: it remembers the
 session, answers in character, and can drive gameplay through **structured
-output**. The 42.30 **Conversations template** (Project Browser → Feature
-Examples) is a used-car haggling game built on it. Publishable since 41.30 (Jul 30
+output**. The older-build **Conversations template** (Project Browser → Feature
+Examples) is a used-car haggling game built on it. Publishable (Jul 30
 2026); not experimental (no 2304 warnings).
 
-Everything below is from the 42.30 `UnrealEngine.digest.verse` and compiled with
-**0 errors, 0 warnings** in UEFN 42.30 (Tycoony, Oct 1 2026). The ready-made
+Everything below is from the `UnrealEngine.digest.verse` and compiled with
+**0 errors, 0 warnings** in UEFN (Tycoony, Oct 1 2026). The ready-made
 version is the Verse template **`llm_npc`** (`verse_template_apply("llm_npc")` →
 `Verse/LLMNPC/llm_npc_behavior.verse`).
 
 ### Docs drift (HARD)
 
 Epic's template companion page ("LLM Game Mechanics with Verse") calls three
-things the 42.30 digest does not have. Each is **E3506**:
+things the digest does not have. Each is **E3506**:
 
 | Do not write | Write |
 | --- | --- |
@@ -31,7 +31,7 @@ things the 42.30 digest does not have. Each is **E3506**:
 | `Session.RegisterPromptBinding(Def, F)` | `Session.RegisterAction(Def, Required, response_struct, F)` |
 | `prompt_binding_definition{…, ResponseType := T}` | `prompt_binding_definition{Name := …, Description := …}` — the struct type is `RegisterAction`'s 3rd argument |
 | `voice_channel(x){}` then `Channel.AddMember(…)` | `agent_group(x){}` holds members; `voice_channel(x){Name := …, Group := Group}` |
-| a `text_channel` (42.40) for typed conversations | `PromptToTalk` and `SetConversationTarget` take a `voice_channel` only (unchanged in 42.40) |
+| a `text_channel` for typed conversations | `PromptToTalk` and `SetConversationTarget` take a `voice_channel` only |
 
 Ducky's Verse lint flags all of them.
 

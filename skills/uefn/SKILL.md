@@ -5,7 +5,7 @@ description: "Placed Creative devices: Epic DeviceToolset placement/properties, 
 license: MIT
 metadata:
   label: UEFN MCP
-  version: 57
+  version: 58
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -21,7 +21,7 @@ metadata:
 4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
 5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
 6. **One house code style** (verse `code_style`).
-7. **Names come from the digest** (verse `digests`).
+7. **Names come from the digest of the installed build** (verse `digests`). The digest wins over every skill page: after a Fortnite update, or when a name does not compile, call `verse_digest_changes()`; an `@experimental` line above a name means it blocks publishing.
 8. **Done means played** — build, then one live run; two players for multiplayer (verse `runtime_pitfalls`).
 
 **Building a whole island or feature set:** follow `skill_read_subskill("uefn", "build_order")` — plan, session shell, our packs, mode logic, Scene Graph objects, build then wire, UI, saves, two-player verify, dress — with leveldesign `full_game_director` for the level space. AI-made monsters, loot, spells and cast moves → `ai_game_pipeline`.
@@ -32,7 +32,7 @@ metadata:
 
 **Launch blockers:** "Failed to connect to beacon" at Downloading while other islands launch = generated Verse data too big (≤ ~250 KB, flat `[]int`) → `launch_beacon_failure`. Validator "Vertex count of LOD0 ... too high (30,000)" on a Nanite mesh = the fallback is counted → `nanite_fallback_vertex_count`.
 
-**UEFN 43.00 (Nov 2026, current):** what changed and where it is covered → `skill_read_subskill("uefn", "patch_43_00")`. Picking an Epic toolset and its gotchas → `epic_toolsets`. Profiling an island (Spatial Profiler, Timing / Verse Insights, Memory Snapshot, Creator Portal Technical metrics) → `profiling`; driving it through MCP → `profiling_mcp`; common causes and fixes → `profiling_fixes`; reading Verse Insights and fixing a server Verse hitch → `verse_insights`. Save blocked by Data Recovery placeholders, asset redirectors into Verse → `verse_build_lifecycle`. Discover artwork is required to publish from Oct 22 2026 → `creator_portal`. Epic MCP call failed, returned OK but changed nothing, wrong island on :8000, or a bulk edit → `epic_mcp_ops` (Epic's own safety/recovery rules). Full Unreal Engine 5 (not UEFN) → `skill_read_subskill("unreal-engine")`. Moderation flags during cook → `content_prechecks`. Benchmarks, offer errors, memory in MB, Rocket Racing, Fab → `creator_portal`.
+**What changed after a Fortnite update:** `verse_digest_changes()` reads it from the installed build; where each change is covered → `skill_read_subskill("uefn", "recent_changes")`. Picking an Epic toolset and its gotchas → `epic_toolsets`. Profiling an island (Spatial Profiler, Timing / Verse Insights, Memory Snapshot, Creator Portal Technical metrics) → `profiling`; driving it through MCP → `profiling_mcp`; common causes and fixes → `profiling_fixes`; reading Verse Insights and fixing a server Verse hitch → `verse_insights`. Save blocked by Data Recovery placeholders, asset redirectors into Verse → `verse_build_lifecycle`. Discover artwork is required to publish from Oct 22 2026 → `creator_portal`. Epic MCP call failed, returned OK but changed nothing, wrong island on :8000, or a bulk edit → `epic_mcp_ops` (Epic's own safety/recovery rules). Full Unreal Engine 5 (not UEFN) → `skill_read_subskill("unreal-engine")`. Moderation flags during cook → `content_prechecks`. Benchmarks, offer errors, memory in MB, Rocket Racing, Fab → `creator_portal`.
 
 **Place like Content Drawer (HARD):** search `/Game/Creative/**` → keep only
 `BlueprintGeneratedClass` / `*_C`. **5+ pieces** → Programmatic `execute_tool_script`
@@ -60,7 +60,7 @@ at the end of a placement batch.
 
 **Placed-device traps (HARD):**
 - **Placed values win over code defaults.** Changing an `@editable` default in Verse does not change a device already in the level — `GetDeviceProperties` / `get_verse_editables` the placed one and `SetDeviceProperty` / `set_verse_editable` it too.
-- **Classic devices (43.00):** HUD Controller, granters, teleporters, Audio Player… — `ListClassicDeviceOptions` then `SetClassicDeviceOption`; `Get/SetDeviceProperty` only reach Verse `creative_device` settings.
+- **Classic devices:** HUD Controller, granters, teleporters, Audio Player… — `ListClassicDeviceOptions` then `SetClassicDeviceOption`; `Get/SetDeviceProperty` only reach Verse `creative_device` settings.
 - **Read start-up options on every device you place or reuse** — "add to players on start", "hide player character", "enabled at game start", priority. A camera or HUD added to every player at start stays on in the hub and hides players.
 - **Some things are only device settings**, never Verse: the crosshair/reticle, minimap and other HUD parts live on the **HUD Controller** (`GetDeviceProperties` → set it there). Template packs ship their own HUD — turn it off when the island has its own.
 - **A device type that won't take an `@editable` wire** → give it a Verse tag (`VerseTagMarkup` component with your `tag` class) and find it at runtime with `FindCreativeObjectsWithTag`.

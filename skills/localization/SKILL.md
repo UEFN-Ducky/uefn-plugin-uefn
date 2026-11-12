@@ -5,7 +5,7 @@ description: "UEFN Text Localization — project settings, Export Localization P
 license: MIT
 metadata:
   label: UEFN Text Localization
-  version: 5
+  version: 6
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -21,7 +21,7 @@ per language under **L10N**.
 language). That is app chrome. This pack is **Fortnite player-facing island**
 text and localized content.
 
-**Communities posts** (v42.20 auto-translate) are Epic-side Discover chrome —
+**Communities posts** (auto-translate) are Epic-side Discover chrome —
 the island PO / L10N pipeline in this pack is unchanged.
 
 ## MCP hard rule
@@ -94,7 +94,7 @@ This pack owns the Epic pipeline + readiness checklist. Code recipes live in
 - Private Version / Publish Build Localization → `private_version`
 - Per-language asset swaps (`L10N/`) → `asset_l10n`
 
-## 42.30
+## Loading
 
 `<localizes>` loads faster on the server: a module with 2000+ `<localizes>`
 values used to hang the island while loading — no longer. Keep using named

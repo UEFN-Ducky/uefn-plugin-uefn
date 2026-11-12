@@ -51,6 +51,33 @@ def test_reference_header(ref: Path):
     assert len(front.get("description", "")) >= 20, f"{ref}: description missing or too short"
 
 
+# A Fortnite release number (43.10, v42.40, 42.x) or an upload gate with its number (FN ≥ 4100,
+# MinUploadedAtFNVersion := 4300, @available 4300). A page that names one is wrong after the
+# next update: the digest of the installed build says what exists, what is experimental and
+# what is new (verse_digest_changes), so skills and templates never do.
+RELEASE = re.compile(r"(?<![\d.\w])v?(?:3[89]|4[0-9])\.(?:\d{2}|x)(?!\d|\.\d)"
+                     r"|FN\s*≥\s*\d{4}|MinUploadedAtFNVersion\s*:=\s*\d{4}|@available\s+\d{4}")
+
+
+def test_no_skill_or_template_names_a_fortnite_release():
+    root = SKILLS.parent
+    files = [*SKILLS.rglob("*.md"), *(root / "templates").rglob("*.verse"), root / "plugin.json"]
+    named = []
+    for f in files:
+        for number, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+            hit = RELEASE.search(line)
+            if hit:
+                named.append(f"{f.relative_to(root)}:{number}: {hit.group(0)}")
+    assert not named, "say what the digest says, not which release:\n" + "\n".join(named[:40])
+
+
+def test_every_pack_with_the_hard_rules_points_at_the_digest_of_the_installed_build():
+    for pack in PACKS:
+        text = (pack / "SKILL.md").read_text(encoding="utf-8")
+        if "Names come from the digest" in text:
+            assert "verse_digest_changes" in text, f"{pack.name}: rule 7 must name verse_digest_changes"
+
+
 def test_cross_links_resolve():
     names = {p.name for p in PACKS}
     broken = []

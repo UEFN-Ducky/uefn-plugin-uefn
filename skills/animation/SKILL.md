@@ -5,7 +5,7 @@ description: "Create, import, retarget, bake, and PLAY custom skeletal animation
 license: MIT
 metadata:
   label: UEFN Animation
-  version: 36
+  version: 37
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -22,7 +22,7 @@ metadata:
 4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
 5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
 6. **One house code style** (verse `code_style`).
-7. **Names come from the digest** (verse `digests`).
+7. **Names come from the digest of the installed build** (verse `digests`). The digest wins over every skill page: after a Fortnite update, or when a name does not compile, call `verse_digest_changes()`; an `@experimental` line above a name means it blocks publishing.
 8. **Done means played** — build, then one live run; two players for multiplayer (verse `runtime_pitfalls`).
 
 Character and creature motion is animation assets (Animated Mesh device, the play-animation controller, NPC AnimPresets) — never per-tick transform writes. Moving objects without a skeleton: scenegraph `movement_transforms`.
@@ -274,9 +274,9 @@ physics + spawn): install the MetaHuman Store plugin, then
 
 `get_anim_sequence_info` / `get_npc_definition_info`. Never ask the user to start PIE.
 
-## 42.30 notes
+## Notes
 
-- Epic `EditorToolset.SkeletalMeshToolset` (43.00 name; bones, sockets,
+- Epic `EditorToolset.SkeletalMeshToolset` (name; bones, sockets,
   materials) is available when `epic_mcp_online` — uefn `epic_toolsets`.
 - Skinned-mesh import fixed: inverse bind matrices resolve, bind poses no longer
   drift from the scene hierarchy, multi-root skinned files import.

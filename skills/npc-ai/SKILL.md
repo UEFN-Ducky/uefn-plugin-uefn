@@ -5,7 +5,7 @@ description: "UEFN NPC AI exact recipes — character definitions, equipment/wea
 license: MIT
 metadata:
   label: "UEFN NPC AI & Enemies"
-  version: 19
+  version: 20
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -21,7 +21,7 @@ metadata:
 4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
 5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
 6. **One house code style** (verse `code_style`).
-7. **Names come from the digest** (verse `digests`).
+7. **Names come from the digest of the installed build** (verse `digests`). The digest wins over every skill page: after a Fortnite update, or when a name does not compile, call `verse_digest_changes()`; an `@experimental` line above a name means it blocks publishing.
 8. **Done means played** — build, then one live run; two players for multiplayer (verse `runtime_pitfalls`).
 
 Projectiles and moving NPC parts are Scene Graph entities moved with `keyframed_movement_component` (attached parts follow with `SetOrigin`), never `MoveTo` or per-tick teleports; every NPC loop stops on elimination.

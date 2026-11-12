@@ -1,4 +1,4 @@
-# Team text chat (UEFN 42.40, compile-verified).
+# Team text chat (UEFN, compile-verified).
 #
 # Place team_text_chat_device in the level. Each team gets its own text channel
 # ("Team 1", "Team 2", ...) in its own color, with a [Team N] label after names.

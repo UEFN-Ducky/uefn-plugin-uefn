@@ -5,7 +5,7 @@ description: "Niagara VFX in UEFN — assemble systems from stock modules via MC
 license: MIT
 metadata:
   label: "UEFN Niagara"
-  version: 16
+  version: 17
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -21,7 +21,7 @@ metadata:
 4. **No lag** — events over polling, every loop waits, visuals ~10 Hz, pools, shared materials, HUD and saves on change (verse `runtime_pitfalls`).
 5. **Everything stops when its owner goes** — stop events on leave and elimination, `defer` cleanup (verse `async`).
 6. **One house code style** (verse `code_style`).
-7. **Names come from the digest** (verse `digests`).
+7. **Names come from the digest of the installed build** (verse `digests`). The digest wins over every skill page: after a Fortnite update, or when a name does not compile, call `verse_digest_changes()`; an `@experimental` line above a name means it blocks publishing.
 8. **Done means played** — build, then one live run; two players for multiplayer (verse `runtime_pitfalls`).
 
 **CRITICAL — editor mutations are SERIAL:** one heavy MCP call → wait → next
@@ -161,12 +161,12 @@ Asset-side changes are already saved by the assembly tools.
 
 `get_niagara_system_info` after assemble/place. Judge the look yourself — do not ask the user to confirm.
 
-## Epic Niagara toolsets (42.30)
+## Epic Niagara toolsets
 
 Four Niagara toolsets when `epic_mcp_online` (uefn `epic_toolsets` for tool names):
 `NiagaraToolsets.NiagaraToolset_Info` (enum lookups, guidance — call first),
 `NiagaraToolset_System` (systems, emitters, modules, schema, topology, data),
 `NiagaraToolset_Component` (Niagara components on actors, runtime user-variable
 overrides), `NiagaraToolset_Assets` (asset-registry discovery and metadata of
-Niagara scripts). 42.30 fixed the Hexylvania Alight Torch 02 flame not showing in
+Niagara scripts). Epic fixed the Hexylvania Alight Torch 02 flame not showing in
 Performance Mode.

@@ -21,7 +21,7 @@ same player-manager bus as every other system** (`sys_architecture`,
 | `GetSimulationElapsedTime()` (`<transacts>`) | No — resets every session | In-session deltas (timers, tick accrual) |
 | `GetSecondsSinceEpoch()` (`<reads>`) | Yes — wall-clock time | Login timestamps, offline elapsed, total playtime |
 
-43.00 adds the same wall clock as a `clock` object: `SecondsSinceEpochClock.GetSeconds()`
+Epic added the same wall clock as a `clock` object: `SecondsSinceEpochClock.GetSeconds()`
 (`<reads>`, no `using`). Pass it wherever an API takes a `clock` (the experimental
 `timer`'s `ReferenceClock`, `sys_rounds_timers`). Either form reads the same epoch seconds.
 

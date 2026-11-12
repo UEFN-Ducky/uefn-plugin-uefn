@@ -57,7 +57,7 @@ clients and costs network for each moved object.
   it with collidable child meshes that have `Visible` off (rails, walls) in the
   same entity tree, so everything moves as one parent with one KFM. Play-test a
   new ride once: speed and slopes decide whether players keep their footing.
-- No moving `chair_device`: devices have no Scene Graph entity in 43.00 (only
+- No moving `chair_device`: devices have no Scene Graph entity (only
   characters and NPC behaviours expose `GetEntity[]`), so a chair can't ride
   keyframes, and `MoveTo` is never used. Chairs are seats that stay put.
 - A seated player **cannot** be teleported — `Eject` (after `EnableExit`) first,

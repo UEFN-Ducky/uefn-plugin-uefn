@@ -15,7 +15,7 @@ via `PlayerManager.GetXPAwarder()` — they do not keep their own level table,
 thresholds, or persist map. Tycoon base Level is **building tiers**, not
 this XP ladder (don't merge them).
 
-**Quests (43.00) feed this pack, they don't replace it.** Goals shown in the
+**Quests feed this pack, they don't replace it.** Goals shown in the
 Fortnite quest UI are the Progression API (`sys_quests`); when a quest completes,
 award XP through `GetXPAwarder()` from a `GrantEvent` loop or the collection's
 `CompleteEvent`. Quests are not persistable — store quest progress here or in

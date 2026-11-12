@@ -5,7 +5,7 @@ description: "Full Unreal Engine 5 editor through Epic's official unreal-mcp ser
 license: MIT
 metadata:
   label: Unreal Engine (Epic MCP)
-  version: 1
+  version: 2
   author: UEFN-Ducky (adapted from Epic Games)
   copyright: Copyright 2026 Epic Games, Inc.; adaptation Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true

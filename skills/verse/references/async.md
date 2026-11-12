@@ -128,7 +128,7 @@ SaveProgress(P : player)<suspends> : void =
 ### Tasks
 
 `spawn` returns a `task(t)`, where `t` is the spawned function's return type. The
-type lives in `/Verse.org/Concurrency`. In 42.40 a task has only `Await()` — there
+type lives in `/Verse.org/Concurrency`. A task has only `Await()` — there
 is **no `Cancel()`**.
 
 ```verse
@@ -196,7 +196,7 @@ Without the `defer`, an entity spawned inside a race arm that loses is never rem
 
 ### Subscribing to events (the async trigger surface)
 
-From **43.00** every event has `.Subscribe`: device events, playspace and character events are `listenable`, and your own `event(t)` fields and UMG event fields are now `listenable` too (`MyEvent.Subscribe(Handler)` returns a `cancelable`). On a 42.x island, `event(t)` and UMG event fields have only `.Await`. Details: `events_subscriptions`.
+Now every event has `.Subscribe`: device events, playspace and character events are `listenable`, and your own `event(t)` fields and UMG event fields are now `listenable` too (`MyEvent.Subscribe(Handler)` returns a `cancelable`). On an older-build island, `event(t)` and UMG event fields have only `.Await`. Details: `events_subscriptions`.
 
 `.Subscribe(Handler)` registers an immediate handler; the event calls it later. Two
 shapes appear, depending on the API — an event **field** vs an event **accessor

@@ -98,19 +98,19 @@ Same idea: Pressed starts `spawn{ ContinuousLoop(Agent) }`; Released sets a
 - Subscribing once in `OnBegin` is enough; Register only enables that agent.
 - `Register` / `Unregister` / event names are as shown — do not invent others; re-check only if the error list flags one.
 
-### Verse input mappings (Enhanced Input) — v42.10 additions (digest-verified)
+### Verse input mappings (Enhanced Input)
 
 Besides `input_trigger_device`, every player exposes `player_input`
 (`GetPlayerInput[Player]`, `/Verse.org/Input`). The Fortnite character mappings live in
 `/Fortnite.com/Input/Character`:
 
-| Mapping | Actions | Status |
+| Mapping | Actions | Publishing |
 |---------|---------|--------|
-| `TraversalMapping` | `Crouch`, `Sprint`, `Jump` : `input_action(logic)`; **`Move` : `input_action(vector3)`** (v42.10) | `Move` is Experimental |
+| `TraversalMapping` | `Crouch`, `Sprint`, `Jump` : `input_action(logic)`; **`Move` : `input_action(vector3)`** | check the digest |
 | `RangedWeaponMapping` | `Reload`, `WeaponPrimary`, `WeaponSecondary` : `input_action(logic)` | released |
-| **`InteractMapping`** (v42.10) | **`Interact` : `input_action(logic)`** | Experimental |
+| **`InteractMapping`** | **`Interact` : `input_action(logic)`** | check the digest |
 
-Experimental actions block publishing. Subscribe exactly like the Virtual Pointer skill:
+An action with `@experimental` above it in the digest blocks publishing (`get_verse_api("Character")` shows each one); the rest are released. Subscribe exactly like the Virtual Pointer skill:
 
 ```verse
 using { /Verse.org/Input }
@@ -135,7 +135,7 @@ OnInteract(Arg : tuple(player, logic)) : void =
 Keep the returned `cancelable`s and `RemoveInputMapping` on leave (see `virtualpointer`
 skill for the full per-player subscription pattern and event payload table).
 
-### Mobile / owning-client input (v42.20)
+### Mobile / owning-client input
 
 `input_trigger_device` **Standard Action** now fires on mobile (it was broken).
 

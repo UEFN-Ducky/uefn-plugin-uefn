@@ -28,7 +28,7 @@ When the project has Epic's Verse UI Kit, `list_widget_classes` also returns its
 | `ScrollBox` | Scroll. Slot is padding. There is no Verse scroll-offset API |
 | `SizeBox` | Fixed desired size |
 | `ScaleBox` | Scale to fit |
-| `SafeZone` | 43.00. Keeps its child inside the screen's safe area (notches, rounded corners, TV overscan) on console and mobile. Wrap full-screen HUD content in it (`umg_layout`) |
+| `SafeZone` | Keeps its child inside the screen's safe area (notches, rounded corners, TV overscan) on console and mobile. Wrap full-screen HUD content in it (`umg_layout`) |
 | `NamedSlot` | One hole a child User Widget or Verse fills |
 | `WidgetSwitcher` | One visible child |
 | `UIFrameworkCustomButtonWidget` | Custom Button. Alias `CustomButton`. The only raw button — the kit's buttons are built on it |
@@ -60,6 +60,6 @@ Do not pass them. The tool raises before the editor call:
 
 ### Custom Button events
 
-`list_bindable_properties` on `UIFrameworkCustomButtonWidget` includes `OnClicked`, `OnPressed`, `OnReleased`, `OnHovered`, `OnUnhovered`, `OnButtonClicked`, `OnButtonHighlight`, `OnButtonUnhighlight`, plus `IsFocusable`, `RenderOpacity`, `RenderTransform`, `ColorAndOpacity`, `Visibility`. In 42.30 only `OnButtonClicked` / `OnButtonHighlight` / `OnButtonUnhighlight` compile as event-binding sources; the others fail with "The property path … is invalid". `IsFocusable` is listed but never override it — that fails asset validation (`umg_style`).
+`list_bindable_properties` on `UIFrameworkCustomButtonWidget` includes `OnClicked`, `OnPressed`, `OnReleased`, `OnHovered`, `OnUnhovered`, `OnButtonClicked`, `OnButtonHighlight`, `OnButtonUnhighlight`, plus `IsFocusable`, `RenderOpacity`, `RenderTransform`, `ColorAndOpacity`, `Visibility`. Only `OnButtonClicked` / `OnButtonHighlight` / `OnButtonUnhighlight` compile as event-binding sources; the others fail with "The property path … is invalid". `IsFocusable` is listed but never override it — that fails asset validation (`umg_style`).
 
 Bind with `bind_widget_event`. Highlight uses `OnButtonHighlight` / `OnButtonUnhighlight`. A kit button's click is its inner Custom Button: bind `<Child>.Main_Button.OnButtonClicked` / `<Child>.Root_Button.OnButtonClicked` (read the path from the child's tree) to a shared int event on your screen (`verse_ui_kit` — Clicks).

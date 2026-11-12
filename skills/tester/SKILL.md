@@ -5,7 +5,7 @@ description: "UEFN testing suite — device-graph simulation, Verse harness asse
 license: MIT
 metadata:
   label: UEFN Testing
-  version: 11
+  version: 12
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -67,7 +67,7 @@ This guide is already in your context — load reference files with `skill_read_
 
 `verse_test_run` then `tester_get_results` — report PASS/FAIL. Never ask the user to playtest.
 
-## 42.30 notes
+## Notes
 
 - Logs from Epic when `epic_mcp_online`: `ConsoleToolset.LogsToolset.GetLogEntries(category,
   pattern, maxEntries)` (editor: Verse compile results, blueprint errors, Content Pre-Checks)

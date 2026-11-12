@@ -1,18 +1,18 @@
 ---
-description: "Verse field events in UMG (39.40+, tool-created in 42.30) — add_verse_field type event (≤1 bool/int/float param), Custom Button OnButtonClicked → event field (OnClicked no longer compiles), the widget-editor-open requirement, reflected types event(tuple()) / event(tuple(int)), Subscribe from Verse in 43.00 (returns cancelable) or Await (42.x: Await only), race-to-stop watcher"
+description: "Verse field events in UMG (tool-created on older builds) — add_verse_field type event (≤1 bool/int/float param), Custom Button OnButtonClicked → event field (OnClicked no longer compiles), the widget-editor-open requirement, reflected types event(tuple()) / event(tuple(int)), Subscribe from Verse now (returns cancelable) or Await (older builds: Await only), race-to-stop watcher"
 metadata:
   order: 62
-  label: "UMG Verse field events (39.40+, 42.30)"
+  label: "UMG Verse field events"
   default_enabled: false
   load_condition: "Handling UMG button clicks / hover via Verse field events, or awaiting widget events from Verse"
 ---
 
-## UMG Verse field events (39.40+)
+## UMG Verse field events
 
 UMG Verse fields can be **events**. Bind a Custom Button's click to a Verse event field on the
-widget, then **subscribe to** (43.00) or **await** that event from your `creative_device`. This replaces the obsolete myth that
+widget, then **subscribe to** or **await** that event from your `creative_device`. This replaces the obsolete myth that
 "Verse cannot get a named button from a UMG widget." Everything below was verified live in UEFN
-42.30 (Oct 2 2026): tool-made widget → event field → button binding → Verse device awaits the click
+(Oct 2 2026): tool-made widget → event field → button binding → Verse device awaits the click
 (0 compile errors), and the binding survives a save + reload from disk.
 
 Requires basics from `umg_verse_fields` / `umg_widgets`. On a Verse UI Kit screen, follow `verse_ui_kit` — the kit's `Helper.SubscribeToEvent` does the awaiting for you and `Helper.ClearAllForPlayer` stops it.
@@ -34,7 +34,7 @@ Requires basics from `umg_verse_fields` / `umg_widgets`. On a Verse UI Kit scree
    tool remaps them. Never report a bind as done when `compiled` is false.
 3. **Build Verse**, then confirm the members: `list_verse_types(digest="assets", name_filter="UW_…")`.
 
-**Why the tools open the widget's editor (`verse_ready`)** — in 42.30 a widget's Verse fields only
+**Why the tools open the widget's editor (`verse_ready`)** — a widget's Verse fields only
 become real once its asset editor has been opened in the editor session. Before that the event field
 is a transient object, so (a) the Assets digest lists the widget with **no members** (Verse: E3506
 "Unknown member `OnBuyClicked`") and (b) a click binding is saved with **no target** (after a reload:
@@ -54,14 +54,14 @@ must be made again (`bind_widget_event`).
 | event with one `int` | `OnSlotPicked<public>:event(tuple(int)) = external {}` | a one-element tuple: `Picked(0)` (handler `(Picked:tuple(int))`) |
 | value field | `var Price<public>:int = external {}` | — (`set Widget.Price = 10`) |
 
-A UMG event field is a Verse `event`. **43.00:** `event(t)` is also a `listenable`, so
+A UMG event field is a Verse `event`. `event(t)` is also a `listenable`, so
 `Sub := Widget.OnBuyClicked.Subscribe(OnBuy)` returns a `cancelable` — call `Sub.Cancel()` when the
-widget closes (compiled on 43.00 with an `event(int)`). **42.x:** no `Subscribe` (Script error 3506
+widget closes (compiled now with an `event(int)`). **Older builds:** no `Subscribe` (Script error 3506
 "Unknown member `Subscribe` in `event(tuple())`"); Await it in a loop. The Await loop below works on
 both (`events_subscriptions`).
 
 ```verse
-# 43.00: one subscription per widget instance; cancel on close.
+# One subscription per widget instance; cancel on close.
 var BuySub:?cancelable = false
 Open(Widget:UW_Shop_Screen):void =
     set BuySub = option{Widget.OnBuyClicked.Subscribe(OnBuy)}
@@ -130,12 +130,12 @@ shop_watcher := class:
 ```
 
 Don't add Epic's interim tutorial helper (an `event_subscription` class, `AwaitForEvent` and an
-extension `(Event:event(t) where t:type).Subscribe(…)`): it compiled on 42.40, but on 43.00 its
+extension `(Event:event(t) where t:type).Subscribe(…)`): it compiled on older builds, but now its
 `Subscribe` is an ambiguous overload of the built-in one. A project that has it: delete the
 extension (`events_subscriptions` — migration).
 
 ### Related
 
 - Data fields: `umg_verse_fields`
-- Events in general (listenable vs event, 43.00): `events_subscriptions`
+- Events in general (listenable vs event): `events_subscriptions`
 - Template: `verse_template_apply("umg_widget")`

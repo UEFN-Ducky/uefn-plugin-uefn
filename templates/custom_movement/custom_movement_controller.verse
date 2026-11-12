@@ -3,8 +3,8 @@
 #    -> child CameraPivot (transform_component) -> child Camera (perspective_camera_component).
 # 2. Add player_movement_component to the ROOT entity of that prefab.
 # 3. Place this device, wire RigPrefabRoot to the placed rig.
-# EXPERIMENTAL: `Move` input + Scene Graph camera classes + fort_* camera modifiers
-# all block publishing (Script warning 2304).
+# Names the digest marks @experimental (Script warning 2304) block publishing:
+# check the camera classes and fort_* camera modifiers before you ship.
 using { /Fortnite.com/Devices }
 using { /Fortnite.com/Characters }
 using { /Fortnite.com/Playspaces }
@@ -26,7 +26,7 @@ custom_movement_controller := class(creative_device):
     @editable
     HideStockCharacter : logic = true
 
-    # Orbit camera tuning -- all live on fort_orbit_camera_modifier (centimeters).
+    # Orbit camera tuning (centimeters): the boom arm's offset from the rig.
     @editable
     CameraDistanceCentimeters : float = 450.0
 
@@ -71,18 +71,22 @@ custom_movement_controller := class(creative_device):
             JumpSub := PlayerInput.GetInputEvents(Jump).TriggerActivationEvent.Subscribe(OnJump)
             if (set Subs[P] = array{MoveSub, MoveEnd, JumpSub}) {}
 
-    # Scene Graph orbit camera: a fort_orbit_camera_modifier on the rig camera's
-    # modifier stack. TargetEntity is not a `var` -> set at construction.
+    # Scene Graph orbit camera from modifier pieces on the rig camera's stack. They run
+    # in the order added: follow the rig, swing on the boom arm, stay out of walls.
     RigOrbitCamera(Cam : camera_component) : void =
-        Orbit := fort_orbit_camera_modifier:
-            TargetEntity := RigPrefabRoot
-        set Orbit.CameraDistanceCentimeters = CameraDistanceCentimeters
-        set Orbit.CameraHeightCentimeters = CameraHeightCentimeters
-        set Orbit.EnableCollision = CameraCollision
+        Follow := fort_attach_to_entity_camera_modifier{}
+        set Follow.TargetEntity = RigPrefabRoot
+        set Follow.ShouldFollowOrientation = false
+        Boom := fort_boom_arm_camera_modifier{}
+        set Boom.BoomOffset = vector3{Forward := -CameraDistanceCentimeters, Up := CameraHeightCentimeters}
         # AddModifier has NO <decides> -> parentheses (brackets give error 3511).
-        # 43.00 removed VisualModifierPosition / GlobalModifierPosition: Position is your own order (rational).
-        OrbitHandle := Cam.CameraModifiers.AddModifier(Orbit, 0)
-        # Keep OrbitHandle if you need to pop the modifier later: OrbitHandle.Cancel()
+        FollowHandle := Cam.CameraModifiers.AddModifier(Follow)
+        BoomHandle := Cam.CameraModifiers.AddModifier(Boom)
+        if (CameraCollision?):
+            Push := fort_collision_push_camera_modifier{}
+            set Push.IgnoreEntitiesAndDescendants = array{RigPrefabRoot}
+            PushHandle := Cam.CameraModifiers.AddModifier(Push)
+        # Keep a handle if you need to pop its piece later: BoomHandle.Cancel()
 
     Detach(P : player) : void =
         if (List := Subs[P]):

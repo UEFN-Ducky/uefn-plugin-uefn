@@ -87,7 +87,7 @@ stomp mid-clip.
 
 `OnBegin` must succeed the full `if:` chain (`GetAgent`, `GetFortCharacter`,
 `GetEntity[].GetComponent[npc_actions_component]`, `GetPlayAnimationController`) or the NPC
-never registers. (43.00 deprecated `GetNavigatable` / `GetFocusInterface`; the templates use
+never registers. (Epic deprecated `GetNavigatable` / `GetFocusInterface`; the templates use
 `Actions.NavigateTo` / `Actions.Focus(…, ?LockFocus := true)` / `set Actions.MovementSpeedMultiplier`.) `OnEnd` unregisters.
 
 Anti-bugs worth keeping when you write hunt/flee:

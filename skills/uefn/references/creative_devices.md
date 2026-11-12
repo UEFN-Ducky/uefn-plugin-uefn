@@ -1,5 +1,5 @@
 ---
-description: "Native Creative device workflows — 43.00 classic device options (ListClassicDeviceOptions / SetClassicDeviceOption), place-in-level golden path, Fortnite Audio Player for SFX/horns, 43.00 Teleporter props + TeleportPropEvent, HUD Controller Interact/Pickup override and per-button Apply Canvas Transform, Cinematic Sequence GetSequenceLength, MetaSound via MCP"
+description: "Native Creative device workflows — classic device options (ListClassicDeviceOptions / SetClassicDeviceOption), place-in-level golden path, Fortnite Audio Player for SFX/horns, Teleporter props + TeleportPropEvent, HUD Controller Interact/Pickup override and per-button Apply Canvas Transform, Cinematic Sequence GetSequenceLength, MetaSound via MCP"
 metadata:
   order: 4
   label: "Creative devices"
@@ -23,12 +23,12 @@ unreal__call_tool({
 })
 ```
 
-**Settings (43.00):** classic (Blueprint) devices — granters, buttons, teleporters, Audio
+**Settings:** classic (Blueprint) devices — granters, buttons, teleporters, Audio
 Player, HUD Controller … — use `ListClassicDeviceOptions(devicePath)` then
 `SetClassicDeviceOption(devicePath, optionName, value)` (validated like the Details panel:
 inactive options and unlisted values are rejected; `GetClassicDeviceOptionValues` when
 `allowedValues` is left out). `GetDeviceProperties` / `SetDeviceProperty(device,
-propertyName, value)` are only for **Verse `creative_device`** settings. The 42.40 device
+propertyName, value)` are only for **Verse `creative_device`** settings. The device
 toolset had no classic options (old names: `epic_toolsets` rename table).
 
 The old Ducky Creative-device find/inspect/set tools were pruned and no longer exist.
@@ -130,7 +130,7 @@ Offline fallback only (`epic_mcp_online` false or Epic errored twice):
 ### Audio Player (horns / wave SFX / alarms) — hard rule
 
 Making the sound asset first (import a wav/mp3, music, ambience loop, one-shot, MetaSound
-presets via MCP, tested 43.00 results): `skill_read_subskill("uefn", "audio_metasound")`.
+presets via MCP, tested results): `skill_read_subskill("uefn", "audio_metasound")`.
 
 Gameplay SFX = Fortnite Creative **Audio Player** only (`audio_player_device` in
 Verse). **Never** Speakers, prop “horn” meshes, or Scene Graph `sound_component`
@@ -152,7 +152,7 @@ Offline fallback only: `search_assets(search="Audio", directory="/Game/Creative"
 
 Never `spawn_actor(actor_class="audio_player_device")`.
 
-### First Person Camera + Unarmed (v42.20 FPS melee)
+### First Person Camera + Unarmed (FPS melee)
 
 Verse type `gameplay_camera_first_person_device`. Place it like any other
 Creative device: `ListDeviceAssets` → pick the **First Person Camera** asset →
@@ -162,12 +162,12 @@ Creative device: `ListDeviceAssets` → pick the **First Person Camera** asset �
 Punch / unarmed melee is **not** a device and **not** a custom montage. Grant
 `Unarmed_Creative_V1_Common{}` via `AddItemDistribute` (`skill_read_subskill("scenegraph", "itemization")`).
 
-### Player Movement Device caps (v42.20)
+### Player Movement Device caps
 
 ToyOptions via `GetDeviceProperties` / `SetDeviceProperty` — **never scale**
 the device. New maxima (values above the old caps are at-own-risk):
 
-| ToyOption | Old cap | 42.20 max |
+| ToyOption | Old cap | older-build max |
 |-----------|---------|-----------|
 | Sprint Maximum Speed | 2,000 | **11,000** |
 | Tactical Sprint Speed Multiplier | 5 | **20** |
@@ -181,7 +181,7 @@ assume it is the Player Movement Device until the asset name matches.
 `wire_verse_device_ref(actor_path="MyDevice", field="SomeTriggerField", target_path="MyTrigger_1")` —
 **one field per turn**.
 
-## 43.00 device changes
+## Device changes
 
 - **Teleporter + props (Verse):** `teleporter_device.Teleport` / `Activate` take a
   `creative_prop`; `TeleportPropEvent` fires when a prop teleports. The device implements
@@ -203,7 +203,7 @@ assume it is the Player Movement Device until the asset name matches.
 - Fixed: `SprintedEvent` fired on movement start/stop instead of sprint input changes;
   Pickaxes with built-in emotes could damage while Pickaxes were disabled.
 
-## 42.40 device fixes
+## Device fixes
 
 - **Guard Spawner** keeps the weapons you assign in the editor (it used to remove them).
 - **Shock Rocks** no longer destroy structures when Environmental Damage is off.
@@ -211,9 +211,9 @@ assume it is the Player Movement Device until the asset name matches.
 - **HUD Controller** touch layouts (Touch Control Layout Override, Apply Canvas
   Transform): virtualpointer `touch_layout_override`.
 
-## Racing without the Rocket Racing template (42.30)
+## Racing without the Rocket Racing template
 
-Rocket Racing **template** islands were unpublished in 42.30 and cannot be
+Rocket Racing **template** islands were unpublished and cannot be
 updated. Build racing with the migrated tools on a normal island: **Track Spline
 Tool**, **Boost Pads**, **Volume Hazards**, vehicle **Spawner** devices (find
 them with `ListDeviceAssets(nameFilter=…)`). Converting an old island:

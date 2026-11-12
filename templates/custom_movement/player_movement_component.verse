@@ -17,7 +17,7 @@ using { /Verse.org/Simulation }
 using { /UnrealEngine.com/Temporary/Diagnostics }
 
 # --- per-entity movement integrator -----------------------------------------
-# NOTE: TickEvents.PrePhysics.Subscribe is epic_internal on FN 42.10 (execution_listenable
+# NOTE: TickEvents.PrePhysics.Subscribe is epic_internal on FN (execution_listenable
 # is class<epic_internal>) — creator code cannot subscribe. The per-frame hook available to
 # us is OnSimulate + loop with Sleep(0.0) (one frame) and our own delta clock.
 player_movement_component<public> := class<final_super>(component):
@@ -52,7 +52,7 @@ player_movement_component<public> := class<final_super>(component):
         set JumpQueued = true
 
     OnSimulate<override>()<suspends> : void =
-        # Not `Last`: 43.00 Verse has operator'.Last' and the local becomes ambiguous (3588).
+        # Not `Last`: Verse has operator'.Last' and the local becomes ambiguous (3588).
         var PrevTime : float = GetSimulationElapsedTime()
         loop:
             Sleep(0.0)                                  # one frame

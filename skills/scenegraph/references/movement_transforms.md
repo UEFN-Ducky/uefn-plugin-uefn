@@ -20,7 +20,7 @@ Why: KFM plays natively in the Pre-Physics phase, outside your Verse, and the
 client interpolates it. Epic's keyframed movement page says it avoids the
 per-update cost of `TeleportTo()` / `MoveTo()`. One `SetKeyframes` + `Play()`
 replaces a loop that would run every frame, so hundreds of movers stay cheap,
-and from 43.00 the server also skips entities that aren't moving.
+and the server also skips entities that aren't moving.
 
 `SetEntityTransform` / `SetLocalTransform` here are **Scene Graph entities**, not
 Fortnite Creative devices. Never actor-scale buttons, triggers, or volumes —
@@ -105,27 +105,27 @@ Held.ResetOrigin()
 entity-backed implementation (`Entity` field).
 
 **Do not change the origin and move in the same frame** — that combination
-stopped working in 40.00 (Epic bug report still open). Set the origin, let a
+stopped working (Epic bug report still open). Set the origin, let a
 frame pass (`Sleep(0.0)` in a `<suspends>` context, or act on the next tick),
 then set the transform. The same "too fast" class of bug leaves the mesh behind
 while collision moves, so avoid rapid attach/detach/move bursts.
 
-**Move, then query, same frame (43.00).** An entity moved with `SetGlobalTransform` /
+**Move, then query, same frame.** An entity moved with `SetGlobalTransform` /
 `SetLocalTransform` is visible to `FindOverlapHits` / `FindSweepHits` **in the same
 frame** — query right after the move. Remove any `Sleep(0.0)` you put between a move and
-an overlap/sweep query before 43.00; it now only costs a frame of latency.
+an overlap/sweep query in older builds; it now only costs a frame of latency.
 
 ```verse
 Entity.SetGlobalTransform(NewTransform)
-for (Hit : Entity.FindOverlapHits()):    # sees the new position (43.00+)
+for (Hit : Entity.FindOverlapHits()):    # sees the new position
     HandleHit(Hit)
 ```
 
-### Scene Graph handles (43.00)
+### Scene Graph handles
 
 A **handle** refers to an entity or component *without granting access to it*; you
 resolve it with a failable getter (fails if unset or not accessible). All
-`@available 4300`, `/Verse.org/SceneGraph`, not experimental:
+`@available`, `/Verse.org/SceneGraph`, not experimental:
 
 | Type | Resolve | Notes |
 |---|---|---|
@@ -140,7 +140,7 @@ a compound hierarchy. `mesh_component` also gained `var CanAffectNavigation : lo
 won't route around meshes with it off).
 
 ```verse
-# Which meshes did this sweep hit, and whose are they? (compiled 0 errors in 43.00)
+# Which meshes did this sweep hit, and whose are they? (compiled 0 errors)
 HitMeshes(Mover:entity, Delta:vector3):[]mesh_component =
     for:
         Hit : Mover.FindSweepHits(Delta)
@@ -196,7 +196,7 @@ Playback modes: `oneshot_` (play once, stay at the end), `loop_` (repeat from th
 start), `pingpong_keyframed_movement_playback_mode` (forward, then back, forever).
 Translation and Scale on a delta are **additive**; Rotation is relative.
 
-Easing (`/Verse.org/SceneGraph/KeyframedMovement`, 43.00 digest — all five are
+Easing (`/Verse.org/SceneGraph/KeyframedMovement`, digest — all five are
 `<concrete>`, so `{}` works, and none is Experimental, so all publish):
 
 | Class | Motion |
@@ -232,7 +232,7 @@ keyframes — different system, different API.
 - **Many copies, different timing:** give each instance its own `StartDelay`
   or keys instead of one loop that offsets them.
 
-#### Recipes (type-checked on the 43.00 digests)
+#### Recipes (type-checked on the digests)
 
 **Designer-authored path** — the keys are an `@editable` array, so they are
 typed into the Details panel of the prefab (Transform, Duration, Easing per key)
@@ -385,7 +385,7 @@ this list, then confirm in PIE / Launch Session before declaring it broken:
    after a successful Verse build — check the EntityToolset component listing (`unreal__describe_toolset` for the exact tool name).
 3. Is the work in the right hook? Setup in `OnBeginSimulation`, async and
    per-frame in `OnSimulate` (runs **once** — wrap it in `loop` with
-   `Sleep(0.0)`); `TickEvents.Subscribe` is Epic-internal on 42.10.
+   `Sleep(0.0)`); `TickEvents.Subscribe` is Epic-internal.
 4. KFM: did you call `Play()` after `SetKeyframes`? Are the deltas non-zero
    (they are additive, `0` means no change)? Is the `keyframed_movement_component`
    on the **same** entity your component reads it from? Keys set in the Details
@@ -406,5 +406,5 @@ this list, then confirm in PIE / Launch Session before declaring it broken:
   `SetLocalTransform` for children, and parent a spawned entity **directly to
   its intended parent** rather than adding it to `SimulationEntity` first.
 - **`-0.0` transform values.** Prefabs or placed objects carrying `-0` instead
-  of `0` broke island launch in 39.20. Write `0.0`.
+  of `0` broke island launch. Write `0.0`.
 - **Same-frame origin change plus move** — see the attach section above.

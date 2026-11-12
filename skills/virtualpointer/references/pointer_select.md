@@ -6,7 +6,7 @@ metadata:
 
 # PointerSelect — screen-space coordinates
 
-`PointerSelect` is an `input_action(vector3)` in `/Verse.org/Input/UI` (FN ≥ 4100, **publishable**). The `vector3` carries the screen-space pointer position.
+`PointerSelect` is an `input_action(vector3)` in `/Verse.org/Input/UI` ( **publishable**). The `vector3` carries the screen-space pointer position.
 
 ## Screen coordinate system
 
@@ -59,5 +59,5 @@ Keep every `cancelable` per player and `.Cancel()` them in `OnEnd` / when leavin
 
 - World hit-test: `screenspace_trace.md` (`DeprojectViewportToWorld` + `FindSweepHits`).
 - Swipes / taps: `swipe.md`.
-- Pinch: `pinch_zoom.md` (`PointerZoom`, publishable from 43.00).
+- Pinch: `pinch_zoom.md` (`PointerZoom`, publishable).
 - Template: `verse_template_apply("vp_screenspace_trace")`.

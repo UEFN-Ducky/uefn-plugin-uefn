@@ -39,7 +39,7 @@ generator_purchaseable <public> := class<concrete>(purchaseable):
         if (AppliedOffline = false):
             ApplyOffline()
             set AppliedOffline = true
-        var PrevTime : float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last' (43.00)
+        var PrevTime : float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last'
         Gen := RunId
         loop:
             Sleep(0.25)

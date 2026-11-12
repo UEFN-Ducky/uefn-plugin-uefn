@@ -1,5 +1,5 @@
 ---
-description: "Procedural generation in UEFN: PCG in UEFN 43.00 (MCP PCGToolset create/edit graphs, PCG Library examples, reusable PCG tools, forests/cities/POIs, seeds) vs algorithmic placement, seeded patterns, collision-checked spawning, cleanup and perf budgets"
+description: "Procedural generation in UEFN: PCG in UEFN (MCP PCGToolset create/edit graphs, PCG Library examples, reusable PCG tools, forests/cities/POIs, seeds) vs algorithmic placement, seeded patterns, collision-checked spawning, cleanup and perf budgets"
 metadata:
   order: 2
   label: "Procedural generation"
@@ -9,9 +9,9 @@ metadata:
 
 ## Procedural generation — two routes
 
-### Route A: PCG graphs (UEFN 43.00+)
+### Route A: PCG graphs
 
-PCG (Procedural Content Generation Framework) is in UEFN from 43.00: graph-based,
+PCG (Procedural Content Generation Framework) is in UEFN: graph-based,
 deterministic placement (seed + noise, not AI) for forests, cities, POIs, scatter.
 
 - **Drawing by hand in PCG Mode (Shift+7: splines, paint, volumes)?** That's the `pcg` skill:
@@ -90,7 +90,7 @@ Cleanup: `EditorToolset.LevelToolset.RemoveFromScene{actor: volume}` removes its
 `EditorToolset.AssetToolset.Delete{path}` removes the graph.
 Older Ducky tools `pcg_get_graph_info` / `pcg_generate(force=true)` still regenerate an existing PCGComponent.
 
-**Tested recipe (43.00): 20 m square of cubes with density + seed + spacing**
+**Tested recipe: 20 m square of cubes with density + seed + spacing**
 
 | node | subgraph | jsonParams |
 |---|---|---|

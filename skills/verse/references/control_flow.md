@@ -45,7 +45,7 @@ if (A := Agent?):                     # unwrap an option; body runs only if it h
   `for`"). For a value use the expression form
   `Rate := if (Tier := Tiers[Level]) then Tier.Rate else 0.0`. An empty body is
   `if (set Map[Key] = Value) {}` on the same line — a `{}` alone on the next line
-  is a parse error too. (Verified with verse-lsp, 42.40.)
+  is a parse error too. (Verified with verse-lsp.)
 - Reserved words cannot name your types or functions: a class called `generator`
   fails ("Cannot use reserved identifier").
 - Chain a second test with `else if (…):`:
@@ -155,7 +155,7 @@ case (Phase):
 
 - A `case` over an enum that lists **every** value needs no `_` (one there anyway
   is warning 2302, unreachable).
-- A `case` over `int`, `string` or an open enum (42.40 ability enums) must end with
+- A `case` over `int`, `string` or an open enum (ability enums) must end with
   `_ => …`; without it the case can fail (3512).
 - An arm can hold several lines: put them indented under `Value =>`.
 

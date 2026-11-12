@@ -53,7 +53,7 @@ match_timer_controller := class(creative_device):
         set Running = false
 
     TimerLoop<private>()<suspends> : void =
-        var PrevTime : float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last' (43.00)
+        var PrevTime : float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last'
         loop:
             if (not Running?):
                 break

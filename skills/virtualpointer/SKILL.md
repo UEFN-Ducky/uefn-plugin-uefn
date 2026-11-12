@@ -1,10 +1,10 @@
 ---
 name: virtualpointer
-description: "UEFN Virtual Pointer — cross-platform pointer input via Verse Enhanced Input: TouchMapping, PointerSelect and PointerZoom (both publishable from 43.00; touch pinch values 50x larger), swipes, taps, pinch zoom/scale, screen-space deproject and world traces. Use when the user mentions virtual pointer, touch mapping, PointerSelect, PointerZoom, pinch, swipe, tap-to-select, or cross-platform on-screen pointer."
+description: "UEFN Virtual Pointer — cross-platform pointer input via Verse Enhanced Input: TouchMapping, PointerSelect and PointerZoom (both publishable; touch pinch values 50x larger), swipes, taps, pinch zoom/scale, screen-space deproject and world traces. Use when the user mentions virtual pointer, touch mapping, PointerSelect, PointerZoom, pinch, swipe, tap-to-select, or cross-platform on-screen pointer."
 license: MIT
 metadata:
   label: UEFN Virtual Pointer
-  version: 8
+  version: 9
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -17,17 +17,20 @@ Add cross-platform pointer input to a UEFN island using Verse Enhanced Input, wi
 
 ## Publish status (say this first)
 
-| Feature | Status | Publishable |
-|---------|--------|-------------|
-| `TouchMapping` + `PointerSelect` (tap / click / select, swipes, traces) | Released (FN ≥ 4100) | **Yes** |
-| `PointerZoom` (pinch / scroll / right-stick zoom) | Released in **43.00** (FN ≥ 4120; Experimental on 42.x) | **Yes** (43.00+) |
+The digest decides: `get_verse_api("UI")` (module `/Verse.org/Input/UI`) lists every pointer
+action, and one with `@experimental` above it emits warning 2304 and blocks publishing.
 
-> **43.00 breaking change:** touch pinch values from `PointerZoom` are now **50× larger** so they
+| Feature | What it is | Publishable when this page was written |
+|---------|------------|-------------|
+| `TouchMapping` + `PointerSelect` | tap / click / select, swipes, traces | **Yes** |
+| `PointerZoom` | pinch / scroll / right-stick zoom | **Yes** |
+| `PointerRotate` | two-finger rotate gesture on a touch device | **No** (`@experimental`) |
+
+> **Touch pinch values:** touch pinch values from `PointerZoom` are **50× larger** than they once were, so they
 > match mouse wheel and gamepad. Retune any threshold, sensitivity or clamp written for the old touch
 > range. For example `MinPinchAmount 0.001` becomes `0.05`, and `ScaleSensitivity 2.0` becomes about
 > `0.04` for the same feel on touch. Check the new numbers in Mobile Preview or UE Remote.
 
-On a 42.x island `PointerZoom` is still Experimental and blocks publishing.
 
 ## What it is
 
@@ -35,7 +38,7 @@ The Virtual Pointer lets players point at and interact with on-screen elements o
 
 | Device | Pointer | Pinch / zoom (`PointerZoom`) |
 |--------|---------|------------------------------|
-| Touch | Finger contact | Two-finger pinch; value = pinch speed (50× the 42.x range from 43.00), `0` = no change; centered between fingers |
+| Touch | Finger contact | Two-finger pinch; value = pinch speed (50× the older-build range now), `0` = no change; centered between fingers |
 | Mouse + keyboard | Existing mouse pointer | Scroll wheel `-1`…`1` by direction (freewheel behaves like a stick); centered on pointer |
 | Controller | On-screen pointer driven by the **left stick** | Right stick Up = zoom in, Down = zoom out, deflection `-1`…`1`; centered on pointer |
 
@@ -45,15 +48,16 @@ Hard facts:
 - You must `AddInputMapping(TouchMapping)` on each player; no mapping → no events.
 - `Abs` is a compiler intrinsic that the digest does not list; it compiles. The swipe template uses a local `AbsF` helper so it stays digest-searchable, either works.
 - The world-trace needs `using { /Verse.org/SceneGraph }` for `collision_point` / `FindSweepHits` — Epic's trace sample omits it and fails to compile.
-- Templates below were compiled in UEFN (swipe + trace: 0 errors; pinch: 42.x showed the "PointerZoom is experimental" warning 2304, which 43.00 drops; the 43.00 digest has no `@experimental` on `PointerZoom`).
+- Templates below were compiled in UEFN (swipe + trace: 0 errors; pinch: older-build showed the "PointerZoom is experimental" warning 2304, which drops; the digest has no `@experimental` on `PointerZoom`).
 
 ## Digest facts (verified — never invent names)
 
 | Symbol | Module | Signature / notes |
 |--------|--------|-------------------|
-| `TouchMapping` | `/Verse.org/Input/UI` | `input_mapping`, FN ≥ 4100 |
-| `PointerSelect` | `/Verse.org/Input/UI` | `input_action(vector3)`, FN ≥ 4100 |
-| `PointerZoom` | `/Verse.org/Input/UI` | `input_action(vector3)`, FN ≥ 4120; `@experimental` until 42.x, released 43.00 |
+| `TouchMapping` | `/Verse.org/Input/UI` | `input_mapping` |
+| `PointerSelect` | `/Verse.org/Input/UI` | `input_action(vector3)` |
+| `PointerZoom` | `/Verse.org/Input/UI` | `input_action(vector3)` |
+| `PointerRotate` | `/Verse.org/Input/UI` | `input_action(vector3)`: two-finger rotate on touch. Subscribe like `PointerZoom` (`GetInputEvents(PointerRotate)`), log the vector once to learn its range, and tune sensitivity on a real phone |
 | `GetPlayerInput[Player]` | `/Verse.org/Input` | `player` → `player_input` (failable) |
 | `AddInputMapping` / `RemoveInputMapping` | `player_input` | Enter / exit Virtual Pointer mode |
 | `GetInputEvents(Action)` | `player_input` | → `input_events(t)` |
@@ -82,7 +86,7 @@ Handler signatures must match exactly (e.g. `OnPointerUp(Arg : tuple(player, flo
 ## Golden path
 
 ```
-1. State publish status: PointerSelect/TouchMapping/PointerZoom publishable on 43.00 (PointerZoom: retune touch values, 50x)
+1. State publish status: PointerSelect/TouchMapping/PointerZoom publishable (PointerZoom: retune touch values, 50x)
 2. Prefer a template: verse_template_apply("vp_screenspace_trace" | "vp_swipe_detector" | "vp_pinch_scale" | "virtualpointer")
    → writes Verse/VirtualPointer/<device>.verse (never at Verse root)
 3. Per player (join + existing): GetPlayerInput[Player] → AddInputMapping(TouchMapping)
@@ -122,16 +126,16 @@ RemoveTouchInput(Player : player):void =
 |----|------|------|
 | `vp_screenspace_trace` | `screenspace_trace_device.verse` | Tap/click → deproject → sweep, prints hit. Publishable. |
 | `vp_swipe_detector` | `swipe_detector_device.verse` | Per-player swipe/tap classifier (Up/Down/Left/Right). Publishable. |
-| `vp_pinch_scale` | `pinch_scale_device.verse` | PointerZoom pinch → scale a Scene Graph entity. Publishable on 43.00; retune its `MinPinchAmount` / `ScaleSensitivity` for the 50× touch range. |
+| `vp_pinch_scale` | `pinch_scale_device.verse` | PointerZoom pinch → scale a Scene Graph entity. Publishable now; retune its `MinPinchAmount` / `ScaleSensitivity` for the 50× touch range. |
 | `virtualpointer` | all three → `Verse/VirtualPointer/` | Whole pack. |
 
 All templates subscribe existing players + `PlayerAddedEvent`, keep cancelables per player, and clean up in `OnEnd`.
 
-## Testing on mobile (v42.10)
+## Testing on mobile
 
 - **Mobile Preview** (UEFN toolbar) now lets you pick a specific iOS/Android device; the preview adds rounded corners, camera cutouts and the correct safe zones, so pointer UI can be checked against real screen bounds.
 - **UE Remote** (iOS/Android app) replays touch input from a real phone into the editor session — the only way to test native pinch/swipe recognition before publishing.
-- v42.10 also added (digest-verified, `/Fortnite.com/Input/Character`, all Experimental): `Move : input_action(vector3)` on `TraversalMapping`, and `InteractMapping` with `Interact : input_action(logic)`. They are separate from `TouchMapping` and subscribe the same way (`GetInputEvents(Move).TriggerActivationEvent` payload `tuple(player, vector3)`). Details: verse skill `sys_input_devices`.
+- Character input lives in `/Fortnite.com/Input/Character` (check each in the digest for `@experimental`): `Move : input_action(vector3)` on `TraversalMapping`, and `InteractMapping` with `Interact : input_action(logic)`. They are separate from `TouchMapping` and subscribe the same way (`GetInputEvents(Move).TriggerActivationEvent` payload `tuple(player, vector3)`). Details: verse skill `sys_input_devices`.
 
 ## Reference files
 
@@ -144,17 +148,17 @@ All templates subscribe existing players + `PlayerAddedEvent`, keep cancelables 
 - `references/swipe.md` — Full swipe/tap detector (Begin → Trigger → End), direction classification
   Load when: Detecting swipe / flick / drag gestures
 - `references/pinch_zoom.md` — PointerZoom device value table, zoom subscribe, pinch-to-scale device
-  Load when: Zoom camera or resize props/entities with pinch (publishable from 43.00; touch values 50x)
+  Load when: Zoom camera or resize props/entities with pinch (publishable; touch values 50x)
 - `references/example_trace_device.md` — Full `screenspace_trace_device` sample
   Load when: Scaffolding a complete creative_device for VP picking
-- `references/touch_layout_override.md` — Developer touchscreen layouts: UMG Canvas + Touch Control Layout Override (`DeveloperLayoutButtonProxy`) on a HUD Controller, Apply Canvas Transform (42.40), hiding default buttons from Verse
+- `references/touch_layout_override.md` — Developer touchscreen layouts: UMG Canvas + Touch Control Layout Override (`DeveloperLayoutButtonProxy`) on a HUD Controller, Apply Canvas Transform, hiding default buttons from Verse
   Load when: Moving, re-icons, recoloring or hiding Fortnite's default touch buttons (Jump, Shoot, Sprint …), HUD Controller touch layout, or mobile buttons the island doesn't use
 
 ## Verify
 
 `workspace_compile_verse` then `get_verse_editables` on the pointer device.
 
-## 43.00 mobile changes
+## Mobile changes
 
 - **PointerZoom out of Experimental** (publishable); touch pinch values 50× larger (above).
 - **Virtual Pointer on PS5** with a controller moves and works again.
@@ -162,11 +166,11 @@ All templates subscribe existing players + `PlayerAddedEvent`, keep cancelables 
 - **SafeZone** widget in UMG keeps custom UI inside the safe area on console and mobile (verse `umg_layout`).
 - Mobile profiling: sessions on a connected iOS/Android device report into the profilers (uefn `profiling`).
 
-## 42.40 mobile fixes
+## Mobile fixes
 
 HUD Controller touch layouts: Jetpack Jump/Sprint → Up/Boost, Shoot with an empty override widget, Carry/Drop overridable, overridden Sprint/Shoot/Reload/Crouch let touches pass through; new **Apply Canvas Transform** for icon-only overrides — `touch_layout_override`.
 
-## 42.30 mobile fixes
+## Mobile fixes
 
 - Interact and pick-up button icons can be overridden again.
 - Shoot/fire button visibility no longer depends on holding Aim.

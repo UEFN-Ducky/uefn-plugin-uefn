@@ -1,5 +1,5 @@
 ---
-description: "Fully custom player controller on a Scene Graph entity — 42.10 Move/Jump input actions, a Verse movement component with editable speed/accel/friction/gravity/jump, orbit camera via fort_orbit_camera_modifier, stock fort_character parked in stasis; compiled templates and the exact gotchas"
+description: "Fully custom player controller on a Scene Graph entity — Move/Jump input actions, a Verse movement component with editable speed/accel/friction/gravity/jump, orbit camera built from the camera modifier pieces (attach, boom arm, collision push), stock fort_character parked in stasis; compiled templates and the exact gotchas"
 metadata:
   order: 12
   label: "Custom entity player controller"
@@ -14,20 +14,20 @@ Graph entity** you integrate yourself, an **orbit camera modifier** follows it,
 and the stock `fort_character` is parked so it cannot fight your motion. Every
 number (speed, acceleration, friction, gravity, jump impulse) is an `@editable`.
 
-> **Experimental — cannot be published.** The `Move` / `Interact` input actions
-> (`/Fortnite.com/Input/Character`), the Scene Graph camera components and the
-> `fort_*` camera modifiers all emit `Script warning 2304`. Tell the user this
-> first. Everything below compiles in UEFN 43.00 with **0 errors**.
+> **Check the digest for what is experimental.** A name with an `@experimental` line
+> above it (`get_verse_api("<name>")`) emits `Script warning 2304` and an island that uses
+> it cannot be published. The Scene Graph camera components and the `fort_*` camera
+> modifiers were marked that way when this page was written; the input actions were not.
+> Tell the user what the digest says before you build.
 
-> [!WARNING] 43.00 camera changes
-> Angles are **radians** (`FieldOfView`, not `FieldOfViewDegrees`), and
-> `GlobalModifierPosition` / `VisualModifierPosition` are gone — pass your own `rational`
-> (`0`) to `AddModifier`. A template applied before 43.00 fails with 3506 on those names;
-> fix them as below. Details and the modifier layers: `cameras`.
+> [!WARNING] Cameras
+> Angles are **radians** (`FieldOfView`), and modifiers run in the order you add them:
+> `AddModifier(Modifier)` takes the modifier only. Old names (`FieldOfViewDegrees`,
+> `fort_orbit_camera_modifier`, a position argument) fail with 3506; fix them as below.
+> Details and the modifier layers: `cameras`.
 >
-> **Play servers (43.00 only, fixed 43.10):** the camera never activates because
-> `GetComponent[camera_director_component]` fails. The `using { /Fortnite.com/SceneGraphCameras }`
-> line below is also the workaround (private versions) — never remove it.
+> Never remove the `using { /Fortnite.com/SceneGraphCameras }` line below: without it the
+> camera director may not be found on a play server.
 > If interacting with devices gets hard while the rig camera is active, add a
 > **Third Person Controls** device next to the rig.
 
@@ -65,10 +65,10 @@ using { /Verse.org/Input }                # GetPlayerInput
 using { /Verse.org/SceneGraph }
 using { /Verse.org/Simulation }           # needed for @editable in a component
 using { /Verse.org/SpatialMath }
-using { /Fortnite.com/SceneGraphCameras } # fort_orbit_camera_modifier
+using { /Fortnite.com/SceneGraphCameras } # fort_* camera modifiers
 ```
 
-**1. Input (42.10).** `Move : input_action(vector3)` and `Jump` live on
+**1. Input.** `Move : input_action(vector3)` and `Jump` live on
 `TraversalMapping`. Nothing fires until the mapping is added per player:
 
 ```verse
@@ -85,13 +85,13 @@ WASD axes, -1..1 in `Forward`/`Left`), its `EndDetectEvent` is
 is `tuple(player, logic)`. Keep every `cancelable` per player and cancel on leave.
 
 **2. Per-frame integration.** `TickEvents.PrePhysics.Subscribe` is **not**
-available to creator code on 42.10 — `execution_listenable` is
+available to creator code — `execution_listenable` is
 `class<epic_internal>`, so subscribing fails with "Invalid access of internal
 function". The hook you do have is `OnSimulate` plus your own delta clock:
 
 ```verse
 OnSimulate<override>()<suspends> : void =
-    var PrevTime : float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last' (43.00)
+    var PrevTime : float = GetSimulationElapsedTime()   # not `Last`: 3588 vs operator'.Last'
     loop:
         Sleep(0.0)                      # exactly one frame
         if (not IsSimulating[]):
@@ -105,17 +105,22 @@ Then move the entity with `Entity.GetGlobalTransform()` /
 `Entity.SetGlobalTransform(transform{...})` — global, not local, or a parented rig
 drifts (`movement_transforms`).
 
-**3. Orbit camera.** Install `fort_orbit_camera_modifier` on the rig's camera and
-hand that camera to the player's director:
+**3. Orbit camera.** Stack three modifier pieces on the rig's camera (they run in the
+order added: follow the rig, swing on the boom arm, stay out of walls) and hand that
+camera to the player's director:
 
 ```verse
 if (Cam := (for (C : RigPrefabRoot.FindDescendantComponents(perspective_camera_component)) do C)[0]):
-    Orbit := fort_orbit_camera_modifier:
-        TargetEntity := RigPrefabRoot
-    set Orbit.CameraDistanceCentimeters = 450.0
-    set Orbit.CameraHeightCentimeters = 120.0
-    set Orbit.EnableCollision = true
-    OrbitHandle := Cam.CameraModifiers.AddModifier(Orbit, 0)   # parens! (43.00: no position constants)
+    Follow := fort_attach_to_entity_camera_modifier{}
+    set Follow.TargetEntity = RigPrefabRoot
+    set Follow.ShouldFollowOrientation = false
+    Boom := fort_boom_arm_camera_modifier{}
+    set Boom.BoomOffset = vector3{Forward := -450.0, Up := 120.0}
+    Push := fort_collision_push_camera_modifier{}
+    set Push.IgnoreEntitiesAndDescendants = array{RigPrefabRoot}
+    FollowHandle := Cam.CameraModifiers.AddModifier(Follow)    # parens!
+    BoomHandle := Cam.CameraModifiers.AddModifier(Boom)
+    PushHandle := Cam.CameraModifiers.AddModifier(Push)
     if (Director := (for (D : P.FindDescendantComponents(camera_director_component)) do D)[0]):
         if (CamHandle := Director.AddCamera[Cam, 100]) {}                            # brackets!
 ```
@@ -161,8 +166,8 @@ height test with a downward `FindSweepHits` probe (see the virtualpointer skill'
 | `3511` / `3513` on the modifier line | `AddModifier` is not `<decides>` | parens, not brackets |
 | `3511` on the camera line | `AddCamera` **is** `<decides>` | brackets, and put it in an `if` |
 | "Invalid access of internal function" on a tick subscribe | `execution_listenable` is `epic_internal` | `OnSimulate` + `Sleep(0.0)` |
-| `3506 Unknown identifier 'VisualModifierPosition'` / `'FieldOfViewDegrees'` | removed in 43.00 | `AddModifier(Orbit, 0)`; `FieldOfView` in radians |
-| Camera works in UEFN session, not on a private play server | 43.00 known issue | keep `using { /Fortnite.com/SceneGraphCameras }` (fixed 43.10) |
+| `3506 Unknown identifier 'fort_orbit_camera_modifier'` / `'VisualModifierPosition'` / `'FieldOfViewDegrees'`, or too many arguments on `AddModifier` | old camera names | build the orbit from the pieces above; `AddModifier(Modifier)`; `FieldOfView` in radians |
+| Camera works in UEFN session, not on a private play server | the camera director was not found | keep `using { /Fortnite.com/SceneGraphCameras }` in the file |
 | Camera tilt way off | degrees passed where radians expected | `Deg * PiFloat / 180.0` |
 | `3588` on a local named like a method | local shadowed the component's `Step` | rename the local |
 | Rig teleports back each frame | stock character still driving | `PutInStasis` + `Hide` |
@@ -170,24 +175,23 @@ height test with a downward `FindSweepHits` probe (see the virtualpointer skill'
 ### Verify
 
 1. `workspace_compile_verse` → 0 errors (2304 warnings expected).
-2. Launch a session: the camera should sit behind the rig at
-   `CameraDistanceCentimeters`, and WASD/stick should move the **rig**, not a
-   Fortnite character.
+2. Launch a session: the camera should sit behind the rig at the boom offset, and
+   WASD/stick should move the **rig**, not a Fortnite character.
 3. Jump: apex should scale with `JumpImpulse` and fall rate with `Gravity` —
    if it doesn't, your delta clock isn't advancing (check `IsSimulating[]`).
 4. Second player joins → they get their own component instance and camera claim.
 
 ### Don'ts
 
-- Don't promise a publishable island — this is Experimental end to end.
+- Don't promise a publishable island while the digest marks any name you use `@experimental`.
 - Don't drive the rig from the device tick; put the integrator on the entity.
 - Don't skip `AddInputMapping(TraversalMapping)` — no mapping, no `Move` events.
 - Don't read a position out of `Move`'s `EndDetectEvent` — it carries only a float.
 - Don't leave a player's `cancelable`s uncancelled on leave (camera stays claimed).
 - Don't mix the two `vector3` families — SpatialMath (Forward/Left/Up) here.
-- Don't write a custom `camera_modifier` for the follow camera: user-written modifiers
-  run on the server (43.00) and lag; `fort_orbit_camera_modifier` runs client-side.
-- Sound already follows the rig camera (43.00 fix) — no audio listener workaround.
+- Don't write your own camera modifier for the follow camera: one user-written modifier
+  moves the whole camera to the server and it lags; the `fort_*` pieces run on the client.
+- Sound already follows the rig camera: no audio listener workaround.
 
 ### Related
 
