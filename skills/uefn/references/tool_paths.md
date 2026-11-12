@@ -21,7 +21,8 @@ UEFN still has **two** device shapes. Using the wrong path fails silently.
 |------------------|------|------|-------------------------|
 | Native Creative (granter, button, spawner, `Device_*_C`) | Epic `DeviceToolset` | `GetDeviceProperties` / `ListDeviceProperties` via `unreal__call_tool` | `SetDeviceProperty` via `unreal__call_tool` |
 | Custom Verse (`VerseDevice_C`) | Ducky VerseDevice | `inspect_verse_device` | `wire_verse_device_ref`, `set_verse_editable`, … |
-| Static mesh / prop / Fort actor | Ducky actors **or** Epic `ActorTools` / `SceneTools` | `get_all_actors` or Epic describe | `set_actor_properties` / Epic |
+| Static mesh / prop / Fort actor | Ducky actors **or** Epic `EditorToolset.ActorToolset` / `EditorToolset.LevelToolset` | `get_all_actors` or Epic describe | `set_actor_properties` / Epic |
+| A picture of the level or editor | Ducky `take_high_res_screenshot` (level) / `uefn_window_capture` (editor window) **or** Epic `SceneCaptureToolset.SceneCaptureToolset` | the returned `path` | — |
 
 **Decision:** Epic DeviceToolset for Creative; `inspect_verse_device` only for project Verse scripts.
 

@@ -33,6 +33,10 @@ toolsets (that tool sits outside its registry), so describe first, then script.
 
 ## Gotchas
 
+- **Pictures:** for a picture of the level call Ducky's `take_high_res_screenshot` (works in every
+  agent, needs no Epic toolset); `uefn_window_capture` for the editor window itself. Through Epic
+  it is the scene capture toolset or the editor app's viewport capture. No toolset is named
+  "scene" or "SceneTools": that 42.40 name answers "Toolset … not found".
 - **Place Creative content from its class, never from its asset:** placing a `/Game/Creative/**`
   Blueprint from the asset makes a static mesh actor that fails to cook.
 - **PCG:** Epic ships a PCG graph skill (read it through the agent skill toolset) and leveldesign

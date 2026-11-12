@@ -64,7 +64,7 @@ Run them with `exec_console_command`.
 |---|---|
 | `unreal__*` missing / `list_toolsets` errors | `epic_mcp_online` is only a TCP probe. `uefn_popups`, retry once, then the closest Ducky tool and finish. Missing tools do not prove the editor is stopped. 43.00: Editor Settings → MCP → Start if the server is stopped. |
 | Python-backed toolsets (Sequencer, Geometry, PythonScripting, Programmatic) missing | `ValkyriePythonToolset.IsPythonReadyForMainProject` → `EnablePythonForMainProject` (async), then re-list or `RefreshTools`. |
-| "Unknown toolset" for `editor_toolset.toolsets.scene.SceneTools` / `ActorTools` / `AssetTools` | Renamed in 43.00: `EditorToolset.LevelToolset` / `ActorToolset` / `AssetToolset`, PascalCase tools (`epic_toolsets`). |
+| "Toolset … not found" for a name ending `scene.SceneTools` / `actor.ActorTools` / `asset.AssetTools` | Renamed in 43.00: call `EditorToolset.LevelToolset` / `EditorToolset.ActorToolset` / `EditorToolset.AssetToolset`, PascalCase tools (`epic_toolsets`). For a picture of the level call `take_high_res_screenshot`. |
 | An expected toolset missing | `ModelContextProtocol.RefreshTools`, re-list. |
 | "Failed to listen on port" in the log | Another editor owns 8000 — close it, or change `ServerPortNumber` and the Ducky MCP URL. |
 | Calls hang | Popup (`uefn_popups` first), Verse build, level load, or a running session. |
