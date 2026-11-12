@@ -5,7 +5,7 @@ description: "Create, import, retarget, bake, and PLAY custom skeletal animation
 license: MIT
 metadata:
   label: UEFN Animation
-  version: 37
+  version: 38
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC

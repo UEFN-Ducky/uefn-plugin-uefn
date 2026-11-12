@@ -1,9 +1,9 @@
 {
   "id": "uefn",
   "kind": "plugin",
-  "version": "1.2.14",
+  "version": "1.2.15",
   "label": "UEFN",
-  "description": "Everything for the UEFN editor in one plugin: actors, assets, data tables, editor control, level design and worldgen, materials, modeling, Niagara VFX, Scene Graph, Verse (digests, compile, UMG, New-file templates), animation and retargeting, MetaHuman, physics, Virtual Pointer, testing, UEFN Logs and NPC AI recipes. Bundles every UEFN skill. Serial editor ops (one MCP call per turn).",
+  "description": "Everything for the UEFN editor in one plugin: actors, assets, data tables, editor control, level design and worldgen, materials, modeling, Niagara VFX, Scene Graph, Verse (digests, compile, UMG, New-file templates), animation and retargeting, MetaHuman, physics, Virtual Pointer, testing, UEFN Logs, NPC AI recipes and AI NPCs that talk (LLM conversations). Bundles every UEFN skill. Serial editor ops (one MCP call per turn).",
   "min_app_version": "1.2.412",
   "default_enabled": true,
   "data_sharing": false,
@@ -1424,6 +1424,20 @@
           {
             "path": "llm_npc_behavior.verse",
             "file": "templates/llm_npc/llm_npc_behavior.verse"
+          }
+        ],
+        "order": 16
+      },
+      {
+        "id": "llm_npc_shopkeeper",
+        "name": "LLM NPC Shopkeeper",
+        "icon": "🗣️",
+        "description": "An AI-powered NPC you talk to by voice that acts in the game: it wanders, stops and faces whoever talks to it, hands out the item the player asks for (structured output filled on every reply), complains when it is shot (PromptToTalk on a game event), and takes in players who join later. Put llm_npc_shopkeeper_behavior on an NPC Character Definition with a Persona Modifier. Compile-verified.",
+        "folder": "LLMNPCShopkeeper",
+        "files": [
+          {
+            "path": "llm_npc_shopkeeper_behavior.verse",
+            "file": "templates/llm_npc_shopkeeper/llm_npc_shopkeeper_behavior.verse"
           }
         ],
         "order": 16

@@ -85,7 +85,7 @@ Rules of thumb:
 | `/UnrealEngine.com/Temporary/SpatialMath` | `vector3`, `rotation`, `Distance` |
 | `/UnrealEngine.com/Marketplace` | entitlements, `MakePriceVBucks`, `BuyOffer`, `GrantEntitlement` (**not** island Coins; `/Fortnite.com/Marketplace` is deprecated aliases) |
 
-`/UnrealEngine.com/Conversations` (module; mainstream) — `persona_component`, `ai_session`, `prompt_binding_definition`, voices, `ai_error`s, `@ai_description` (`sys_conversations`).
+`/UnrealEngine.com/Conversations` (module; mainstream) — `persona_component`, `ai_session`, `prompt_binding_definition`, voices, `ai_error`s, `@ai_description` (the `conversations` skill, `verse_api`).
 | `/Verse.org/Chat` | `voice_channel`, `text_channel` + `text_message_style`, `AddChatChannel` / `GetTextChannels` on the simulation entity — `sys_chat_channels`, `sys_text_chat` |
 | `/Verse.org/Random` | `GetRandomInt`, random selection |
 | `/Verse.org/Colors` (+ `/NamedColors`) | `color`, named colors |

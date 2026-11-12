@@ -5,7 +5,7 @@ description: "UEFN NPC AI exact recipes — character definitions, equipment/wea
 license: MIT
 metadata:
   label: "UEFN NPC AI & Enemies"
-  version: 20
+  version: 21
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
   allow_redistribute: true
@@ -39,6 +39,8 @@ Generic pattern primers (keep linked, do not duplicate):
 
 
 - `skill_read_subskill("verse", "sys_npc_ai")` — generic `npc_behavior` skeleton
+
+- the `conversations` skill — NPCs that talk to players by voice (Persona Modifier, structured output); `skill_read_subskill("conversations", "setup")` to start
 
 - `skill_read_subskill("animation", "npc_characters")` — physics → AnimPreset → BP → NPCDef → spawner **via tools** (never Details)
 - `skill_read_subskill("animation", "npc_ecosystem")` — multi-species session registries, play-dead, hardcoded same-module clips

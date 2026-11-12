@@ -20,7 +20,7 @@ may type, and color and label their messages. Everything on this page is from th
 how messages look, on/off. It **cannot** send a message, read what players type,
 filter words, or react to a message — there is no message API and no message event
 (voice channels have speaking events; text channels have none). LLM NPC
-conversations take a `voice_channel` only (`sys_conversations`).
+conversations take a `voice_channel` only (the `conversations` skill).
 
 ```verse
 using { /Verse.org/Chat }         # text_channel, has_text_member_info, text_message_style

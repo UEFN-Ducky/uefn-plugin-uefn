@@ -9,7 +9,7 @@ metadata:
 
 ## Chat channels — Channel API
 
-> Conversations (LLM NPCs) use the same `agent_group` + `voice_channel`, plus `Player.SetConversationTarget(Persona, Channel)` — `sys_conversations`.
+> Conversations (AI NPCs that talk) use the same `agent_group` + `voice_channel`, plus `Player.SetConversationTarget(Persona, Channel)`: `skill_read_subskill("conversations", "players_and_channels")`.
 
 Custom **voice** groups so players hear only who you put in the channel, and so
 you can mute, cut comms, or react when someone talks. Everything below is

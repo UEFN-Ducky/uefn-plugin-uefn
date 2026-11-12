@@ -9,7 +9,7 @@ metadata:
 
 ## NPC AI — `npc_behavior` patterns
 
-> **Talking NPCs:** an NPC with a Persona Modifier answers players by voice and can drive gameplay through structured output — `sys_conversations` (template `llm_npc`).
+> **Talking NPCs:** an NPC with a Persona Modifier answers players by voice and can drive gameplay through structured output: the `conversations` skill (templates `llm_npc_shopkeeper`, `llm_npc`). Its `behaviors` page has the walk, stop and face-the-speaker loop built on this page's `npc_actions_component`.
 
 The code below is verified against the digests (the chaser and guard
 behaviors compiled with 0 errors on Nov 1 2026) — copy names and signatures as-is

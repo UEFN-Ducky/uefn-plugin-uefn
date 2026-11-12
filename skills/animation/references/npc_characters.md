@@ -232,6 +232,8 @@ If any step lacks a tool, **that is a bug in this skill** — do not invent a
 ## Talking NPCs and Sidekicks
 
 An NPC Character Definition can also carry a **Persona Modifier** (LLM
-conversations: voice, personality, structured output) — verse `sys_conversations`,
-template `llm_npc`. One persona per character definition. Epic also fixed Sidekick
+conversations: voice, personality, structured output): the `conversations` skill
+(`setup` page), templates `llm_npc_shopkeeper` and `llm_npc`. The Persona Modifier and
+UI Modifier are added in the definition's Details by the person; no tool adds them.
+One persona per character definition. Epic also fixed Sidekick
 style options not applying (they stayed on the default style).

@@ -5,7 +5,7 @@ description: "Writing Verse source — syntax, effects (no_rollback/transacts/de
 license: MIT
 metadata:
   label: UEFN Verse
-  version: 60
+  version: 61
   managed_by: uefn-ducky
   author: UEFN-Ducky
   copyright: Copyright 2026 Mindful Path Company, LLC
@@ -59,7 +59,7 @@ message, never `_v2` copies of a device (`skill_read_subskill("uefn", "verse_dev
 | Spawning things at runtime, waves, pools | `sys_spawning`, `design_patterns` |
 | Ground height, paths, obstacles, GPS / NPC routes without raycasts; seeded random | `sys_world_data` |
 | NPCs and enemies | `sys_npc_ai` (+ the `npc-ai` skill) |
-| NPCs that talk (LLM persona, conversations) | `sys_conversations` |
+| NPCs that talk (AI-powered, LLM persona, conversations) | the `conversations` skill (`sys_conversations` points there) |
 | Damage, healing, elimination | `sys_damage_health` |
 | Destructible props, custom health pools, damage types, damaging entities (Experimental) | `sys_health_pipeline` |
 | Teams, party, chat | `sys_teams`, `sys_party`, `sys_chat_channels`, `sys_text_chat` |

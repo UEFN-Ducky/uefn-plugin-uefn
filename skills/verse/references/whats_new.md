@@ -37,7 +37,7 @@ exist" were copied from Epic pages or guessed by agents and fail with E3506.
   `Session.Prompt(Msg, struct)`, with an `agent_group` + `voice_channel` and
   `Player.SetConversationTarget`. `AppendToPersonality`, `RegisterPromptBinding` and
   `ResponseType` do not exist. Build `<localizes>` messages before a `[ ]` call (E3512).
-  Ready-made: `verse_template_apply("llm_npc")`. → `sys_conversations`
+  Ready-made: `verse_template_apply("llm_npc_shopkeeper")`, `verse_template_apply("llm_npc")`. → the `conversations` skill
 
 ### Items, weapons, abilities
 

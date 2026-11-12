@@ -71,6 +71,7 @@ Combat-enemy `@editable` numeric ranges still live on the class with defaults (s
 ## Talking NPCs
 
 A character definition can add a **Persona Modifier** so the NPC talks by voice and
-drives gameplay through structured output — verse `sys_conversations`, template
-`llm_npc`. One persona per definition; the persona works alongside the combat
-behaviors here (an enemy that taunts, a merchant that haggles).
+drives gameplay through structured output: the `conversations` skill
+(`skill_read_subskill("conversations", "setup")` for the definition, templates
+`llm_npc_shopkeeper` and `llm_npc`). One persona per definition; the persona works
+alongside the combat behaviors here (an enemy that taunts, a merchant that haggles).
