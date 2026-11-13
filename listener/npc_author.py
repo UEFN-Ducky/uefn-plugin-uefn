@@ -786,30 +786,56 @@ def create_physics_asset_for_mesh(skeletal_mesh_path: str, name: str = "", dest_
         return {"ok": True, "created": False, "physics_asset": _path_of(existing),
                 "note": "Mesh already has a Physics Asset."}
 
-    base = skeletal_mesh_path.split(".")[0]
-    folder = pin_project_folder(dest_folder, default_leaf="") or base.rsplit("/", 1)[0]
-    asset_name = (name or "").strip() or "PHYS_%s" % base.rsplit("/", 1)[-1].replace("SKM_", "").replace("SK_", "")
-
-    factory = unreal.PhysicsAssetFactory()
-    for field in ("target_skeletal_mesh", "skeletal_mesh"):
-        try:
-            factory.set_editor_property(field, mesh)
-            break
-        except Exception:
-            continue
-    physics = _asset_tools().create_asset(asset_name, folder, unreal.PhysicsAsset, factory)
+    # Never PhysicsAssetFactory: it takes its mesh from a picker window, Python cannot set
+    # it, and create_asset then shows "Must specify a valid skeletal mesh for the physics
+    # asset to target." [OK], which holds the editor until someone presses it (7 minutes
+    # on Nov 13 2026). Epic's scripting call makes the asset and sets it on the mesh.
+    create = _physics_asset_maker()
+    if create is None:
+        raise ValueError(
+            "This UEFN build has no create_physics_asset call. In the Content Browser, "
+            "right-click %s > Create > Physics Asset > Create and Assign." % skeletal_mesh_path
+        )
+    physics = create(mesh)
     if physics is None:
-        raise ValueError("Failed to create Physics Asset %s in %s" % (asset_name, folder))
+        raise ValueError("UEFN made no Physics Asset for %s (is the mesh built and saved?)" % skeletal_mesh_path)
 
-    mesh.set_editor_property("physics_asset", physics)
+    # Epic names it <Mesh>_PhysicsAsset beside the mesh. It moves only when the caller
+    # named another place.
+    physics_path = _path_of(physics).split(".")[0]
+    if (name or "").strip() or (dest_folder or "").strip():
+        folder = pin_project_folder(dest_folder, default_leaf="") or physics_path.rsplit("/", 1)[0]
+        wanted = "%s/%s" % (folder, (name or "").strip() or physics_path.rsplit("/", 1)[-1])
+        if wanted != physics_path and unreal.EditorAssetLibrary.rename_asset(physics_path, wanted):
+            physics_path = wanted
+            physics = _load_asset(wanted)
+    try:
+        if mesh.get_editor_property("physics_asset") is None:
+            mesh.set_editor_property("physics_asset", physics)
+    except Exception:
+        pass
     _save(physics)
     _save(mesh)
     return {
         "ok": True,
         "created": True,
-        "physics_asset": "%s/%s" % (folder, asset_name),
+        "physics_asset": physics_path,
         "skeletal_mesh": skeletal_mesh_path,
     }
+
+
+def _physics_asset_maker():
+    """Epic's create_physics_asset(mesh) for this build, or None when it has none."""
+    cls = getattr(unreal, "SkeletalMeshEditorSubsystem", None)
+    if cls is not None:
+        try:
+            make = getattr(unreal.get_editor_subsystem(cls), "create_physics_asset", None)
+            if callable(make):
+                return make
+        except Exception:
+            pass
+    make = getattr(getattr(unreal, "EditorSkeletalMeshLibrary", None), "create_physics_asset", None)
+    return make if callable(make) else None
 
 
 _SPAWNER_DEF_FIELDS = (
