@@ -91,3 +91,13 @@ def test_one_build_or_no_digests_says_so(tmp_path):
     _island(root, "OnlyIsland", NEW_VERSE, NEW_FORT, age_s=10)
     out = dc.changes(root, history)
     assert out["ok"] and out["previous_build"] is False and "added" not in out
+
+
+def test_linux_paths_use_xdg_and_the_proton_prefix(tmp_path, monkeypatch):
+    monkeypatch.setattr(dc.sys, "platform", "linux")
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "share"))
+    assert dc.history_root() == tmp_path / "share" / "UEFN-Ducky" / "verse_digest_history"
+    prefix_local = tmp_path / "pfx" / "AppData" / "Local"
+    (prefix_local / "UnrealEditorFortnite").mkdir(parents=True)
+    monkeypatch.setattr(dc, "_linux_uefn_local", lambda: prefix_local)
+    assert dc.verse_project_root() == prefix_local / "UnrealEditorFortnite" / "Saved" / "VerseProject"

@@ -12,6 +12,7 @@ import hashlib
 import os
 import re
 import shutil
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -20,12 +21,30 @@ KEEP_SETS = 3
 _DECL = re.compile(r"^(?:\([^)]*\)\s*)?(?:var(?:<\w+>)?\s+)?([A-Za-z_]\w*)(?:<[^>]*>)*\s*(?:\([^)]*\))?\s*:=\s*(class|module|interface|enum|struct)\b")
 
 
+def _linux_uefn_local() -> Path:
+    """UEFN runs under Proton on Linux: its LOCALAPPDATA is inside the Wine prefix."""
+    try:
+        from backend.tools.uefn.proton import find_prefix, local_appdata_dirs
+
+        for base in local_appdata_dirs(find_prefix()):
+            if (Path(base) / "UnrealEditorFortnite").is_dir():
+                return Path(base)
+    except Exception:
+        pass
+    return Path.home() / ".local" / "share"  # no prefix: no digests there, callers see none
+
+
 def verse_project_root() -> Path:
+    if sys.platform.startswith("linux"):
+        return _linux_uefn_local() / "UnrealEditorFortnite" / "Saved" / "VerseProject"
     base = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
     return Path(base) / "UnrealEditorFortnite" / "Saved" / "VerseProject"
 
 
 def history_root() -> Path:
+    if sys.platform.startswith("linux"):
+        xdg = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
+        return Path(xdg) / "UEFN-Ducky" / "verse_digest_history"
     base = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
     return Path(base) / "UEFN-Ducky" / "verse_digest_history"
 
