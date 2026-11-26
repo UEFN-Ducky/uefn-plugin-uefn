@@ -45,6 +45,8 @@ def history_root() -> Path:
     if sys.platform.startswith("linux"):
         xdg = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
         return Path(xdg) / "UEFN-Ducky" / "verse_digest_history"
+    if sys.platform == "darwin":  # UEFN stays on the paired PC; only this history lives on the Mac
+        return Path.home() / "Library" / "Application Support" / "UEFN-Ducky" / "verse_digest_history"
     base = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
     return Path(base) / "UEFN-Ducky" / "verse_digest_history"
 

@@ -9,6 +9,13 @@ _spec = importlib.util.spec_from_file_location("digest_changes", os.path.join(os
 dc = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(dc)
 
+def test_mac_history_lives_in_application_support(monkeypatch):
+    import sys
+
+    monkeypatch.setattr(sys, "platform", "darwin")
+    assert dc.history_root() == Path.home() / "Library" / "Application Support" / "UEFN-Ducky" / "verse_digest_history"
+
+
 OLD_VERSE = """Verse<public> := module:
     @experimental
     # Ordered modifiers.
